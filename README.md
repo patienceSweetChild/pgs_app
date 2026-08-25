@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Purple Guide Study — React frontend (`pgs_app`)
 
-## Getting Started
+Standalone Next.js App Router frontend for [purpleguide.study](https://purpleguide.study).  
+**Design:** existing ThemeZaa CSS/assets (pixel-matched).  
+**Structure:** `app/<route>/page.tsx` + `features/` (not PHP-style view dumps).  
+**Backend:** Supabase (Auth, Postgres, RLS) — see below.
 
-First, run the development server:
+## Home (3 variants)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Open `/` — experience comes from Supabase session + premium entitlement when configured.  
+Without env keys, local mock Guest/Student/Premium switcher still works in development.
+
+| Experience | Composition |
+|------------|-------------|
+| **Guest** | Signup hero + all shared sections |
+| **Student** | Identity card + Explore #PGS + shared sections |
+| **Premium** | Identity card (#PURPLEPREMIUM) + welcome + shared sections |
+
+## Folder map
+
+```
+src/app/                 # routes (public + /admin + /portal)
+src/components/layout/   # Header, Footer, SiteShell
+src/features/            # page UI modules
+src/lib/supabase/        # browser / server / admin clients
+src/lib/auth/            # session experience + actor context
+src/lib/catalog/         # public catalog readers
+supabase/migrations/     # schema + RLS (you push)
+public/assets/           # CSS + images
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Supabase setup (you run)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Copy env file and fill keys from the Supabase dashboard:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+cp .env.local.example .env.local
+```
 
-## Learn More
+2. Link and push migrations (CLI already installed):
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+supabase login
+supabase link --project-ref YOUR_PROJECT_REF
+supabase db push
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. Create your first Auth user in the dashboard (or sign up via `/login`), then promote to super admin in SQL Editor:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```sql
+insert into public.staff_profiles (user_id, role_key, display_name, status)
+values ('YOUR_AUTH_USER_UUID', 'super_admin', 'Super Admin', 'active');
+```
 
-## Deploy on Vercel
+4. Restart `npm run dev`. Open `/admin` as that user.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Surfaces
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Path | Who |
+|------|-----|
+| `/` … public site | Guests / students / premium |
+| `/admin` | Active staff (`staff_profiles`) |
+| `/portal` | Guardians (invite + RPC) |
+
+### Security notes
+
+- Cookie SSR sessions via `@supabase/ssr` + middleware refresh
+- Catalog public read: `published = true` AND `lifecycle_phase = 'live'`
+- Guardian data: security-definer RPCs only
+- Service role key: server-only (`src/lib/supabase/admin.ts`)
+
+### Schema size
+
+Migrations are split into numbered files under `supabase/migrations/` (core → catalog → premium → guardians → geo/tags → CMS modules → workspace → ops → RLS).  
+Table coverage aligns with the pgs-v3 / `WARNING` reference (~70 public tables): identity, staff RBAC, catalog + phases, CMS content, premium workspace/docs/kanban, leads, notifications, CRM tags, guardians, audit.  
+pgs-v3’s ~50 migration *files* include many incremental patches; here the same surface is consolidated into fewer ordered migrations you push once with `supabase db push`.
+
+## References (read-only)
+
+- PHP product: `E:\pgs\purpleguide`
+- Ops/guardian patterns: `E:\pgs2\pgs-v3`
+- Schema refs in-repo: `mysql.json`, `-- WARNING_ Thi.txt`, `Table -cms_e.txt`

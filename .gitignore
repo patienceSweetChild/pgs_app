@@ -23,6 +23,8 @@
 # misc
 .DS_Store
 *.pem
+Thumbs.db
+Desktop.ini
 
 # debug
 npm-debug.log*
@@ -30,8 +32,15 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env / secrets — never commit
+.env
+.env.*
+!.env.example
+!.env*.example
+mysql.json
+credentials.json
+*.secret
+/secrets/
 
 # vercel
 .vercel
@@ -39,3 +48,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local reference / dump material (not part of the Next app)
+/standalone-html/
+/audit/
+/-- WARNING_ Thi.txt
+/Table -cms_e.txt
+*.sql
+*.sql.gz
+*.dump

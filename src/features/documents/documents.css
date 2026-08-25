@@ -1,0 +1,19 @@
+.doc-actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.doc-actions .btn-black-upload {
+  width: 120px !important;
+  padding: 0 14px;
+  white-space: nowrap;
+}
+
+.doc-actions .btn-black-outline.doc-action-wide {
+  width: auto !important;
+  padding: 0 12px;
+  white-space: nowrap;
+}

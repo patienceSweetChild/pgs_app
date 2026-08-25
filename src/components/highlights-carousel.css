@@ -1,0 +1,59 @@
+/* Multi-slide peek carousel matching ThemeZaa slider-highlists (~2.8 slides). */
+
+.pgs-highlights-swiper {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  position: relative;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.pgs-highlights-swiper::-webkit-scrollbar {
+  display: none;
+}
+
+.pgs-highlights-track {
+  display: flex;
+  width: max-content;
+}
+
+.pgs-highlights-slide {
+  flex: 0 0 clamp(200px, 28vw, 240px);
+  width: clamp(200px, 28vw, 240px);
+  box-sizing: border-box;
+  padding-right: 20px;
+  scroll-snap-align: start;
+}
+
+.pgs-highlights-slide .full-photo {
+  height: 600px;
+  margin-bottom: 0 !important;
+}
+
+.pgs-highlights-slide .full-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 15px;
+  display: block;
+}
+
+@media (max-width: 991px) {
+  .pgs-highlights-slide {
+    flex: 0 0 70vw;
+    width: 70vw;
+  }
+
+  .pgs-highlights-slide .full-photo {
+    height: 420px;
+  }
+}
+
+@media (max-width: 575px) {
+  .pgs-highlights-slide .full-photo {
+    height: 320px;
+  }
+}

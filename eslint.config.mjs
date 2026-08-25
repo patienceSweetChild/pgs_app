@@ -11,6 +11,12 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
+  {
+    rules: {
+      // Legacy ThemeZaa CSS lives in /public/assets — must load via <link>, not CSS modules.
+      "@next/next/no-css-tags": "off",
+    },
+  },
 ];
 
 export default eslintConfig;

@@ -1,0 +1,223 @@
+export const LOGIN_STATS = [
+  {
+    value: "4/5",
+    kind: "static" as const,
+    text: "of our students built a significantly stronger profile after working with us.",
+  },
+  {
+    value: "90",
+    kind: "percent" as const,
+    text: "of our students received a confirmed offer letter in just four weeks.*",
+  },
+  {
+    value: "94",
+    kind: "percent" as const,
+    text: "of our students successfully earned scholarships with our proven strategies.**",
+  },
+  {
+    value: "85",
+    kind: "percent" as const,
+    text: "of our students earned a spot at one of their top-choice universities.",
+  },
+  {
+    value: "95",
+    kind: "percent" as const,
+    text: "of our medical aspirants achieved their USMLE, PLAB, and AMC goals.",
+  },
+];
+
+export const MEMBER_BENEFITS = [
+  {
+    tag: "VIP Access",
+    title: "Priority Expert Consultation",
+    body: "Skip the queue and get instant access to our senior counselors",
+  },
+  {
+    tag: "Members Only",
+    title: "Exclusive Scholarship Alerts",
+    body: "Access to scholarships guidance from bottom up",
+  },
+  {
+    tag: "#PurplePremium",
+    title: "Personalized University Matching",
+    body: "Mentor-powered recommendations based on your profile",
+  },
+  {
+    tag: "VIP Access",
+    title: "Application Tracking Dashboard",
+    body: "Skip the queue and get instant access to our senior counselors",
+  },
+  {
+    tag: "Members Only",
+    title: "USMLE\nPathway Group",
+    body: "Access to scholarships guidance from bottom up",
+  },
+  {
+    tag: "#PurplePremium",
+    title: "Plab\nPathway Group",
+    body: "Mentor-powered recommendations based on your profile",
+  },
+  {
+    tag: "VIP Access",
+    title: "AMC\nPathway Group",
+    body: "Skip the queue and get instant access to our senior counselors",
+  },
+  {
+    tag: "Members Only",
+    title: "Application\nTracking Dashboard",
+    body: "Access to scholarships guidance from bottom up",
+  },
+  {
+    tag: "#PurplePremium",
+    title: "Member Community &\nNetworking",
+    body: "Mentor-powered recommendations based on your profile",
+  },
+] as const;
+
+export const STUDY_LEVELS = [
+  "UG",
+  "PG",
+  "PhD",
+  "Post MBBS",
+  "Medical Student",
+] as const;
+
+export const PATHWAYS = [
+  {
+    id: "path1",
+    label: "path 1",
+    lines: [
+      "For all from —",
+      "STEM, MBA or Masters, Law & Undergrad abroad.",
+    ],
+  },
+  {
+    id: "path2",
+    label: "path 2",
+    lines: [
+      "For Everything Medical-Related — We’ve Got Two Dedicated Tracks:",
+      "Track 1: Medical Pathways — USMLE, PLAB, AMC.",
+      "Track 2: Nursing, Allied Health, Physiotherapy & More",
+    ],
+  },
+] as const;
+
+/** Common dial codes for frontend mock (replaces PHP dial_code table). */
+export const DIAL_CODES = [
+  "+1",
+  "+44",
+  "+61",
+  "+64",
+  "+49",
+  "+33",
+  "+91",
+  "+92",
+  "+94",
+  "+880",
+  "+977",
+  "+65",
+  "+60",
+  "+62",
+  "+66",
+  "+84",
+  "+81",
+  "+82",
+  "+86",
+  "+971",
+  "+966",
+  "+974",
+  "+968",
+  "+973",
+  "+965",
+  "+27",
+  "+234",
+  "+233",
+  "+254",
+  "+20",
+  "+212",
+  "+230",
+  "+351",
+  "+34",
+  "+39",
+  "+31",
+  "+46",
+  "+47",
+  "+41",
+  "+43",
+  "+32",
+  "+353",
+  "+7",
+  "+55",
+  "+52",
+  "+57",
+  "+54",
+  "+56",
+  "+63",
+  "+852",
+  "+853",
+  "+886",
+];
+
+/** Study-abroad focused country list for mock forms. */
+export const COUNTRIES = [
+  "Afghanistan",
+  "Australia",
+  "Austria",
+  "Bahrain",
+  "Bangladesh",
+  "Belgium",
+  "Brazil",
+  "Canada",
+  "China",
+  "Denmark",
+  "Egypt",
+  "Finland",
+  "France",
+  "Germany",
+  "Ghana",
+  "Hong Kong",
+  "India",
+  "Indonesia",
+  "Ireland",
+  "Italy",
+  "Japan",
+  "Kenya",
+  "Kuwait",
+  "Malaysia",
+  "Mauritius",
+  "Mexico",
+  "Nepal",
+  "Netherlands",
+  "New Zealand",
+  "Nigeria",
+  "Norway",
+  "Oman",
+  "Pakistan",
+  "Philippines",
+  "Poland",
+  "Portugal",
+  "Qatar",
+  "Russia",
+  "Saudi Arabia",
+  "Singapore",
+  "South Africa",
+  "South Korea",
+  "Spain",
+  "Sri Lanka",
+  "Sweden",
+  "Switzerland",
+  "Taiwan",
+  "Thailand",
+  "Turkey",
+  "UAE",
+  "United Kingdom",
+  "United States",
+  "Vietnam",
+  "Other",
+];
+
+export const PENDING_SIGNUP_KEY = "pgs_pending_signup_email";
+
+export function multilineTitle(title: string) {
+  return title.split("\n");
+}

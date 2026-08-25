@@ -1,0 +1,198 @@
+/* Track 1: gray ends early on portrait; quote below gray; tight gap to path section */
+
+.pgs-track1-section {
+  padding-bottom: 1.5rem !important;
+}
+
+.pgs-pathway-path-section {
+  padding-top: 1.5rem !important;
+}
+
+.purple-gray-box.mobile-new-usme {
+  overflow: visible;
+  height: auto !important;
+  min-height: 0;
+  padding-bottom: 0 !important;
+  background: none !important;
+  background-color: transparent !important;
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+}
+
+.purple-gray-box.mobile-new-usme::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: calc(100% - 2.25rem);
+  background-color: #f1f1f1;
+  border-radius: 10px;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.purple-section {
+  overflow: visible;
+  padding-bottom: 0;
+}
+
+.pgs-track1-bottom {
+  position: relative;
+  display: block;
+  margin-top: 1.25rem;
+  width: 100%;
+  padding-right: 300px;
+  padding-bottom: 0;
+  z-index: 1;
+}
+
+.pgs-track1-copy {
+  width: 100%;
+  max-width: none;
+  padding-right: 1.75rem;
+  box-sizing: border-box;
+}
+
+.pgs-track1-card-wrap {
+  position: relative;
+  isolation: isolate;
+  margin-bottom: 0;
+}
+
+.purple-gray-box.mobile-new-usme .bg-pgs-content {
+  position: relative;
+  z-index: 2;
+  margin-bottom: 0 !important;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-position: center;
+  padding-right: 4.25rem !important;
+  overflow: visible;
+  border-radius: 1rem !important;
+}
+
+/* #PGS behind lavender, peeks through right cutout */
+.pgs-track1-card-wrap .pgs-badge {
+  position: absolute;
+  left: auto;
+  top: 50%;
+  bottom: auto;
+  right: -1.65rem;
+  transform: translateY(-50%);
+  width: 7rem;
+  height: 8.75rem;
+  margin: 0;
+  padding: 0 0.35rem 0 2.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  background-color: #d9e0ff;
+  color: #111827;
+  font-size: 1.7rem;
+  line-height: 1;
+  white-space: nowrap;
+  z-index: 1;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+/*
+  Portrait pulled further up so gray covers only the top ~1/3,
+  and the lower half hangs below the gray box.
+*/
+.pgs-track1-portrait {
+  position: absolute !important;
+  top: -4.5rem;
+  right: 0;
+  bottom: auto !important;
+  left: auto !important;
+  width: 280px;
+  height: 360px;
+  margin: 0;
+  padding: 0;
+  background: #f4e5e4;
+  border: 1px solid #00000033;
+  border-radius: 29px;
+  overflow: hidden;
+  z-index: 2;
+}
+
+.pgs-track1-portrait img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 29px;
+}
+
+/* Quote below gray — beside the lower half of the portrait */
+.pgs-track1-quote {
+  width: calc(100% - 300px);
+  max-width: 440px;
+  margin-top: 1.25rem;
+  padding-left: 40px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 767px) {
+  .pgs-track1-section {
+    padding-bottom: 1rem !important;
+  }
+
+  .pgs-pathway-path-section {
+    padding-top: 1rem !important;
+  }
+
+  .purple-gray-box.mobile-new-usme {
+    padding-bottom: 1rem !important;
+  }
+
+  .pgs-track1-bottom {
+    padding-right: 0;
+    display: block;
+  }
+
+  .pgs-track1-copy {
+    padding-right: 0;
+  }
+
+  .purple-gray-box.mobile-new-usme .bg-pgs-content {
+    padding-right: 10px !important;
+  }
+
+  .pgs-track1-card-wrap .pgs-badge {
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: -1.25rem;
+    transform: none;
+    width: 100%;
+    height: 4.25rem;
+    padding: 1.6rem 0 0;
+    border-radius: 0 0 10px 10px;
+    font-size: 1.35rem;
+    z-index: 0;
+  }
+
+  .pgs-track1-portrait {
+    position: relative !important;
+    top: auto;
+    right: auto;
+    width: 55%;
+    max-width: 220px;
+    height: 260px;
+    margin: 2.5rem 0 0 auto;
+  }
+
+  .pgs-track1-quote {
+    width: 100%;
+    max-width: none;
+    margin-top: 1rem;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}

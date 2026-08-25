@@ -1,0 +1,685 @@
+/* Admin portal — isolated from ThemeZaa public styles */
+html.pgs-admin-html,
+html.pgs-admin-html body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #f4f2f8;
+  cursor: auto !important;
+}
+
+html.pgs-admin-html body.custom-cursor {
+  cursor: auto !important;
+}
+
+html.pgs-admin-html .circle-cursor,
+html.pgs-admin-html .circle-cursor-inner,
+html.pgs-admin-html .circle-cursor-outer {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+.pgs-admin {
+  --admin-bg: #f4f2f8;
+  --admin-sidebar: #2a1848;
+  --admin-accent: #7c3aed;
+  --admin-card: #ffffff;
+  --admin-border: #e7e2f0;
+  --admin-text: #1f1633;
+  --admin-muted: #6b6280;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  background: var(--admin-bg);
+  color: var(--admin-text);
+  font-family: "Segoe UI", system-ui, sans-serif;
+  z-index: 1;
+  line-height: 1.45;
+}
+
+.pgs-admin *,
+.pgs-admin *::before,
+.pgs-admin *::after {
+  box-sizing: border-box;
+}
+
+.pgs-admin a {
+  text-decoration: none;
+}
+
+.pgs-admin section {
+  padding: 0;
+}
+
+.pgs-admin__sidebar {
+  background: var(--admin-sidebar);
+  color: #f8f5ff;
+  padding: 1.25rem 0.85rem;
+  height: 100%;
+  overflow: auto;
+  z-index: 2;
+}
+
+.pgs-admin__brand {
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 0.5rem 0.75rem 1.25rem;
+}
+
+.pgs-admin__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.pgs-admin__nav-group {
+  margin-bottom: 0.15rem;
+}
+
+.pgs-admin__nav-group-btn {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 0;
+  background: transparent;
+  color: #d9d0ef;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.pgs-admin__nav-group-btn:hover {
+  background: rgba(124, 58, 237, 0.2);
+  color: #fff;
+}
+
+.pgs-admin__nav-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.15rem 0 0.35rem 0.65rem;
+}
+
+.pgs-admin__nav-sub a {
+  font-size: 0.85rem !important;
+  padding: 0.4rem 0.7rem !important;
+}
+
+
+.pgs-admin__nav a {
+  display: block;
+  color: #d9d0ef;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  position: relative;
+  z-index: 3;
+  pointer-events: auto;
+}
+
+.pgs-admin__nav a:hover,
+.pgs-admin__nav a.is-active {
+  background: rgba(124, 58, 237, 0.35);
+  color: #fff;
+}
+
+.pgs-admin__main {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.pgs-admin__top {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.9rem 1.5rem;
+  background: var(--admin-card);
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.pgs-admin__content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 1.25rem 1.5rem 2rem;
+  background: var(--admin-bg);
+}
+
+.pgs-admin__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.85rem;
+}
+
+.pgs-admin__card {
+  background: var(--admin-card);
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.pgs-admin__card h3 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.pgs-admin__card p {
+  margin: 0.35rem 0 0;
+  color: var(--admin-muted);
+  font-size: 0.85rem;
+}
+
+.pgs-admin__table-wrap {
+  background: var(--admin-card);
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  overflow: auto;
+}
+
+.pgs-admin__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+}
+
+.pgs-admin__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.pgs-admin__tabs button {
+  border: 1px solid var(--admin-border);
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.pgs-admin__tabs button.is-active {
+  background: var(--admin-accent);
+  border-color: var(--admin-accent);
+  color: #fff;
+}
+
+.pgs-admin table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.pgs-admin th,
+.pgs-admin td {
+  text-align: left;
+  padding: 0.7rem 0.85rem;
+  border-bottom: 1px solid var(--admin-border);
+  vertical-align: top;
+}
+
+.pgs-admin th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--admin-muted);
+  background: #faf8fd;
+}
+
+.pgs-admin__badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.pgs-admin__badge--live {
+  background: #dcfce7;
+  color: #166534;
+}
+.pgs-admin__badge--ended {
+  background: #ffedd5;
+  color: #9a3412;
+}
+.pgs-admin__badge--archived {
+  background: #e5e7eb;
+  color: #374151;
+}
+.pgs-admin__badge--pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+.pgs-admin__badge--approved {
+  background: #dcfce7;
+  color: #166534;
+}
+.pgs-admin__badge--rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.pgs-admin__btn {
+  border: 0;
+  border-radius: 8px;
+  padding: 0.45rem 0.85rem;
+  background: var(--admin-accent);
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.pgs-admin__btn--ghost {
+  background: #fff;
+  color: var(--admin-text);
+  border: 1px solid var(--admin-border);
+}
+
+.pgs-admin__form {
+  display: grid;
+  gap: 0.65rem;
+  max-width: 640px;
+}
+
+.pgs-admin__form label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.pgs-admin__form input,
+.pgs-admin__form textarea,
+.pgs-admin__form select {
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  padding: 0.5rem 0.65rem;
+  font: inherit;
+  width: 100%;
+}
+
+.pgs-admin__drawer {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 10, 40, 0.35);
+  display: flex;
+  justify-content: flex-end;
+  z-index: 10050;
+  pointer-events: auto;
+}
+
+.pgs-admin__drawer-panel {
+  width: min(480px, 100%);
+  background: #fff;
+  height: 100%;
+  overflow: auto;
+  padding: 1.25rem;
+  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.12);
+}
+
+.pgs-admin__drawer-panel--md {
+  width: min(560px, 100%);
+}
+
+.pgs-admin__drawer-panel--wide {
+  width: min(1100px, 100%);
+}
+
+/* Event visual CMS — ACF fields + live template previews */
+.pgs-admin-visual {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pgs-admin-visual__hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--admin-muted);
+}
+
+.pgs-admin-visual__select {
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  background: #fff;
+  padding: 0.75rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.pgs-admin-visual__select-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.pgs-admin-visual__select-head span {
+  color: var(--admin-muted);
+  font-size: 0.78rem;
+}
+
+.pgs-admin-visual__select-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.5rem;
+}
+
+.pgs-admin-visual__select-grid label,
+.pgs-admin-visual__chip-toggle {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 0.55rem !important;
+  font-size: 0.82rem !important;
+  line-height: 1.35 !important;
+  color: var(--admin-muted);
+  cursor: pointer;
+  padding: 0.55rem 0.7rem !important;
+  border-radius: 10px;
+  border: 1px solid var(--admin-border);
+  background: #faf9fc;
+  margin: 0 !important;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  white-space: normal;
+  writing-mode: horizontal-tb;
+  text-orientation: mixed;
+}
+
+.pgs-admin-visual__select-grid label.is-on,
+.pgs-admin-visual__chip-toggle.is-on {
+  color: var(--admin-text);
+  background: #f3eefc;
+  border-color: #c4b5e8;
+}
+
+.pgs-admin-visual__select-grid label span,
+.pgs-admin-visual__chip-toggle-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: normal !important;
+  overflow-wrap: break-word;
+  word-break: normal;
+  writing-mode: horizontal-tb !important;
+}
+
+.pgs-admin-visual__select-grid input[type="checkbox"],
+.pgs-admin-visual__chip-toggle input[type="checkbox"] {
+  appearance: auto !important;
+  -webkit-appearance: checkbox !important;
+  width: 1rem !important;
+  height: 1rem !important;
+  min-width: 1rem !important;
+  max-width: 1rem !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  flex: 0 0 1rem !important;
+  align-self: center;
+  accent-color: var(--admin-accent);
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.pgs-admin-visual__select-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.pgs-admin-visual__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.55rem 0.75rem;
+  padding: 0.75rem;
+  background: #f8f6fc;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+}
+
+.pgs-admin-visual__fields label {
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.78rem;
+  color: var(--admin-muted);
+}
+
+.pgs-admin-visual__fields label.is-focused {
+  color: var(--admin-accent);
+}
+
+.pgs-admin-visual__fields label.is-focused input,
+.pgs-admin-visual__fields label.is-focused textarea {
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
+}
+
+.pgs-admin-visual__fields input,
+.pgs-admin-visual__fields textarea {
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  padding: 0.4rem 0.55rem;
+  font: inherit;
+  width: 100%;
+  background: #fff;
+  color: var(--admin-text);
+}
+
+.pgs-admin-visual__tabs {
+  margin: 0;
+}
+
+.pgs-admin-visual__canvas {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pgs-admin-visual__panel {
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #faf9fc;
+}
+
+.pgs-admin-visual__panel.is-off {
+  opacity: 0.45;
+}
+
+.pgs-admin-visual__panel-check {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 0.45rem !important;
+  cursor: pointer;
+  margin: 0 !important;
+  font-size: inherit;
+  font-weight: 600;
+  width: auto !important;
+  max-width: calc(100% - 5rem);
+  white-space: normal;
+  writing-mode: horizontal-tb;
+}
+
+.pgs-admin-visual__panel-check span {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: normal !important;
+}
+
+.pgs-admin-visual__panel-check input[type="checkbox"] {
+  appearance: auto !important;
+  -webkit-appearance: checkbox !important;
+  width: 1rem !important;
+  height: 1rem !important;
+  min-width: 1rem !important;
+  max-width: 1rem !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  flex: 0 0 1rem !important;
+  accent-color: var(--admin-accent);
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.pgs-admin-visual__off-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--admin-muted);
+  background: #eeeaf5;
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+}
+
+.pgs-admin-visual__panel-head {
+  padding: 0.55rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: #fff;
+  border-bottom: 1px solid var(--admin-border);
+  color: var(--admin-text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.pgs-admin-visual__panel-body {
+  padding: 1rem;
+  overflow: auto;
+}
+
+.pgs-admin-visual__card-wrap {
+  max-width: 100%;
+  pointer-events: none;
+}
+
+.pgs-admin-visual__card-wrap--third {
+  max-width: 320px;
+}
+
+.pgs-admin-visual__card-wrap--half {
+  max-width: 420px;
+}
+
+.pgs-admin-visual__hotspot {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  border: 1px dashed transparent;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  text-align: inherit;
+  font: inherit;
+  color: inherit;
+  max-width: 100%;
+}
+
+.pgs-admin-visual__hotspot:hover,
+.pgs-admin-visual__hotspot.is-active {
+  border-color: var(--admin-accent);
+  background: rgba(124, 58, 237, 0.08);
+}
+
+.pgs-admin-visual__chip {
+  max-width: 420px;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+}
+
+.pgs-admin-visual__chip .d-flex {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.pgs-admin-visual__chip h5 {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.pgs-admin-visual__hero {
+  background: #fff;
+  padding: 0.75rem;
+  border-radius: 10px;
+  max-width: 100%;
+}
+
+.pgs-admin-visual__hero h1 {
+  font-size: clamp(1.25rem, 3vw, 2rem) !important;
+  line-height: 1.15 !important;
+}
+
+.pgs-admin-visual .pgs-session-card {
+  width: min(383px, 100%);
+  min-width: 0;
+  flex: none;
+  max-width: 383px;
+}
+
+.pgs-portal {
+  position: fixed;
+  inset: 0;
+  overflow: auto;
+  background: #f7f5fb;
+  color: #1f1633;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+.pgs-portal__bar {
+  background: #2a1848;
+  color: #fff;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pgs-portal__content {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.pgs-portal__card {
+  background: #fff;
+  border: 1px solid #e7e2f0;
+  border-radius: 12px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 0.85rem;
+}
+
+@media (max-width: 900px) {
+  .pgs-admin {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+  .pgs-admin__sidebar {
+    height: auto;
+    max-height: 40vh;
+  }
+}

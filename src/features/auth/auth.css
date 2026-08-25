@@ -1,0 +1,88 @@
+/* Gap under Hello / #univMeet strip (sidebar already adds that row) */
+.pgs-auth-page {
+  padding-top: 24px;
+}
+
+.pgs-auth-page > .login-box.mobile-login-box,
+.pgs-auth-page > .pgs-signup-section {
+  margin-top: 0 !important;
+}
+
+/* Stat counters under login form (replace ThemeZaa jQuery vertical-counter) */
+.pgs-auth-page .pgs-stat-counter {
+  height: auto !important;
+  min-height: 48px;
+  align-items: baseline;
+  font-size: 48px !important;
+  line-height: 1 !important;
+  color: #009c70 !important;
+  letter-spacing: -2px;
+}
+
+.pgs-auth-page .pgs-stat-counter::after {
+  content: attr(data-text);
+  font-size: 48px;
+  display: inline-block;
+  margin-left: 2px;
+  word-break: normal;
+  line-height: 1;
+}
+
+.pgs-auth-page .pgs-stat-counter-value {
+  display: inline-block;
+  font-size: inherit;
+  line-height: inherit;
+  font-weight: inherit;
+}
+
+.pgs-auth-page .cutsom-count-1 {
+  color: #009c70 !important;
+  font-size: 48px !important;
+  height: auto !important;
+  line-height: 1 !important;
+  letter-spacing: -2px;
+}
+
+@media (max-width: 767px) {
+  .pgs-auth-page .pgs-stat-counter,
+  .pgs-auth-page .pgs-stat-counter::after,
+  .pgs-auth-page .cutsom-count-1 {
+    font-size: 32px !important;
+  }
+}
+
+.sinup-box {
+  display: none;
+  flex-direction: column;
+}
+
+.sinup-box.active {
+  display: flex;
+}
+
+.auth-alert {
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.auth-alert-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.auth-alert-success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+@media (max-width: 767px) {
+  .avatar-box {
+    flex-direction: column;
+    gap: 0 !important;
+    display: none;
+  }
+}

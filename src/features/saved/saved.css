@@ -1,0 +1,48 @@
+/* Saved list page — feed spacing tweaks on top of global theme */
+.pgs-saved-page .pgs-saved-header {
+  padding-top: 8px;
+}
+
+/* Global style.css forces .saved-list-pgs .cardbox to column; keep mock horizontal on desktop */
+.pgs-saved-page .saved-list-pgs .pgs-cards .cardbox {
+  margin-bottom: 0;
+  flex-direction: row;
+}
+
+.pgs-saved-page .pgs-promo-card .sop-card-unique {
+  height: 100%;
+}
+
+/* Internship row: keep native card width, sit side-by-side with a tight gap */
+.pgs-saved-page .pgs-feed-col--internship {
+  flex: 0 0 auto;
+  width: auto;
+  max-width: 319px;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+.pgs-saved-page .pgs-internship-card .county-box-short {
+  background: #fff;
+  border-radius: 12px;
+  overflow: visible;
+  height: 100%;
+  max-width: 319px;
+  width: 100%;
+  flex: 0 0 auto;
+  padding: 8px 8px 0;
+}
+
+.pgs-saved-page .pgs-internship-card .img-box-fit {
+  border-radius: 0;
+}
+
+.pgs-saved-page .pgs-internship-card .img-box-fit img {
+  border-radius: 0;
+}
+
+@media (max-width: 991px) {
+  .pgs-saved-page .saved-list-pgs .pgs-cards .cardbox {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,41 @@
+/* #purpleboard — page-only layout (cards live in components/cards/cards.css) */
+.pgs-purpleboard .pgs-board-search .from-control {
+  background: #ece6f0;
+  border: 0;
+  border-radius: 50px;
+  min-height: 45px;
+}
+
+.pgs-purpleboard .pgs-board-list {
+  max-width: 996px;
+}
+
+.pgs-purpleboard .pgs-board-wall {
+  max-width: 1079px;
+}
+
+.pgs-purpleboard .pgs-board-wall .bg-light-greeen {
+  width: auto;
+  margin-left: 92px;
+  padding: 9px 13px;
+}
+
+.pgs-purpleboard .pgs-board-wall .flex-wrap {
+  gap: 12px;
+}
+
+.pgs-purpleboard .pgs-board-wall-fill {
+  height: 152px;
+  width: 100%;
+  background: #ffc524;
+}
+
+.pgs-purpleboard .pgs-board-cta {
+  max-width: 824px;
+}
+
+@media (max-width: 991px) {
+  .pgs-purpleboard .pgs-board-wall .bg-light-greeen {
+    margin-left: 0;
+  }
+}

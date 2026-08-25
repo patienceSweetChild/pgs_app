@@ -1,0 +1,1205 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { HighlightsSection } from "@/components/HighlightsSection";
+import { PgsPicksSection } from "@/components/PgsPicksSection";
+import {
+  DASHBOARD_FEATURES,
+  WHAT_YOU_GET_CHECKLIST,
+  WHAT_YOU_GET_FORMS,
+  type PathwayContent,
+} from "./content";
+import "./pathway.css";
+
+function ProgressStat({
+  value,
+  label,
+  dash,
+}: {
+  value: string;
+  label: string;
+  dash: string;
+}) {
+  return (
+    <div className="d-flex gap-3 align-items-start">
+      <div>
+        <h3 className="fs-500 mb-0 lh-28 text-green fw-500 fs-22">{value}</h3>
+        <p className="text-white mb-0 fs-14">{label}</p>
+      </div>
+      <div className="progress-circle">
+        <svg width="60" height="60">
+          <circle className="progress-bg" cx="30" cy="30" r="20" />
+          <circle
+            className="progress-bar"
+            cx="30"
+            cy="30"
+            r="20"
+            strokeDasharray={dash}
+            strokeDashoffset="100"
+          />
+        </svg>
+        <div className="progress-text" />
+      </div>
+    </div>
+  );
+}
+
+function FaqBlock({ items }: { items: PathwayContent["faq"] }) {
+  const [open, setOpen] = useState(0);
+  return (
+    <section className="faq_section">
+      <div className="w-899px m-auto overlap-gap-section p-0">
+        <div className="bg-very-light-green xl-p-4 md-p-50px sm-p-30px mobile-p-0">
+          <h2 className="fac-title">FAQ’s</h2>
+          <div className="accordion accordion-style-02">
+            {items.map((item, i) => {
+              const isOpen = open === i;
+              return (
+                <div
+                  className={`accordion-item${isOpen ? " active-accordion" : ""}`}
+                  key={`${item.q}-${i}`}
+                >
+                  <div className="accordion-header border-color-extra-medium-gray">
+                    <a
+                      href={`#pathway-faq-${i}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setOpen(isOpen ? -1 : i);
+                      }}
+                    >
+                      <div className="accordion-title mb-0 position-relative text-black mobile-lh-20">
+                        <i
+                          className={`feather ${
+                            isOpen ? "icon-feather-minus" : "icon-feather-plus"
+                          }`}
+                        />
+                        <span className="fw-600 fs-17 lh-22 ls-minus-05px">
+                          {item.q}
+                        </span>
+                      </div>
+                    </a>
+                  </div>
+                  {isOpen ? (
+                    <div className="accordion-collapse collapse show">
+                      <div className="accordion-body last-paragraph-no-margin border-color-light-medium-gray">
+                        <p className="fw-400">{item.a}</p>
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/** Shared medical pathway page — from purpleusme / purpleamc / purpleplab HTML. */
+export function PathwayPage({ content }: { content: PathwayContent }) {
+  const [expenseOpen, setExpenseOpen] = useState(false);
+  const [expenseDone, setExpenseDone] = useState(false);
+  const [expenseName, setExpenseName] = useState("");
+  const [expenseEmail, setExpenseEmail] = useState("");
+  const [expensePhone, setExpensePhone] = useState("");
+
+  return (
+    <>
+    <div className="wrapper-content">
+      <section className="pt-0 about-section half-section overlap-height position-relative minus-5 mobile-board-2">
+        <div className="container overlap-gap-section p-0">
+          <div className="row justify-content-center">
+            <div className="col-lg-8">
+              <div className="w-75 m-auto text-center">
+                <h1 className="text-black fw-500 fs-36 pt-0 mb-1 lh-40">
+                  Get Into Your Dream University Abroad with a Structured
+                  Workflow
+                </h1>
+                <p className="mb-0 lh-20 fs-16">
+                  Boost Your Chances of Selection 3X with Smart, Informed
+                  University Picks
+                </p>
+                <h6 className="mb-0 text-black fs-16 mt-0">
+                  For Medical, STEM, and More—We’ve Got You Covered
+                </h6>
+                <button
+                  type="button"
+                  className="btn btn-purple mt-1 bg-black-btn fs-11 mb-0"
+                >
+                  Set Up a Quick Call
+                </button>
+                <p className="mb-0 fs-12 lh-15 mt-1">
+                  Clear All Your Doubts in 30 Minutes, Figure out your
+                  scholarship path.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="pt-0 overlap-height position-relative mobile-section-step">
+        <div className="container overlap-gap-section p-0">
+          <div className="row justify-content-center">
+            <div className="w-877px">
+              <div className="card-box-img">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/assets/img/music.png" alt="" />
+                <div className="minus-5">
+                  <h4 className="fnt-family mb-0 fs-95 text-black">
+                    Step into
+                  </h4>
+                  <h4 className="mb-0 fs-95 text-black d-flex gap-3 align-items-end lh-80">
+                    <span className="fnt-family">#purplepremium </span>
+                    <span className="fs-28 lh-35 mb-1 fw-500">
+                      {content.id === "usmle" ? (
+                        <>
+                          Masters, STEM
+                          <br />
+                          UG, MBA & Others
+                        </>
+                      ) : (
+                        content.heroBadge
+                      )}
+                    </span>
+                  </h4>
+                </div>
+              </div>
+              <p className="text-center fs-22 mobile-pt-2">
+                Backed by experience. Trusted by students since 2006 (formerly
+                CEG).
+              </p>
+            </div>
+            <div className="col-lg-9 mt-8 mobile-w-80 mobile-auto">
+              <h3 className="text-black fnt-family w-80 mb-1 m-auto d-flex justify-content-center fs-38 lh-32 text-center mobile-fs-24 mobile-lh-full mobile-pt-5">
+                Why We Built #PurplePremium <br />
+                (And Why It Matters)
+              </h3>
+              <div className="w-555px m-auto">
+                <h5 className="text-black fs-17 mt-2 fw-600 mb-1">
+                  The high-stakes medical pathways:
+                </h5>
+                <ul className="p-0">
+                  <li className="mb-2 text-black fs-14 d-flex gap-2 align-items-start lh-full">
+                    Is Studying Medicine Abroad Worth It? 100%—If You Do It
+                    Right. Many journey usually starts with a story. You see a
+                    medico-influencer cracking USMLE, PLAB, or AMC. Or someone
+                    confidently chasing nursing or allied health abroad. Maybe
+                    it’s a senior from your college who’s now respected for
+                    their international degree. You get inspired. So you start
+                    watching videos. Asking around. Dreaming big.
+                  </li>
+                  <li className="mb-2 text-black fs-14 d-flex gap-2 align-items-start lh-full">
+                    Looks great from the outside.
+                  </li>
+                  <li className="mb-2 text-black fs-14 d-flex gap-2 align-items-start lh-full">
+                    But here’s the part no one warns you about—Many can lose
+                    years figuring it out the wrong way. One misstep, one rushed
+                    choice or poorly researched decision, endless job
+                    applications, not building your CV enough to stand out,
+                    remember you are competing from people all over the world
+                    for limited number of positions available... and suddenly
+                    you&apos;re stuck. No offer. No progress. Just time you’ll
+                    never get back.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="pt-3 half-section overlap-height position-relative">
+        <div className="w-899px overlap-gap-section p-0 m-auto">
+          <div className="col-lg-12 bg-very-light-green xl-p-4 md-p-50px sm-p-30px mobile-pb-0 mobile-mb-2">
+            <div className="mb-10px">
+              <div className="text-center mobile-w-90 mobile-auto">
+                <h6 className="mb-1 text-black fs-20 lh-22 fw-600">
+                  This is where #purplePremium comes in.
+                </h6>
+                <p className="mb-0 text-black fs-14 lh-full">
+                  Because not every journey needs the same map. Explore them
+                  below.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="row align-items-center justify-content-md-start mt-3 mobile-new-bg-path">
+            <div className="col-lg-5 col-md-5 position-relative md-mb-50px sm-mb-40px">
+              <figure className="position-relative text-center mb-8 fix-object-cover-video">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/assets/img/play-book-read.png"
+                  alt=""
+                  className="border-radius-6px"
+                />
+              </figure>
+            </div>
+            <div className="col-lg-7 col-md-7 position-relative md-mb-50px sm-mb-40px mobile-w-85 mobile-mb-0">
+              <div className="d-flex align-items-center gap-1 mt-2">
+                <div className="bg-path">
+                  <br />
+                  <i className="bi bi-arrow-right-short fs-40" />
+                </div>
+                <h5 className="mb-0 fs-25 lh-30 text-black bg-light-blue-1 border-radius-8px p-1 p-05 fw-400 mobile-fs-14 mobile-lh-16 mobile-p-3">
+                  For all from — STEM, Management, Design & More.
+                </h5>
+              </div>
+              <div className="d-flex w-60 gap-3 align-items-start mt-4 m-auto mb-10 mobile-mb-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/assets/img/dots-top-arrow.png"
+                  className="pb-10"
+                  alt=""
+                />
+                <h6 className="text-black fs-17 lh-22 fw-600 mb-0 pt-15 mobile-fs-14 mobile-lh-16">
+                  Your path.
+                  <br />
+                  Let’s get started.
+                </h6>
+              </div>
+            </div>
+          </div>
+
+          <div className="row justify-content-center">
+            <div className="col-lg-11">
+              <div className="d-flex gap-5 mobile-wrap">
+                <div className="w-50 mobile-w-65 mobile-auto">
+                  <h5 className="mb-3 fs-20 text-black fw-500 lh-22">
+                    Getting into a medical pathway that’s well-researched
+                    matters, a lot.
+                  </h5>
+                  <p className="text-black fs-14 lh-full mb-8">
+                    Let’s be real—studying abroad isn’t just “another phase.”
+                    And it’s not just about taking classes. You’re chasing that
+                    high-paying job, aiming to build a global network, and
+                    picking up real skills that actually make you stand out.
+                  </p>
+                  <h5 className="mb-0 fs-17 text-black fw-600 lh-20">
+                    You need to start thinking like a recruiter.
+                  </h5>
+                  <p className="text-black fs-12 fw-500 mobile-fs-14">
+                    What are they going to see when they open your CV
+                    post-graduation?
+                  </p>
+                  <div className="d-flex gap-3 ml-7">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/assets/img/filter-line.png" alt="" />
+                    <ul className="mb-0 p-0 mobile-checklist-medical">
+                      <li className="fs-14 lh-14 mb-1 fw-300 mb-5">
+                        You guessed it, it’s not just about the degree, <br />
+                        —it all stacks up.&nbsp;
+                      </li>
+                      {(
+                        [
+                          ["bg-green", "Where you studied."],
+                          ["bg-red", "What you built."],
+                          ["bg-light-yellow", "Your experience level."],
+                          ["bg-light-green", "Real-world projects."],
+                          ["bg-blue", "Internships. Research papers."],
+                          ["bg-purple", "Peer-reviewed publications."],
+                        ] as const
+                      ).map(([dot, text]) => (
+                        <li
+                          className="text-black fw-400 fs-12 d-flex gap-2 align-items-start"
+                          key={text}
+                        >
+                          <span className={`dots-box-grid ${dot}`} />
+                          {text}&nbsp;
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+                <div className="w-256px">
+                  <div className="card-box-study px-2">
+                    <h6 className="mb-0 fs-50 text-black fw-600">
+                      Study Abroad Pathway
+                    </h6>
+                    <p
+                      className="text-black fs-25 fw-300 mt-10 w-70 mobile-fs-20"
+                      style={{
+                        fontFamily: "'Roboto Mono'",
+                        backgroundImage: "url('/assets/img/bg-liner.png')",
+                        backgroundRepeat: "no-repeat",
+                        backgroundSize: "contain",
+                        backgroundPosition: "bottom",
+                      }}
+                    >
+                      un-planned
+                    </p>
+                    <p
+                      className="text-black fs-20 fw-300 mt-10 mobile-fs-16"
+                      style={{ fontFamily: "'Roboto Mono'" }}
+                    >
+                      well-researched 🙌
+                    </p>
+                    <div
+                      className="frame-set-content"
+                      style={{
+                        backgroundImage: "url('/assets/img/frame-set.png')",
+                      }}
+                    >
+                      <h5 className="fw-500">
+                        It’s about launching your future. You owe it to yourself
+                        to do it right. And we’re here to make sure you do.{" "}
+                        <b>#pgs</b>
+                      </h5>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <br />
+
+      <section className="left-4 top-50s pt-5 pb-5 mobile-pb-40 pgs-track1-section">
+        <div className="container">
+          <div className="row">
+            <div className="w-900px m-auto position-relative purple-section ">
+              <div className="purple-gray-box ht-786px mobile-new-usme">
+                <h1 className="fnt-family text-green fs-38 d-flex align-items-center gap-2 mobile-fs-30">
+                  #purplePremium{" "}
+                  <span className="text-red fs-19 mobile-fs-20">
+                    MEDICAL PATHWAY
+                  </span>
+                </h1>
+                <div className="text-center w-75 m-auto mt-6 text-black mobile-w-90 mobile-pb-10">
+                  <h3 className="fnt-family mb-2 fs-38 mobile-d-flex gap-3 mobile-justify-center">
+                    <span className="mobile-fs-20">{content.trackLabel}</span>
+                    {content.trackTitle}
+                  </h3>
+                  <h6 className="fs-17 fw-400 lh-22 text-black mobile-fs-14 mobile-lh-full">
+                    {content.trackIntro}
+                  </h6>
+                  <p className="text-black fs-17 lh-22 mb-1 text-start mobile-fs-14 mobile-lh-full">
+                    {content.trackBody}
+                  </p>
+                </div>
+                <div className="d-flex align-items-start gap-3 mt-2 position-relative justify-content-center mobile-respo-box-1 mobile-respo-box-3">
+                  <div className="w-20 mobile-w-50">
+                    <div className="card-box-border h-300px">
+                      <div className="icon-box-position">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/assets/img/list-check.png" alt="" />
+                      </div>
+                      <div className="bg-light-box mt-10">
+                        <h6>Smart shortlisting</h6>
+                        <h6>+</h6>
+                        <h6>Profile deep-dive</h6>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-230px mobile-w-50 mobile-pt-4">
+                    <div className="card-box-border d-flex gap-3 justify-content-start">
+                      <div className="icon-box-position w-50">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src="/assets/img/user-edit.png"
+                          width={40}
+                          style={{ height: 26, width: 125 }}
+                          alt=""
+                        />
+                      </div>
+                      <div className="bg-light-box">
+                        <h6>
+                          Observation or rotation training that aligns with the
+                          medical system you’re aiming for
+                        </h6>
+                      </div>
+                    </div>
+                    <div className="card-box-border mt-4">
+                      <div className="icon-box-position w-50">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src="/assets/img/heart.gif"
+                          width={80}
+                          className="mb-0"
+                          style={{ width: 50 }}
+                          alt=""
+                        />
+                      </div>
+                      <br />
+                      <div className="text-black fs-15 w-60 mt-10 m-last ">
+                        <h6 className="text-black fs-16 lh-22 mb-3 mobile-fs-12 mobile-lh-full">
+                          And a timeline that doesn’t burn you out or waste
+                          years
+                        </h6>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-25 mobile-w-50 mobile-none">
+                    <div className="card-box-border">
+                      <div className="icon-box-position w-50">
+                        <div className="icon-box-position">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src="/assets/img/topy.png" alt="" />
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src="/assets/img/stemp.png" alt="" />
+                        </div>
+                      </div>
+                      <div className="bg-light-box">
+                        <h6>
+                          Observation or rotation training that aligns with the
+                          medical system you’re aiming for
+                        </h6>
+                      </div>
+                      <span className="fw-500 fs-30 m-auto text-center d-block text-black">
+                        +
+                      </span>
+                      <div className="bg-light-box">
+                        <h6>
+                          Pathway-relevant certificate <br />
+                          courses
+                        </h6>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="pgs-track1-bottom mobile-mt-10">
+                  <div className="pgs-track1-copy">
+                    <div className="pgs-track1-card-wrap">
+                      <div className="pgs-badge fnt-family fw-500">#PGS</div>
+                      <div
+                        className="bg-pgs-content px-4 py-4 border-radius-10px"
+                        style={{
+                          backgroundImage: "url('/assets/img/Subtract.png')",
+                        }}
+                      >
+                        <h5 className="text-black fs-17 lh-22 fw-600 mobile-fs-14 mobile-lh-full">
+                          Yes, the competition is global, but so are the rewards
+                          —stay sharp and go claim yours.
+                        </h5>
+                        <p className="mb-0 text-dark-gray lh-19 fs-14 mobile-fs-12 mobile-lh-full">
+                          We’ve worked closely with students who’ve taken this
+                          path—and yeah, it definitely takes commitment. But with
+                          the right mentor and a clear plan, it makes all the
+                          difference. That’s why we’ve built a solid approach for
+                          each pathway, helping our students stay on track and
+                          move forward with confidence.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <figure className="pgs-track1-portrait">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/assets/img/step.png" alt="" />
+                  </figure>
+                </div>
+              </div>
+              <div className="pgs-track1-quote d-flex gap-2">
+                <span className="fnt-family fs-40 text-black">“</span>
+                <p className="mb-0 fs-14 lh-full text-black mobile-fs-14">
+                  Everything changed when I crossed paths with my mentor, Mr.
+                  Nilmek of purpleGuide. Back when uncertainty clouded my path,
+                  they gave me more than just the right guidance—they offered
+                  unwavering support and care at every step. For me, they didn’t
+                  just make my dream possible—they made it happen.
+                  <span className="fnt-family fs-40 text-black d-block m-last text-end">
+                    ”
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="pt-8 pgs-pathway-path-section">
+        <div className="container">
+          <div className="w-990px m-auto">
+            <div className="text-center">
+              <h3 className="text-black mb-1 fnt-family mb-0 fs-38 mobile-fs-24 mobile-lh-full">
+                {content.pathParen}
+              </h3>
+              <p className="text-black fs-16 lh-19 mobile-fs-14">
+                This is where real mentorship kicks in, aka #purplePremium for
+                Medical. Let’s show you how.
+              </p>
+            </div>
+            <div className="bg-black what-is-purple-relative border-radius-10px pt-5 purple-mobile-box-1">
+              <div className="w-100">
+                <h5 className="text_purple fs-30 text-end mobile-fs-24 mobile-text-start">
+                  #purplePremium
+                </h5>
+              </div>
+              <div className="d-flex gap-4 w-95 m-auto mobile-wrap">
+                <div className="w-50">
+                  <div className="text-indennt-30">
+                    <h4 className="text-yellow fnt-family fs-39 lh-22 fw-400 mb-0 mobile-lh-full">
+                      get to know
+                    </h4>
+                    <h4 className="text-yellow fnt-family fs-100 fw-400 lh-100">
+                      {content.getToKnowTitle}
+                    </h4>
+                  </div>
+                  <h4 className="mb-0 text-white fs-19 fw-600 text-indennt-30 mobile-fs-14 mobile-lh-full">
+                    {content.gatewayTitle}
+                  </h4>
+                  <p className="text-white lh-19 fw-300 fs-14 px-5 mobile-fs-14 mobile-lh-full mobile-p-0">
+                    {content.gatewayBody}
+                  </p>
+                  <div className="mt-4 w-100 m-auto mb-3 mobile-none">
+                    <div className="d-flex gap-2 align-items-center mobile-wrap">
+                      {content.steps.map((step) => (
+                        <div className="w-145px" key={step.title}>
+                          <button
+                            type="button"
+                            className="btn bg-yellow border-radius-10px px-4 w-100 fnt-family py-1 lh-20 fs-20 mb-4"
+                          >
+                            {step.title}
+                          </button>
+                          <h6 className="text-yellow fs-12 lh-full mobile-fs-12 mobile-mb-0">
+                            {step.detail.split("\n").map((line) => (
+                              <span key={line}>
+                                {line}
+                                <br />
+                              </span>
+                            ))}
+                          </h6>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="w-50">
+                  <div className="mobile-none">
+                    <h5 className="text-green mb-0 fs-17 lh-22 fw-600">
+                      Performance Data
+                    </h5>
+                    <p className="text-white fs-14 fw-400 lh-14 mb-0">
+                      (2024* Passing%)
+                    </p>
+                  </div>
+                  <div className="d-flex gap-3 mt-3 mobile-none">
+                    {content.stats.map((s) => (
+                      <ProgressStat key={s.label} {...s} />
+                    ))}
+                  </div>
+                  <h5 className="box-border-mark lh-16">
+                    This pathway will tak 2-3 years of your <br /> time to
+                    complete
+                  </h5>
+                  <h5 className="text-yellow fs-13 lh-15 mb-1 mobile-pt-2">
+                    Residency or Fellowship:
+                  </h5>
+                  <p className="text-white lh-16 mobile-fs-14 mobile-lh-full">
+                    Whether you stop at residency or chase a specialty
+                    you&apos;re part of the system.
+                  </p>
+                  <h5 className="text-yellow fs-14 lh-16 fw-600 w-80 pt-2 mb-0">
+                    The U.S. Match system is one of the most organized and
+                    transparent residency processes worldwide.
+                  </h5>
+                </div>
+              </div>
+
+              <div className="col-lg-12 m-auto">
+                <div className="gray-bg-overlaping">
+                  <div className="ml-0 d-flex align-items-end text-black gap-2 justify-content-end minus-5">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/assets/img/intro.png"
+                      alt="intro"
+                      className="small-mobile-img"
+                    />
+                  </div>
+                  <h1 className="fnt-family text-black fs-50 pt-1 text-center mb-2 lh-48 mobile-fs-32 mobile-lh-full mobile-text-start">
+                    What you get with #PurplePremium
+                    <br />
+                    for your {content.shortName} journey
+                  </h1>
+                  <div className="d-flex purple-gray-box-1 gap-3 justify-content-center mt-5 mobile-wrap">
+                    <div className="w-50">
+                      <div className="mb-3 text-black">
+                        <div className="w-263px m-last">
+                          <h6 className="fs-17 fw-600 mb-0">
+                            Network. De-stress. Stand Out.
+                          </h6>
+                          <p className="mb-0 fs-14 lh-20">
+                            From the moment you decide to take this path,
+                            we&apos;ll help you build your plan, choose the
+                            right resources, guide you through registrations,
+                            visa steps, and even get you invites to prestigious
+                            medical meetups in the U.S. ❤️
+                          </p>
+                        </div>
+                      </div>
+                      <div className="card-box-border w-452px">
+                        <div>
+                          <h5 className="text-black fw-500 mobile-fs-20">
+                            📌 We guide you through all the important forms
+                          </h5>
+                          <ul className="points w-65 m-last pb-4 mobile-w-80">
+                            {WHAT_YOU_GET_FORMS.map((item) => (
+                              <li
+                                className="text-black fs-16 lh-20 mb-1"
+                                key={item}
+                              >
+                                {item}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                      <div className="card-box-border mt-3 w-90 m-last mobile-w-95">
+                        <div>
+                          <h5 className="text-black fw-500 mb-2 fs-32 mobile-fs-20 mobile-lh-full">
+                            Be added to a prep group
+                          </h5>
+                          <p className="text-black fs-16 lh-20 mb-1 pb-5 mobile-fs-14">
+                            As students join, we group them with peers on a
+                            similar path—so they can share strategies, stay
+                            motivated, and grow together.
+                          </p>
+                        </div>
+                      </div>
+                      <div className="light-purple-bg py-3 px-5 border-radius-10px mt-3 pb-4">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/assets/img/speach.png" alt="" />
+                        <h5 className="fs-17 lh-22 text-black mb-0 text-center mobile-fs-14 mobile-lh-full">
+                          As part of your profile-building, you’ll have the
+                          opportunity to showcase your research poster at
+                          medical conferences in the U.S. and we’ll guide you
+                          through every step.
+                        </h5>
+                      </div>
+                    </div>
+                    <div className="w-50">
+                      <div className="card-box-border">
+                        <div>
+                          <h5 className="text-black fw-500 mobile-fs-20 mobile-lh-full">
+                            we get you a major checklist to get you on your path
+                          </h5>
+                          <ul className="w-100 m-last">
+                            {WHAT_YOU_GET_CHECKLIST.map((item) => (
+                              <li
+                                className="text-black fs-18 lh-25 mb-2 d-flex gap-2 align-items-start mobile-fs-14 mobile-lh-full"
+                                key={item}
+                              >
+                                <span className="green-box-dot" />
+                                <div className="mobile-w-90">{item}</div>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                      <div className="card-box-border w-65 mt-3 mobile-w-95s">
+                        <div className="mb-5 icon-box-position d-flex align-items-center gap-2 justify-content-start">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src="/assets/img/desk-user.png"
+                            className="mb-0"
+                            alt=""
+                          />
+                          <span className="fs-20 mobile-fs-16 mobile-lh-full">
+                            Book feedback sessions
+                          </span>
+                        </div>
+                        <div className="calendar-box-img">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src="/assets/img/bookcalendar.png" alt="" />
+                        </div>
+                      </div>
+                      <div className="mt-8">
+                        <h4 className="mb-1 fs-17 fw-600 text-black lh-15 mobile-fs-14">
+                          Get Matched for Clinical Rotations
+                          <span className="d-block fs-12 fw-400 text-start mt-2 mobile-fs-14">
+                            Exclusive discounts for purplePremium students,
+                          </span>
+                        </h4>
+                        <h4 className="mb-0 fs-17 mb-2 lh-20 fw-600 text-black mobile-fs-14">
+                          VISA application help
+                        </h4>
+                        <h4 className="mb-0 fs-17 fw-600 lh-20 text-black mobile-fs-14">
+                          Help in building your CV
+                        </h4>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-center mt-3 mb-3">
+                    <a
+                      href="#offer_script"
+                      className="btn btn-green-btn m-auto mobile-fs-14 mobile-lh-full"
+                    >
+                      Step into the {content.shortName} grind—with
+                      #purplePremium
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="about-section half-section overlap-height position-relative overflow-hidden pt-13">
+        <div className="overlap-gap-section p-0 w-863px m-auto">
+          <div className="row align-items-center justify-content-md-center m-0">
+            <div className="col-lg-12 col-md-12 m-0">
+              <div className="card card-comment">
+                <h5>
+                  <span className="fnt-50">“</span>
+                  <span>
+                    From your first step to your final admit or medical pathway
+                    — our expert counselors guide the entire journey with you.
+                    <span className="fnt-50 dot-flot-1">”</span>
+                  </span>
+                </h5>
+                <div className="tag-comment lt-1">
+                  <div className="tag-border">purpleguide.study</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+      <HighlightsSection />
+
+      <div className="wrapper-content">
+      <section className="position-relative pb-100 mobile-aboutus">
+        <div className="w-903px p-0 m-auto pb-100">
+          <div className="row align-items-center justify-content-center d-flex gap-5">
+            <div className="position-relative bg-gray w-504px bg-very-light-green xl-p-4 md-p-50px sm-p-30px border-radius-10px px-5">
+              <div className="mb-10px">
+                <div className="mt-10 mobile-px-4">
+                  <h2 className="mb-1 text-uppercase fnt-bab text-black fs-38 mobile-br-none mobile-fs-20 mobile-lh-20 mobile-w-60">
+                    DOCUMENTATION <br /> REQUIREMENTS FOR <br /> USCE
+                  </h2>
+                  <button
+                    type="button"
+                    style={{ padding: "8px 30px" }}
+                    className="mb-2 mobile-px-3 btn btn-small-large border-radius-10px btn-base-color btn-rounded btn-switch-text d-inline-block me-20px sm-me-10px align-middle left-icon mt-5px"
+                    onClick={() => {
+                      setExpenseDone(false);
+                      setExpenseOpen(true);
+                    }}
+                  >
+                    <span>
+                      <span
+                        className="btn-double-text ls-minus-05px fs-15"
+                        data-text="Request it here"
+                      >
+                        Request it here
+                      </span>
+                    </span>
+                  </button>
+                  <p className="text-black mt-3 mb-3">
+                    — we’ll send it straight to your inbox.
+                  </p>
+                  <p className="text-black fs-16 lh-19 mt-6 mb-30 mobile-fs-14 mobile-pb-30">
+                    Whether you&apos;re just getting started or planning ahead
+                    for all three steps, knowing the costs involved can help you
+                    make better decisions. From registration fees and travel
+                    expenses to prep materials and clinical rotations — we’ve
+                    mapped out the full journey. Just drop a request and get a
+                    clear picture of what to expect, without surprises.
+                  </p>
+                </div>
+                <figure className="about-floting-img m-0 text-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/assets/img/doctor.png"
+                    alt=""
+                    className="border-radius-6px"
+                  />
+                </figure>
+              </div>
+            </div>
+            <div className="w-336px">
+              <figure className="request-img-box text-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/assets/img/insta-girl.png"
+                  alt=""
+                  className="border-radius-6px"
+                />
+              </figure>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div className="container">
+          <div className="row">
+            <div className="col-lg-11 m-auto mobile-p-0">
+              <h3 className="text-black fnt-family w-60 fs-38 lh-full text-center m-auto mobile-fs-24 mobile-w-full">
+                Unlock the full power of your personalized <br /> dashboard with
+                Purple Premium
+              </h3>
+              <div className="box-img-grid-gorup grid-block-size mt-4">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/assets/img/restro-img.jpg"
+                  className="border-radius-10px"
+                  alt=""
+                />
+              </div>
+              <div className="line-active" />
+              <div className="group-flex-items mt-4 d-flex wrap justify-content-space mobile-scrolling-nowrap">
+                {DASHBOARD_FEATURES.map((title) => (
+                  <div className="w-20" key={title}>
+                    <div className="d-flex align-items-start gap-3 mb-5 w-202px">
+                      <span className="icon-box">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/assets/img/icon-traingal.png" alt="" />
+                      </span>
+                      <h4 className="text-black mb-0 fs-19 lh-25 w-80 mobile-fs-19 mobile-lh-25">
+                        {title.split("\n").map((line) => (
+                          <span key={line}>
+                            {line}
+                            <br />
+                          </span>
+                        ))}
+                      </h4>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        className="pt-10 js-purplepremium-offer-section"
+        id="offer_script"
+      >
+        <div className="w-899px m-auto">
+          <div className="row justify-content-center mobile-row-0">
+            <div className="mobile-p-0">
+              <div className="box-gray-2 border-radius-10px">
+                <div className="w-90 m-auto">
+                  <div className="w-95 card-box-border bg-white border-black pt-4 m-auto mobile-bg-white">
+                    <h1 className="fnt-family text-black w-75 fs-50 lh-45 mb-0 mobile-fs-24 mobile-lh-full mobile-pb-4">
+                      {content.offerHeadline}
+                    </h1>
+                    <p className="text-black fs-12 lh-18 w-75 mb-0 pb-4 mobile-lh-full mobile-fs-14">
+                      Every student&apos;s journey takes time, attention, and
+                      real mentorship. That&apos;s why we limit the number of
+                      students each batch - so our experts can actually guide,
+                      not just supervise.
+                    </p>
+                  </div>
+                  <div className="w-100 card-box-border bg-black border-liner custom-padding-100 m-auto minus-5 border-radius-0px mobile-bg-black">
+                    <h6 className="fs-16 fw-500 text-white d-flex gap-2 align-items-center mobile-wrap mobile-d-block mobile-mb-0">
+                      <span className="mobile-d-block mobile-pb-5 mobile-text-center mobile-fs-13">
+                        Get Started at discounted price
+                      </span>
+                      <span className="mobile-flot-price">
+                        <span
+                          className="bg-yellow text-black px-2 py-1 border-radius-6px"
+                          style={{ height: 25, lineHeight: "17px" }}
+                        >
+                          35% off
+                        </span>{" "}
+                        <del className="fw-300 fs-25 mobile-fs-16">
+                          was ₹ 509,999
+                        </del>
+                      </span>
+                    </h6>
+                    <h2 className="mb-4 text-white fw-800 fs-50 lh-30 mobile-text-center">
+                      ₹ 65,0000
+                    </h2>
+                    <Link
+                      className="btn btn-purple2 text-black fw-500 w-230px mt-2 fs-19"
+                      href="/purplepremiumhome"
+                    >
+                      Enroll Now
+                    </Link>
+                  </div>
+                  <h1 className="mb-0 fs-28 mt-4 fnt-family text-black mobile-fs-24">
+                    What’s Included when you sign up:
+                  </h1>
+                  <p className="fw-400 fs-12 lh-16 text-black mobile-fs-14 mobile-lh-full">
+                    A 10-point journey built by seeing what {content.shortName}{" "}
+                    aspirants really go through—and what kind of support
+                    actually makes a difference.
+                  </p>
+                  <ul className="check-list">
+                    {content.included.map((item) => (
+                      <li key={item}>
+                        <i className="bi bi-check-circle-fill" />
+                        <div>{item}</div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              <div className="group-of-box-bottom d-flex gap-2 align-items-start">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/assets/img/high-fiy.png" alt="" />
+                <h5 className="fw-400 text-black fs-12 lh-full mb-0">
+                  You get full access for a year—and even after that, we’re
+                  still here when you need us. From Step 1 to Step 2, we’ve got
+                  the tools, tips, and real guidance to back you up.
+                </h5>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div className="w-899px m-auto">
+          <div className="row justify-content-center">
+            <div className="col-lg-6 mobile-w-90 mobile-auto">
+              <div className="mobile-d-flex mobile-align-center mobile-pb-5">
+                <h3 className="text-black fnt-family fs-38 mb-1 mobile-fs-24 mobile-w-60">
+                  Got questions about <br />
+                  #purplePremium?{" "}
+                </h3>
+                <p className="text-green fs-17 fw-500 mobile-fs-14 mobile-lh-full mobile-w-50 mobile-mb-0">
+                  Let’s clear them in one quick call.
+                </p>
+              </div>
+              <ul className="p-0 m-0">
+                {[
+                  content.meetFitLine,
+                  "Talk about your profile (and yep, you might just score a discount depending on your journey stage)",
+                  "Figure out how to start a roadmap from exactly where you stand",
+                  "Got a “what if” or “how do I”? Clear it over the call",
+                ].map((line) => (
+                  <li
+                    className="d-flex gap-2 align-items-center mb-4"
+                    key={line}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/assets/img/yellow-check.png"
+                      className="mobile-w-25px"
+                      alt=""
+                    />
+                    <h6 className="fs-16 text-black mb-0 fw-500 lh-20 mobile-fs-14">
+                      {line}
+                    </h6>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="col-lg-5">
+              <div className="bg-black p-4 pt-4 pb-4 border-radius-10px text-white text-center">
+                <h5 className="mb-0 fs-25 lh-25 pt-3 mobile-fs-20">
+                  MEET + GREET
+                </h5>
+                <h4 className="mb-0 fs-32 mobile-pb-2">
+                  <b>With an Expert</b>
+                </h4>
+                <p className="mb-3 fs-12 fw-300">
+                  Check the available slots & book your appointment.
+                </p>
+                <button
+                  type="button"
+                  className="btn btn-purple2 fs-19 fw-700"
+                  style={{ width: 230 }}
+                >
+                  Schedule Now
+                </button>
+                <div className="fix-object-img-w-200">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/assets/img/meet-laptop.jpg" alt="" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <FaqBlock items={content.faq} />
+
+      <section className="pt-0 mobile-pgs-info">
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-lg-11 m-auto">
+              <div className="d-flex align-items-center justify-content-center m-d-flex">
+                <div className="w-20 new-black-m">
+                  <h5 className="mb-0 bg-black text_purple_bg">#PGS</h5>
+                  <p className="text-black fs-15 mb-0">#StudentSupportHub</p>
+                </div>
+                <div className="w-40">
+                  <h6 className="mb-2 text-black d-flex gap-2 fs-20 fw-500">
+                    <span className="w-20 ml-3 px-1 bg-yellow fs-18 d-inline-block">
+                      Call Us{" "}
+                    </span>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/assets/img/phone.png" width={20} alt="" />
+                    91 95665 66298
+                  </h6>
+                  <h6 className="mb-2 text-black d-flex gap-2 fs-20 fw-500">
+                    <span className="w-20 ml-3 px-1 bg-yellow fs-18 d-inline-block">
+                      Email Us
+                    </span>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/assets/img/phone.png" width={20} alt="" />
+                    connect@purpleguide.study
+                  </h6>
+                </div>
+                <div className="w-15">
+                  <p className="text-black font-style-italic fs-15 lh-20">
+                    Reach out on our helpline for fast bookings, expert advice,
+                    and answers to all your study abroad questions. We’ve also
+                    got dedicated mentor groups for medical and non-medical
+                    courses—so you’re always connected to the right people.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <PgsPicksSection />
+      </div>
+
+      {expenseOpen ? (
+        <div
+          className="mobile-applicant pgs-modal premium-modal-overlay modal-pgsamc"
+          style={{ display: "flex" }}
+        >
+          <div className="premium-modal-container purple-modal d-flex">
+            <div className="panel-left">
+              <button
+                className="close-btn desktop-none"
+                type="button"
+                aria-label="Close"
+                onClick={() => setExpenseOpen(false)}
+              >
+                ✕
+              </button>
+              <div className="brand-row">
+                <div className="brand-title">#PGS</div>
+                <div className="heart-badge">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/assets/img/heart.gif" alt="" />
+                </div>
+              </div>
+              <div className="sub-label fnt-family">
+                medical pathway finance
+              </div>
+              <p className="tagline lh-18ppx">
+                Prepping your medical journey? Figure out your expenses
+              </p>
+              <div className="boost-wrap">
+                <div className="mobile-none" style={{ margin: "0 0 0 auto" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/assets/img/arrow-modal.png"
+                    style={{ width: 95, marginLeft: -10 }}
+                    alt=""
+                  />
+                  <span className="w-full d-block fs-16 text-white lh-18">
+                    get the <br />
+                    boost <br /> your <br /> deserves
+                  </span>
+                </div>
+                <div className="mb-4">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/assets/img/bump.png" alt="" />
+                </div>
+                <div className="desktop-none">
+                  <p className="mb-0 fs-14 lh-20 fw-400 text-white">
+                    get the boost your <br /> PREP deserves
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="panel-right">
+              <button
+                className="close-btn mobile-none"
+                type="button"
+                aria-label="Close"
+                onClick={() => setExpenseOpen(false)}
+              >
+                ✕
+              </button>
+              {expenseDone ? (
+                <div className="success-msg" style={{ display: "block" }}>
+                  <div className="checkmark">🎉</div>
+                  <h3>You&apos;re all set!</h3>
+                  <p>
+                    Your personalised checklist is on its way.
+                    <br />
+                    Check your inbox soon.
+                  </p>
+                </div>
+              ) : (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!expenseName.trim() || !expenseEmail.includes("@"))
+                      return;
+                    setExpenseDone(true);
+                  }}
+                >
+                  <div className="field-group">
+                    <div className="field">
+                      <input
+                        type="text"
+                        placeholder="Enter Name *"
+                        autoComplete="name"
+                        required
+                        value={expenseName}
+                        onChange={(e) => setExpenseName(e.target.value)}
+                      />
+                    </div>
+                    <div className="field">
+                      <input
+                        type="email"
+                        placeholder="Email *"
+                        autoComplete="email"
+                        required
+                        value={expenseEmail}
+                        onChange={(e) => setExpenseEmail(e.target.value)}
+                      />
+                    </div>
+                    <div className="field">
+                      <input
+                        type="tel"
+                        placeholder="Phone (Whatsapp number preffered)"
+                        autoComplete="tel"
+                        value={expensePhone}
+                        onChange={(e) => setExpensePhone(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <br />
+                  <div>
+                    <p className="section-label mb-2">
+                      What describes you best?
+                    </p>
+                    <div className="d-flex gap-3">
+                      <select className="modal-btn-pgs" defaultValue="1">
+                        <option value="1">1st year Prep?</option>
+                        <option value="2">1st year Prep? - 1</option>
+                      </select>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src="/assets/img/arrow-btn.png"
+                        style={{ width: 26, height: 26 }}
+                        alt=""
+                      />
+                    </div>
+                  </div>
+                  <div className="cta-row mt-5">
+                    <button className="cta-btn" type="submit">
+                      GET MY EXPENSE CHECKLIST
+                      <span className="arrow">←</span>
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
+  );
+}

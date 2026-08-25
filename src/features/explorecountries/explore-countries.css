@@ -1,0 +1,64 @@
+/* Featured “study in …” country card */
+.pgs-featured-country-body {
+  position: relative;
+  overflow: visible;
+}
+
+.pgs-featured-country .pgs-country-title {
+  display: block;
+  text-transform: uppercase;
+  line-height: 0.85;
+}
+
+/* Lock height to 2-line countries (e.g. United States) so single-line names don’t shrink the card */
+.pgs-featured-country h4.fs-75 {
+  line-height: 0.85;
+  margin-bottom: 0;
+  min-height: 1.7em; /* 2 lines × line-height 0.85 */
+}
+
+.pgs-country-line {
+  display: block;
+}
+
+.pgs-featured-country .card-box-img {
+  overflow: visible;
+}
+
+.pgs-featured-country-cta {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1;
+}
+
+.pgs-featured-country-cta .btn-green-btn {
+  position: relative;
+  z-index: 2;
+}
+
+.pgs-featured-country .pointer-img {
+  position: relative;
+  width: 160px;
+  height: auto;
+  margin-top: 2px;
+  pointer-events: none;
+  z-index: 1;
+  /* pointer.webp is white art on solid black — knock out the black so it can’t clip the badge */
+  mix-blend-mode: screen;
+}
+
+/* Country switcher — keep labels (EUROPE / OTHERS) on one line when selected */
+.pgs-country-switcher.vs-box-set h1,
+.pgs-country-switcher .vs-box-set h1 {
+  white-space: nowrap;
+  overflow: visible;
+}
+
+.pgs-country-switcher.vs-box-set h1 > span,
+.pgs-country-switcher .vs-box-set h1 > span {
+  white-space: nowrap;
+  display: inline-block;
+}

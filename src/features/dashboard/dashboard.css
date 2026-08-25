@@ -1,0 +1,222 @@
+/* Center feed dashboard content (all experience variants) */
+
+.pgs-dashboard-feed {
+  padding-left: 0 !important;
+}
+
+.pgs-dashboard-feed-inner {
+  width: 100%;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.pgs-dashboard-feed-inner > .w-729px {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.pgs-dashboard-feed-inner > .container {
+  max-width: 1080px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  overflow: visible;
+}
+
+.pgs-dashboard-feed-inner .row.align-items-start {
+  justify-content: center;
+  flex-wrap: nowrap;
+  position: relative;
+  overflow: visible;
+}
+
+.pgs-dashboard-feed-inner .row > .w-616px {
+  width: 700px !important;
+  flex-shrink: 0;
+}
+
+/* Top Picks: pulled out to align under the UniMeet banner */
+.pgs-dashboard-feed-inner .row > .w-303px {
+  flex-shrink: 0;
+  position: absolute;
+  right: -380px;
+  top: 0;
+}
+
+@media (max-width: 991px) {
+  .pgs-dashboard-feed-inner {
+    max-width: 100%;
+  }
+}
+
+/* Notes + progress row — give actions column more width for arrow callouts */
+.pgs-dashboard-feed .mobile-notes-div .notes-box.w-50 {
+  width: 38% !important;
+  flex-shrink: 0;
+}
+
+.pgs-dashboard-feed .mobile-notes-div > .w-50.position-relative {
+  width: 60% !important;
+  min-width: 400px;
+  flex-shrink: 0;
+}
+
+.pgs-dashboard-feed .mobile-notes-div > .w-50.position-relative > div:last-child {
+  position: relative;
+  padding-top: 72px;
+}
+
+/* Arrow callout text — force line breaks like design reference */
+.pgs-dashboard-feed .post-arrow-text span {
+  display: block;
+  white-space: nowrap;
+}
+
+.pgs-dashboard-feed .post-arrow p,
+.pgs-dashboard-feed .post-arrow-2 p {
+  max-width: 210px;
+  flex-shrink: 0;
+}
+
+.pgs-dashboard-feed .post-arrow {
+  top: 0;
+  bottom: auto;
+  right: -32%;
+  width: auto;
+  max-width: 300px;
+}
+
+.pgs-dashboard-feed .post-arrow-2 {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: auto;
+  max-width: 320px;
+  margin-right: -32%;
+  margin-top: 12px;
+}
+
+/* Feed upcoming-events month calendar (matches design switcher + grid) */
+.pgs-feed-calendar {
+  background: #e9e9e9;
+  border-radius: 18px;
+  padding: 1.1rem 1.15rem 1.25rem;
+  height: 100%;
+  min-height: 320px;
+  box-sizing: border-box;
+}
+
+.pgs-feed-calendar__switcher {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  margin-bottom: 1rem;
+}
+
+.pgs-feed-calendar__pills {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.pgs-feed-calendar__pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border-radius: 10px;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #111;
+  line-height: 1;
+  min-width: 4.5rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.pgs-feed-calendar__nav {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.pgs-feed-calendar__nav--prev {
+  background: #fff;
+  color: #6b6b6b;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.pgs-feed-calendar__nav--next {
+  background: #2f6bff;
+  color: #fff;
+}
+
+.pgs-feed-calendar__dow,
+.pgs-feed-calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.35rem 0.2rem;
+  text-align: center;
+}
+
+.pgs-feed-calendar__dow {
+  margin-bottom: 0.45rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #222;
+}
+
+.pgs-feed-calendar__day {
+  position: relative;
+  aspect-ratio: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #111;
+  border-radius: 8px;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 40px;
+}
+
+.pgs-feed-calendar__day.is-outside {
+  color: #c0c0c0;
+}
+
+.pgs-feed-calendar__day.is-event {
+  background: #2f6bff;
+  color: #fff;
+  font-weight: 700;
+  border-radius: 8px;
+}
+
+.pgs-feed-calendar__badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1.5px solid #fff;
+  background: #111;
+  pointer-events: none;
+}
