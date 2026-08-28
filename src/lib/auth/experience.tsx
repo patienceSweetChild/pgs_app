@@ -1,5 +1,6 @@
 "use client";
 
+import type { Session } from "@supabase/supabase-js";
 import {
   createContext,
   useCallback,
@@ -76,7 +77,7 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [pgsCode, setPgsCode] = useState<string | null>(null);
 
-  const refreshFromSession = useCallback(async () => {
+  const refreshFromSession = useCallback(async (session?: Session | null) => {
     if (!configured) {
       setReady(true);
       return;
@@ -84,9 +85,11 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
 
     try {
       const supabase = createSupabaseBrowserClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const user =
+        session?.user ??
+        (
+          await supabase.auth.getUser()
+        ).data.user;
 
       if (!user) {
         clearIdentity(
@@ -152,8 +155,11 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
     const supabase = createSupabaseBrowserClient();
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
-      void refreshFromSession();
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      // Defer Supabase calls to avoid deadlocking signInWithPassword (auth-js #762).
+      setTimeout(() => {
+        void refreshFromSession(session);
+      }, 0);
     });
 
     return () => subscription.unsubscribe();

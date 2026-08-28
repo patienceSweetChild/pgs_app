@@ -143,7 +143,7 @@ function QuoteBanner() {
 export function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { loginAs, isLoggedIn } = useExperience();
+  const { loginAs, isLoggedIn, refreshSession } = useExperience();
 
   const initialMode: Mode = useMemo(() => {
     const raw = (searchParams.get("signup") || "").toLowerCase();
@@ -220,6 +220,7 @@ export function LoginPage() {
         setError(signError.message);
         return;
       }
+      await refreshSession();
       router.push(redirectTo === "/" ? "/" : redirectTo);
       router.refresh();
     } catch (err) {
@@ -371,7 +372,7 @@ export function LoginPage() {
                       className="btn btn-purple w-258px fs-16 nowrap mobile-fs-14"
                       disabled={submitting}
                     >
-                      Access your #PGS account
+                      {submitting ? "Signing in…" : "Access your #PGS account"}
                     </button>
                   </div>
                 </form>
