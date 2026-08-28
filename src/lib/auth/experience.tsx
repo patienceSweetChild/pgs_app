@@ -1,6 +1,6 @@
 "use client";
 
-import type { Session } from "@supabase/supabase-js";
+import type { Session, User } from "@supabase/supabase-js";
 import {
   createContext,
   useCallback,
@@ -36,12 +36,13 @@ type ExperienceContextValue = {
   email: string | null;
   avatarUrl: string | null;
   pgsCode: string | null;
-  refreshSession: () => Promise<void>;
+  refreshSession: (session?: Session | null) => Promise<void>;
 };
 
 const ExperienceContext = createContext<ExperienceContextValue | null>(null);
 
 const DEFAULT_AVATAR = "/assets/img/student-avatar.png";
+const PROFILE_FETCH_TIMEOUT_MS = 8_000;
 
 function experienceFromFlags(loggedIn: boolean, premium: boolean): Experience {
   if (!loggedIn) return "anonymous";
@@ -63,6 +64,29 @@ function clearIdentity(
   setPgsCode(null);
 }
 
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error("Profile fetch timed out")), ms);
+    }),
+  ]);
+}
+
+async function loadProfileAndPremium(user: User) {
+  const supabase = createSupabaseBrowserClient();
+  const [{ data: profile }, { data: premium }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("full_name, avatar_path, pgs_code, updated_at")
+      .eq("id", user.id)
+      .maybeSingle(),
+    supabase.rpc("student_has_active_premium", { uid: user.id }),
+  ]);
+
+  return { profile, premium: Boolean(premium) };
+}
+
 export function ExperienceProvider({ children }: { children: ReactNode }) {
   const configured = isSupabaseConfigured();
   const allowMock =
@@ -77,48 +101,12 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [pgsCode, setPgsCode] = useState<string | null>(null);
 
-  const refreshFromSession = useCallback(async (session?: Session | null) => {
-    if (!configured) {
-      setReady(true);
-      return;
-    }
-
-    try {
-      const supabase = createSupabaseBrowserClient();
-      const user =
-        session?.user ??
-        (
-          await supabase.auth.getUser()
-        ).data.user;
-
-      if (!user) {
-        clearIdentity(
-          setUserId,
-          setFullName,
-          setEmail,
-          setAvatarUrl,
-          setPgsCode,
-        );
-        setExperienceState("anonymous");
-        setReady(true);
-        return;
-      }
-
-      setUserId(user.id);
-      setEmail(user.email ?? null);
-
-      const [{ data: profile }, { data: premium }] = await Promise.all([
-        supabase
-          .from("profiles")
-          .select("full_name, avatar_path, pgs_code, updated_at")
-          .eq("id", user.id)
-          .maybeSingle(),
-        supabase.rpc("student_has_active_premium", { uid: user.id }),
-      ]);
-
+  const applyProfile = useCallback(
+    (user: User, profile: Awaited<ReturnType<typeof loadProfileAndPremium>>["profile"], premium: boolean) => {
       setFullName(profile?.full_name ?? null);
       setPgsCode(profile?.pgs_code ?? null);
 
+      const supabase = createSupabaseBrowserClient();
       const resolved = publicObjectUrl(
         supabase,
         STORAGE_BUCKETS.avatars,
@@ -133,20 +121,69 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
         setAvatarUrl(null);
       }
 
-      setExperienceState(experienceFromFlags(true, Boolean(premium)));
-    } catch {
-      setExperienceState("anonymous");
-      clearIdentity(
-        setUserId,
-        setFullName,
-        setEmail,
-        setAvatarUrl,
-        setPgsCode,
-      );
-    } finally {
-      setReady(true);
-    }
-  }, [configured]);
+      setExperienceState(experienceFromFlags(true, premium));
+    },
+    [],
+  );
+
+  const refreshFromSession = useCallback(
+    async (session?: Session | null) => {
+      if (!configured) {
+        setReady(true);
+        return;
+      }
+
+      try {
+        const supabase = createSupabaseBrowserClient();
+        const user =
+          session?.user ??
+          (
+            await supabase.auth.getUser()
+          ).data.user;
+
+        if (!user) {
+          clearIdentity(
+            setUserId,
+            setFullName,
+            setEmail,
+            setAvatarUrl,
+            setPgsCode,
+          );
+          setExperienceState("anonymous");
+          setReady(true);
+          return;
+        }
+
+        // Fast path: mark logged in immediately so login redirect is not blocked.
+        setUserId(user.id);
+        setEmail(user.email ?? null);
+        setExperienceState("authenticated_standard");
+        setReady(true);
+
+        // Slow path: profile + premium in background (never blocks login redirect).
+        try {
+          const { profile, premium } = await withTimeout(
+            loadProfileAndPremium(user),
+            PROFILE_FETCH_TIMEOUT_MS,
+          );
+          applyProfile(user, profile, premium);
+        } catch {
+          // Keep authenticated_standard when profile/RPC is slow or unavailable.
+        }
+      } catch {
+        setExperienceState("anonymous");
+        clearIdentity(
+          setUserId,
+          setFullName,
+          setEmail,
+          setAvatarUrl,
+          setPgsCode,
+        );
+        setReady(true);
+      }
+    },
+    [applyProfile, configured],
+  );
 
   useEffect(() => {
     void refreshFromSession();

@@ -212,15 +212,21 @@ export function LoginPage() {
         "@/lib/supabase/client"
       );
       const supabase = createSupabaseBrowserClient();
-      const { error: signError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const signInResult = await Promise.race([
+        supabase.auth.signInWithPassword({ email, password }),
+        new Promise<never>((_, reject) => {
+          setTimeout(
+            () => reject(new Error("Sign in timed out. Please try again.")),
+            20_000,
+          );
+        }),
+      ]);
+      const { data, error: signError } = signInResult;
       if (signError) {
         setError(signError.message);
         return;
       }
-      await refreshSession();
+      void refreshSession(data.session);
       router.push(redirectTo === "/" ? "/" : redirectTo);
       router.refresh();
     } catch (err) {
