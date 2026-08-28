@@ -39,6 +39,7 @@ export function SiteShell({
     pathname.startsWith("/ops") ||
     pathname.startsWith("/portal") ||
     pathname.startsWith("/auth") ||
+    pathname.startsWith("/login") ||
     pathname.startsWith("/cms-preview");
 
   useEffect(() => {

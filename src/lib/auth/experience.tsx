@@ -7,6 +7,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -41,8 +42,9 @@ type ExperienceContextValue = {
 
 const ExperienceContext = createContext<ExperienceContextValue | null>(null);
 
-const DEFAULT_AVATAR = "/assets/img/student-avatar.png";
+export const DEFAULT_AVATAR = "/assets/img/student-avatar.png";
 const PROFILE_FETCH_TIMEOUT_MS = 8_000;
+const PROFILE_FETCH_DEBOUNCE_MS = 150;
 
 function experienceFromFlags(loggedIn: boolean, premium: boolean): Experience {
   if (!loggedIn) return "anonymous";
@@ -102,7 +104,11 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
   const [pgsCode, setPgsCode] = useState<string | null>(null);
 
   const applyProfile = useCallback(
-    (user: User, profile: Awaited<ReturnType<typeof loadProfileAndPremium>>["profile"], premium: boolean) => {
+    (
+      user: User,
+      profile: Awaited<ReturnType<typeof loadProfileAndPremium>>["profile"],
+      premium: boolean,
+    ) => {
       setFullName(profile?.full_name ?? null);
       setPgsCode(profile?.pgs_code ?? null);
 
@@ -126,6 +132,26 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const applySession = useCallback((session: Session | null) => {
+    if (!session?.user) {
+      clearIdentity(
+        setUserId,
+        setFullName,
+        setEmail,
+        setAvatarUrl,
+        setPgsCode,
+      );
+      setExperienceState("anonymous");
+      setReady(true);
+      return;
+    }
+
+    setUserId(session.user.id);
+    setEmail(session.user.email ?? null);
+    setExperienceState("authenticated_standard");
+    setReady(true);
+  }, []);
+
   const refreshFromSession = useCallback(
     async (session?: Session | null) => {
       if (!configured) {
@@ -134,73 +160,71 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
       }
 
       try {
-        const supabase = createSupabaseBrowserClient();
-        const user =
-          session?.user ??
-          (
-            await supabase.auth.getUser()
-          ).data.user;
+        const resolvedSession =
+          session ??
+          (await createSupabaseBrowserClient().auth.getSession()).data.session;
+        applySession(resolvedSession);
+      } catch {
+        applySession(null);
+      }
+    },
+    [applySession, configured],
+  );
 
-        if (!user) {
-          clearIdentity(
-            setUserId,
-            setFullName,
-            setEmail,
-            setAvatarUrl,
-            setPgsCode,
-          );
-          setExperienceState("anonymous");
-          setReady(true);
-          return;
-        }
+  useEffect(() => {
+    if (!configured) return;
 
-        // Fast path: mark logged in immediately so login redirect is not blocked.
-        setUserId(user.id);
-        setEmail(user.email ?? null);
-        setExperienceState("authenticated_standard");
-        setReady(true);
+    const supabase = createSupabaseBrowserClient();
+    void supabase.auth.getSession().then(({ data: { session } }) => {
+      applySession(session);
+    });
 
-        // Slow path: profile + premium in background (never blocks login redirect).
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      // Session-only: never call Supabase APIs here (auth-js #762 deadlock).
+      applySession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [applySession, configured]);
+
+  const profileUserIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!configured || !userId) return;
+
+    profileUserIdRef.current = userId;
+    let cancelled = false;
+
+    const timer = setTimeout(() => {
+      void (async () => {
         try {
+          const supabase = createSupabaseBrowserClient();
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
+          const user = session?.user;
+          if (!user || cancelled || profileUserIdRef.current !== user.id) return;
+
           const { profile, premium } = await withTimeout(
             loadProfileAndPremium(user),
             PROFILE_FETCH_TIMEOUT_MS,
           );
-          applyProfile(user, profile, premium);
+          if (!cancelled && profileUserIdRef.current === user.id) {
+            applyProfile(user, profile, premium);
+          }
         } catch {
           // Keep authenticated_standard when profile/RPC is slow or unavailable.
         }
-      } catch {
-        setExperienceState("anonymous");
-        clearIdentity(
-          setUserId,
-          setFullName,
-          setEmail,
-          setAvatarUrl,
-          setPgsCode,
-        );
-        setReady(true);
-      }
-    },
-    [applyProfile, configured],
-  );
+      })();
+    }, PROFILE_FETCH_DEBOUNCE_MS);
 
-  useEffect(() => {
-    void refreshFromSession();
-    if (!configured) return;
-
-    const supabase = createSupabaseBrowserClient();
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      // Defer Supabase calls to avoid deadlocking signInWithPassword (auth-js #762).
-      setTimeout(() => {
-        void refreshFromSession(session);
-      }, 0);
-    });
-
-    return () => subscription.unsubscribe();
-  }, [configured, refreshFromSession]);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [applyProfile, configured, userId]);
 
   const setExperience = useCallback(
     (next: Experience) => {
@@ -217,22 +241,12 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
   );
 
   const logout = useCallback(() => {
-    if (configured) {
-      const supabase = createSupabaseBrowserClient();
-      void supabase.auth.signOut().then(() => {
-        setExperienceState("anonymous");
-        clearIdentity(
-          setUserId,
-          setFullName,
-          setEmail,
-          setAvatarUrl,
-          setPgsCode,
-        );
-      });
-      return;
-    }
     setExperienceState("anonymous");
     clearIdentity(setUserId, setFullName, setEmail, setAvatarUrl, setPgsCode);
+
+    if (configured) {
+      window.location.href = "/auth/logout";
+    }
   }, [configured]);
 
   const value = useMemo(
@@ -280,5 +294,3 @@ export function useExperience() {
   }
   return ctx;
 }
-
-export { DEFAULT_AVATAR };

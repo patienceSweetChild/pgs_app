@@ -42,11 +42,8 @@ export default function AdminProfilePage() {
     }
   }
 
-  async function logout() {
-    if (!isSupabaseConfigured()) return;
-    const supabase = createSupabaseBrowserClient();
-    await supabase.auth.signOut();
-    window.location.href = "/login?surface=admin";
+  function logout() {
+    window.location.href = "/auth/logout";
   }
 
   return (

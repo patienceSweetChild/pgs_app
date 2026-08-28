@@ -143,7 +143,7 @@ function QuoteBanner() {
 export function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { loginAs, isLoggedIn, refreshSession } = useExperience();
+  const { loginAs, isLoggedIn } = useExperience();
 
   const initialMode: Mode = useMemo(() => {
     const raw = (searchParams.get("signup") || "").toLowerCase();
@@ -190,50 +190,37 @@ export function LoginPage() {
   }, [initialMode, initialEmail]);
 
   useEffect(() => {
+    const serverError = (searchParams.get("error") || "").trim();
+    if (serverError) {
+      setError(
+        serverError === "config"
+          ? "Authentication is not configured."
+          : serverError === "auth"
+            ? "Sign in failed. Please try again."
+            : serverError,
+      );
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
     if (isLoggedIn) router.replace(redirectTo);
   }, [isLoggedIn, redirectTo, router]);
 
   async function onLogin(e: FormEvent) {
-    e.preventDefault();
-    setError(null);
-    if (!email || !password) {
-      setError("Please enter email and password.");
+    const { isSupabaseConfigured } = await import("@/lib/supabase/config");
+    if (!isSupabaseConfigured()) {
+      e.preventDefault();
+      setError(null);
+      if (!email || !password) {
+        setError("Please enter email and password.");
+        return;
+      }
+      loginAs("authenticated_standard");
+      router.push(redirectTo === "/" ? "/" : redirectTo);
       return;
     }
+    setError(null);
     setSubmitting(true);
-    try {
-      const { isSupabaseConfigured } = await import("@/lib/supabase/config");
-      if (!isSupabaseConfigured()) {
-        loginAs("authenticated_standard");
-        router.push(redirectTo === "/" ? "/" : redirectTo);
-        return;
-      }
-      const { createSupabaseBrowserClient } = await import(
-        "@/lib/supabase/client"
-      );
-      const supabase = createSupabaseBrowserClient();
-      const signInResult = await Promise.race([
-        supabase.auth.signInWithPassword({ email, password }),
-        new Promise<never>((_, reject) => {
-          setTimeout(
-            () => reject(new Error("Sign in timed out. Please try again.")),
-            20_000,
-          );
-        }),
-      ]);
-      const { data, error: signError } = signInResult;
-      if (signError) {
-        setError(signError.message);
-        return;
-      }
-      void refreshSession(data.session);
-      router.push(redirectTo === "/" ? "/" : redirectTo);
-      router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Sign in failed.");
-    } finally {
-      setSubmitting(false);
-    }
   }
 
   async function onRegister(e: FormEvent) {
@@ -343,7 +330,11 @@ export function LoginPage() {
                   </div>
                 ) : null}
 
-                <form onSubmit={onLogin}>
+                <form method="POST" action="/auth/login" onSubmit={onLogin}>
+                  <input type="hidden" name="redirect" value={redirectTo} />
+                  {surface ? (
+                    <input type="hidden" name="surface" value={surface} />
+                  ) : null}
                   <div className="form-controls">
                     <label className="mb-0">Email address</label>
                     <div className="input-groups">
