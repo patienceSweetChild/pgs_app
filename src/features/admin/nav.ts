@@ -42,6 +42,8 @@ export const ADMIN_NAV: Array<AdminNavItem | AdminNavGroup> = [
     ],
   },
   { href: "/admin/universities", label: "University Management" },
+  { href: "/admin/countries", label: "Countries" },
+  { href: "/admin/pathways", label: "Pathways" },
   { href: "/admin/programs", label: "Discover Our Programs" },
   { href: "/admin/study-journey", label: "Study abroad journey" },
   { href: "/admin/univmeet", label: "#univMeet Dates" },

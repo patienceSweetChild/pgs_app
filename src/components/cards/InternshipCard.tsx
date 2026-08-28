@@ -1,5 +1,6 @@
 "use client";
 
+import { CmsHtml } from "@/components/CmsHtml";
 import { HeartToggle } from "./HeartToggle";
 import { PillTags } from "./PillTags";
 import type { InternshipCardData } from "./types";
@@ -22,7 +23,11 @@ export function InternshipCard({ data, onToggleSave }: InternshipCardProps) {
         </div>
         <div className="mobile-pb-23 pgs-internship-body">
           <div className="fs-17 fw-600 mb-1 text-black">{data.title}</div>
-          <div className="fs-14 lh-full mb-2 text-black">{data.description}</div>
+          <CmsHtml
+            as="div"
+            className="fs-14 lh-full mb-2 text-black"
+            html={data.description}
+          />
           <PillTags
             tags={data.tags}
             className="pgs-internship-tags mb-2"
@@ -44,7 +49,8 @@ export function InternshipCard({ data, onToggleSave }: InternshipCardProps) {
               <span />
             )}
             <HeartToggle
-              initialSaved={data.saved ?? true}
+              saved={data.saved}
+              initialSaved={data.saved ?? false}
               onToggle={onToggleSave}
               className="pgs-internship-heart"
             />

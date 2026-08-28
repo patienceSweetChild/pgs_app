@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
+import { CmsHtml } from "@/components/CmsHtml";
 import { PgsPicksSection } from "@/components/PgsPicksSection";
 import { UPCOMING_SESSIONS } from "@/features/purpleevents/content";
 import {
@@ -509,9 +510,11 @@ export function StudentResourcesPage({
                       </div>
                     ) : null}
                     <div className="content-p">
-                      <p className="fs-12 fw-400 mb-0 text-black text-start lh-18">
-                        {session.blurb ?? session.whoFor ?? ""}
-                      </p>
+                      <CmsHtml
+                        as="div"
+                        className="fs-12 fw-400 mb-0 text-black text-start lh-18"
+                        html={session.blurb ?? session.whoFor ?? ""}
+                      />
                     </div>
                     <div className="d-flex justify-content-space">
                       <Link

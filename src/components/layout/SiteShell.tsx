@@ -36,13 +36,17 @@ export function SiteShell({
   const pathname = usePathname() || "";
   const bare =
     pathname.startsWith("/admin") ||
+    pathname.startsWith("/ops") ||
     pathname.startsWith("/portal") ||
-    pathname.startsWith("/auth");
+    pathname.startsWith("/auth") ||
+    pathname.startsWith("/cms-preview");
 
   useEffect(() => {
     if (!bare) {
       document.documentElement.classList.remove("pgs-admin-html");
       document.body.classList.remove("pgs-admin-body");
+      document.documentElement.classList.remove("pgs-ops-html");
+      document.body.classList.remove("pgs-ops-body");
     }
   }, [bare]);
 

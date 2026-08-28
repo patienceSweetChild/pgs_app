@@ -1,15 +1,26 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import type { SavedCardData } from "@/components/cards/types";
 import { SavedFeed } from "@/components/cards/SavedFeed";
 import { DEFAULT_AVATAR, useExperience } from "@/lib/auth/experience";
-import { SAVED_ITEMS, SAVED_PROFILE } from "./content";
+import { useCardSave } from "@/features/saved/useCardSave";
+import { SAVED_PROFILE } from "./content";
 import "./saved.css";
 
 /**
  * Saved items list — profile header + CMS-shaped modular card feed
  */
-export function SavedPage() {
+export function SavedPage({ items }: { items: SavedCardData[] }) {
   const { fullName, avatarUrl, email, pgsCode, isPremium } = useExperience();
+  const [feedItems, setFeedItems] = useState(items);
+  const initialIds = items.map((item) => item.id);
+  const { handleToggleSave, loginPopup } = useCardSave(initialIds);
+
+  useEffect(() => {
+    setFeedItems(items);
+  }, [items]);
+
   const displayName = fullName?.trim() || SAVED_PROFILE.name;
   const displayHandle = email
     ? `@${email.split("@")[0]}`
@@ -19,6 +30,7 @@ export function SavedPage() {
 
   return (
     <div className="wrapper-content pgs-saved-page">
+      {loginPopup}
       <section className="pt-0 mobile-student-cart about-section half-section overlap-height position-relative pgs-identity-card">
         <div className="pgs-saved-header">
           <div className="w-729px p-0 m-auto">
@@ -57,7 +69,25 @@ export function SavedPage() {
 
       <section className="pt-0 saved-list-pgs board-list-pgs half-section overlap-height position-relative overflow-hidden">
         <div className="w-990px m-auto overlap-gap-section p-0">
-          <SavedFeed items={SAVED_ITEMS} />
+          {feedItems.length === 0 ? (
+            <p className="text-muted text-center py-5 mb-0">
+              No saved items yet. Heart programs on Purple Board or CV Ready
+              Programs to add them here.
+            </p>
+          ) : (
+            <SavedFeed
+              items={feedItems.map((item) => ({ ...item, saved: true }))}
+              onToggleSave={(id) => {
+                const item = feedItems.find((entry) => entry.id === id);
+                if (!item) return;
+                void handleToggleSave(item).then((stillSaved) => {
+                  if (!stillSaved) {
+                    setFeedItems((prev) => prev.filter((entry) => entry.id !== id));
+                  }
+                });
+              }}
+            />
+          )}
         </div>
       </section>
     </div>

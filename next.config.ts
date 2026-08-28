@@ -4,6 +4,11 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   async redirects() {
     return [
+      {
+        source: "/purpleprogramsfull",
+        destination: "/programsfull",
+        permanent: false,
+      },
       { source: "/countriesusa", destination: "/countries/usa", permanent: false },
       { source: "/countriesuk", destination: "/countries/uk", permanent: false },
       { source: "/countriesaus", destination: "/countries/aus", permanent: false },
@@ -38,6 +43,10 @@ const nextConfig: NextConfig = {
         destination: "/countries/others",
         permanent: false,
       },
+      { source: "/purpleusme", destination: "/pathways/usmle", permanent: false },
+      { source: "/purpleplab", destination: "/pathways/plab", permanent: false },
+      { source: "/purpleamc", destination: "/pathways/amc", permanent: false },
+      { source: "/purplenonmedical", destination: "/pathways/stem", permanent: false },
     ];
   },
 };

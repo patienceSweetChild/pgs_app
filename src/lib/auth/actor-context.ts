@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
@@ -21,7 +22,7 @@ export type ActorContext = {
   } | null;
 };
 
-export async function resolveActorContext(): Promise<ActorContext> {
+export const resolveActorContext = cache(async (): Promise<ActorContext> => {
   const empty: ActorContext = {
     userId: null,
     email: null,
@@ -59,29 +60,21 @@ export async function resolveActorContext(): Promise<ActorContext> {
 
   let permissions: string[] = [];
   if (staffRow) {
-    const { data: role } = await supabase
-      .from("staff_roles")
-      .select("id")
-      .eq("key", staffRow.role_key)
-      .maybeSingle();
+    const { data: links } = await supabase
+      .from("staff_role_permissions")
+      .select("staff_permissions(key), staff_roles!inner(key)")
+      .eq("staff_roles.key", staffRow.role_key);
 
-    if (role) {
-      const { data: links } = await supabase
-        .from("staff_role_permissions")
-        .select("permission_id, staff_permissions(key)")
-        .eq("role_id", role.id);
-
-      permissions = (links ?? [])
-        .map((row) => {
-          const perm = row.staff_permissions as
-            | { key: string }
-            | { key: string }[]
-            | null;
-          if (Array.isArray(perm)) return perm[0]?.key;
-          return perm?.key;
-        })
-        .filter((k): k is string => Boolean(k));
-    }
+    permissions = (links ?? [])
+      .map((row) => {
+        const perm = row.staff_permissions as
+          | { key: string }
+          | { key: string }[]
+          | null;
+        if (Array.isArray(perm)) return perm[0]?.key;
+        return perm?.key;
+      })
+      .filter((k): k is string => Boolean(k));
   }
 
   let isGuardian = false;
@@ -108,7 +101,7 @@ export async function resolveActorContext(): Promise<ActorContext> {
       ? { id: profile.id, fullName: profile.full_name }
       : { id: user.id, fullName: "" },
   };
-}
+});
 
 export function staffHasPermission(
   staff: StaffContext | null,

@@ -22,8 +22,8 @@ export default function PremiumDashboardListPage() {
     <div>
       <h1 style={{ marginTop: 0 }}>Premium Dashboard</h1>
       <p style={{ color: "#6b6280" }}>
-        Students with premium workspace profiles. Open a user to manage
-        mentoring detail.
+        Students with premium workspace profiles.{" "}
+        <Link href="/ops/students?plan=premium">Manage in Operations</Link>
       </p>
       {error ? (
         <p role="alert" style={{ color: "#b91c1c" }}>

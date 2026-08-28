@@ -1,13 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
-import { CONTENT_ENTITIES } from "./content-registry";
+import { CONTENT_ENTITIES, type ContentField } from "./content-registry";
 import {
   deleteContentRow,
+  listContentFkOptions,
   listContentRows,
   upsertContentRow,
 } from "./content-actions";
+import { MediaAssetField } from "./MediaAssetField";
 
 function slugify(value: string) {
   return value
@@ -17,6 +19,8 @@ function slugify(value: string) {
     .replace(/^-|-$/g, "");
 }
 
+const FK_KEYS = new Set(["country_id", "course_id", "university_id", "category_id"]);
+
 export function ContentCmsTable({ entityKey }: { entityKey: string }) {
   const config = CONTENT_ENTITIES[entityKey];
   const pathname = usePathname();
@@ -24,6 +28,9 @@ export function ContentCmsTable({ entityKey }: { entityKey: string }) {
   const [editing, setEditing] = useState<Record<string, unknown> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [fkOptions, setFkOptions] = useState<
+    Record<string, { value: string; label: string }[]>
+  >({});
 
   const reload = useCallback(async () => {
     if (!config) return;
@@ -47,6 +54,47 @@ export function ContentCmsTable({ entityKey }: { entityKey: string }) {
   useEffect(() => {
     setEditing(null);
   }, [pathname, entityKey]);
+
+  useEffect(() => {
+    if (!config) return;
+    const sources = Array.from(
+      new Set(
+        config.fields
+          .map((f) => f.optionsSource)
+          .filter(Boolean) as Array<"countries" | "universities" | "courses">,
+      ),
+    );
+    if (sources.length === 0) {
+      setFkOptions({});
+      return;
+    }
+    void Promise.all(
+      sources.map(async (source) => {
+        try {
+          const opts = await listContentFkOptions(source);
+          return [source, opts] as const;
+        } catch {
+          return [source, []] as const;
+        }
+      }),
+    ).then((entries) => {
+      setFkOptions(Object.fromEntries(entries));
+    });
+  }, [config, entityKey]);
+
+  const fields = useMemo(() => {
+    if (!config) return [] as ContentField[];
+    return config.fields.map((field) => {
+      if (!field.optionsSource) return field;
+      return {
+        ...field,
+        options: [
+          { value: "", label: "— None —" },
+          ...(fkOptions[field.optionsSource] ?? []),
+        ],
+      };
+    });
+  }, [config, fkOptions]);
 
   if (!config) {
     return <p role="alert">Unknown content module.</p>;
@@ -101,7 +149,7 @@ export function ContentCmsTable({ entityKey }: { entityKey: string }) {
         <div>
           <h1 style={{ margin: 0 }}>{config.title}</h1>
           <p style={{ margin: "0.25rem 0 0", color: "#6b6280" }}>
-            Table CMS — create, edit, publish.
+            Table CMS — create, edit, publish. Fields match Supabase columns.
           </p>
         </div>
         <button
@@ -193,7 +241,21 @@ export function ContentCmsTable({ entityKey }: { entityKey: string }) {
               </button>
             </div>
             <div className="pgs-admin__form">
-              {config.fields.map((field) => (
+              {fields.map((field) =>
+                field.type === "media" ? (
+                  <MediaAssetField
+                    key={field.key}
+                    label={field.label}
+                    value={
+                      editing[field.key] ? String(editing[field.key]) : null
+                    }
+                    accept={field.mediaAccept ?? "image"}
+                    folder={entityKey}
+                    onChange={(id) =>
+                      setEditing({ ...editing, [field.key]: id })
+                    }
+                  />
+                ) : (
                 <label key={field.key}>
                   {field.label}
                   {field.type === "textarea" ? (
@@ -218,28 +280,49 @@ export function ContentCmsTable({ entityKey }: { entityKey: string }) {
                   ) : field.type === "number" ? (
                     <input
                       type="number"
-                      value={Number(editing[field.key] ?? 0)}
+                      value={
+                        editing[field.key] === null ||
+                        editing[field.key] === undefined
+                          ? ""
+                          : String(editing[field.key])
+                      }
                       onChange={(e) =>
                         setEditing({
                           ...editing,
-                          [field.key]: Number(e.target.value),
+                          [field.key]:
+                            e.target.value === ""
+                              ? field.nullable
+                                ? null
+                                : ""
+                              : Number(e.target.value),
                         })
                       }
                     />
                   ) : field.type === "date" ? (
                     <input
                       type="date"
-                      value={String(editing[field.key] ?? "").slice(0, 10)}
+                      value={
+                        editing[field.key]
+                          ? String(editing[field.key]).slice(0, 10)
+                          : ""
+                      }
                       onChange={(e) =>
-                        setEditing({ ...editing, [field.key]: e.target.value })
+                        setEditing({
+                          ...editing,
+                          [field.key]: e.target.value || null,
+                        })
                       }
                     />
                   ) : field.type === "datetime" ? (
                     <input
                       type="datetime-local"
-                      value={String(editing[field.key] ?? "")
-                        .replace("Z", "")
-                        .slice(0, 16)}
+                      value={
+                        editing[field.key]
+                          ? String(editing[field.key])
+                              .replace("Z", "")
+                              .slice(0, 16)
+                          : ""
+                      }
                       onChange={(e) =>
                         setEditing({
                           ...editing,
@@ -251,13 +334,25 @@ export function ContentCmsTable({ entityKey }: { entityKey: string }) {
                     />
                   ) : field.type === "select" ? (
                     <select
-                      value={String(editing[field.key] ?? "")}
-                      onChange={(e) =>
-                        setEditing({ ...editing, [field.key]: e.target.value })
+                      value={
+                        editing[field.key] == null || editing[field.key] === ""
+                          ? ""
+                          : String(editing[field.key])
                       }
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        let next: unknown = raw;
+                        if (FK_KEYS.has(field.key)) {
+                          next =
+                            raw === ""
+                              ? null
+                              : Number(raw);
+                        }
+                        setEditing({ ...editing, [field.key]: next });
+                      }}
                     >
                       {field.options?.map((o) => (
-                        <option key={o.value} value={o.value}>
+                        <option key={o.value || "none"} value={o.value}>
                           {o.label}
                         </option>
                       ))}
@@ -266,20 +361,36 @@ export function ContentCmsTable({ entityKey }: { entityKey: string }) {
                     <input
                       value={String(editing[field.key] ?? "")}
                       onChange={(e) =>
-                        setEditing({ ...editing, [field.key]: e.target.value })
+                        setEditing({
+                          ...editing,
+                          [field.key]:
+                            field.nullable && e.target.value === ""
+                              ? null
+                              : e.target.value,
+                        })
                       }
                     />
                   )}
                 </label>
-              ))}
-              <button
-                type="button"
-                className="pgs-admin__btn"
-                disabled={loading}
-                onClick={() => void save()}
-              >
-                Save
-              </button>
+                ),
+              )}
+              <div className="pgs-admin__form-actions">
+                <button
+                  type="button"
+                  className="pgs-admin__btn"
+                  disabled={loading}
+                  onClick={() => void save()}
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  className="pgs-admin__btn pgs-admin__btn--ghost"
+                  onClick={() => setEditing(null)}
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -7,6 +7,7 @@ import {
   BumpPremiumModal,
   UNLOCK_BUMP_CONFIG,
 } from "@/components/BumpPremiumModal";
+import { CmsHtml } from "@/components/CmsHtml";
 import { SoftLock } from "@/components/SoftLock";
 import { DEFAULT_AVATAR, useExperience } from "@/lib/auth/experience";
 import {
@@ -194,8 +195,10 @@ function TopPickItem({
  */
 export function DashboardPage({
   upcomingEvents,
+  staffStudentId,
 }: {
   upcomingEvents?: FeedUpcomingEvent[];
+  staffStudentId?: string;
 } = {}) {
   const { isLoggedIn, isPremium, fullName, avatarUrl, email, pgsCode } =
     useExperience();
@@ -256,6 +259,24 @@ export function DashboardPage({
 
   return (
     <div className="wrapper-content">
+      {staffStudentId ? (
+        <div
+          style={{
+            background: "#4c1d95",
+            color: "#fff",
+            padding: "0.65rem 1rem",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: "1rem",
+          }}
+        >
+          <span>Staff preview of student dashboard</span>
+          <Link href={`/ops/students/${staffStudentId}`} style={{ color: "#fff" }}>
+            Back to Operations
+          </Link>
+        </div>
+      ) : null}
       <section className="pt-0 mobile-student-cart about-section half-section overlap-height position-relative pgs-dashboard-feed pgs-identity-card">
         <div className="pgs-dashboard-feed-inner">
         <div className="w-729px p-0">
@@ -795,9 +816,11 @@ export function DashboardPage({
                           <h5>{ev.time}</h5>
                         </div>
                         {ev.blurb ? (
-                          <p className="mb-0 fs-11 lh-full text-black fw-400 lh-new-100 mt-3">
-                            {ev.blurb}
-                          </p>
+                          <CmsHtml
+                            as="div"
+                            className="mb-0 fs-11 lh-full text-black fw-400 lh-new-100 mt-3"
+                            html={ev.blurb}
+                          />
                         ) : null}
                         <p className="mb-0 fs-11 lh-full text-black fw-400 lh-full mt-3">
                           <b>Mode:&nbsp;</b>

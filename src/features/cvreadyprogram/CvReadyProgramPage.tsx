@@ -2,6 +2,11 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import type { InternshipCardData, PromoCardData } from "@/components/cards/types";
+import { InternshipCard } from "@/components/cards/InternshipCard";
+import { PromoCard } from "@/components/cards/PromoCard";
+import "@/components/cards/cards.css";
+import { useCardSave } from "@/features/saved/useCardSave";
 import {
   CONTACT_STRIP,
   FILTER_TAGS,
@@ -10,45 +15,81 @@ import {
   PARTNER_LOGOS,
   PATH_SECTION,
   PROGRAM_INTRO,
-  PROGRAMS,
   READY_CTA,
   SORT_TAGS,
   STATS,
   STUDY_JAM,
 } from "./content";
 
+function matchesCardFilters(
+  card: { title: string; tags: string[] },
+  activeFilter: string,
+  query: string,
+): boolean {
+  if (activeFilter && !card.tags.includes(activeFilter)) return false;
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  return (
+    card.title.toLowerCase().includes(q) ||
+    card.tags.some((t) => t.toLowerCase().includes(q))
+  );
+}
+
 /**
  * CV Ready Program — from standalone-html/cvreadyprogram.html
- * (wrapper-content through before footer)
  */
 export function CvReadyProgramPage({
-  programs: programsProp,
+  featured: featuredProp = [],
+  programs: programsProp = [],
+  initialSavedIds = [],
 }: {
-  programs?: { title: string; tags: string[] }[];
+  featured?: InternshipCardData[];
+  programs?: PromoCardData[];
+  initialSavedIds?: string[];
 } = {}) {
   const [activeFilter, setActiveFilter] = useState("");
   const [activeSort, setActiveSort] = useState("order");
   const [query, setQuery] = useState("");
-  const source = programsProp && programsProp.length > 0 ? programsProp : PROGRAMS;
+  const { isSaved, handleToggleSave, loginPopup } = useCardSave(initialSavedIds);
+
+  const allTags = useMemo(() => {
+    const set = new Set<string>();
+    for (const card of [...featuredProp, ...programsProp]) {
+      card.tags.forEach((tag) => set.add(tag));
+    }
+    return [...set].sort((a, b) => a.localeCompare(b));
+  }, [featuredProp, programsProp]);
+
+  const filterTags = useMemo(() => {
+    const dynamic = allTags.map((tag) => ({
+      id: tag,
+      label: tag,
+      filter: tag,
+    }));
+    return [...FILTER_TAGS, ...dynamic];
+  }, [allTags]);
+
+  const featured = useMemo(
+    () =>
+      featuredProp.filter((card) =>
+        matchesCardFilters(card, activeFilter, query),
+      ),
+    [activeFilter, featuredProp, query],
+  );
 
   const programs = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    let list = source.filter((p) => {
-      if (activeFilter && !p.tags.includes(activeFilter)) return false;
-      if (!q) return true;
-      return (
-        p.title.toLowerCase().includes(q) ||
-        p.tags.some((t) => t.toLowerCase().includes(q))
-      );
-    });
+    let list = programsProp.filter((card) =>
+      matchesCardFilters(card, activeFilter, query),
+    );
     if (activeSort === "title") {
       list = [...list].sort((a, b) => a.title.localeCompare(b.title));
     }
     return list;
-  }, [activeFilter, activeSort, query, source]);
+  }, [activeFilter, activeSort, programsProp, query]);
 
   return (
     <div className="wrapper-content">
+      {loginPopup}
       {/* 1. Hero */}
       <section className="pt-0 about-section half-section mobile-cvready-cart overlap-height position-relative minus-5">
         <div className="container overlap-gap-section p-0">
@@ -66,7 +107,7 @@ export function CvReadyProgramPage({
                 <div className="filer-tag fnt-update">
                   <h5 className="mb-0 text-black fs-19">Filter:</h5>
                   <div className="tag-highlights js-filter-tags">
-                    {FILTER_TAGS.map((tag) => (
+                    {filterTags.map((tag) => (
                       <span
                         key={tag.id}
                         className={`js-filter-tag${activeFilter === tag.filter ? " active" : ""}`}
@@ -117,7 +158,27 @@ export function CvReadyProgramPage({
                 </div>
               </div>
               <div className="box-tags-card mt-1 w-730px m-auto d-flex flex-wrap gap-1 justify-content-start">
-                <span className="text-muted">No tags yet.</span>
+                {allTags.length === 0 ? (
+                  <span className="text-muted">No tags yet.</span>
+                ) : (
+                  allTags.map((tag) => (
+                    <span
+                      key={tag}
+                      className={`box-tag-chip${activeFilter === tag ? " active" : ""}`}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => setActiveFilter(activeFilter === tag ? "" : tag)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setActiveFilter(activeFilter === tag ? "" : tag);
+                        }
+                      }}
+                    >
+                      {tag}
+                    </span>
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -156,7 +217,18 @@ export function CvReadyProgramPage({
                 </h5>
                 <div className="row mt-3">
                   <div className="box-style-45 d-flex align-items-stretch gap-3 justify-content-center flex-wrap">
-                    <p className="text-muted">{PROGRAM_INTRO.empty}</p>
+                    {featured.length === 0 ? (
+                      <p className="text-muted">{PROGRAM_INTRO.empty}</p>
+                    ) : (
+                      featured.map((card) => (
+                        <div className="col-auto pgs-feed-col--internship" key={card.id}>
+                          <InternshipCard
+                            data={{ ...card, saved: isSaved(card.id) }}
+                            onToggleSave={() => handleToggleSave(card)}
+                          />
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
@@ -192,13 +264,16 @@ export function CvReadyProgramPage({
               </div>
 
               <div className="row mt-3 wrap mobile-all-w-47">
-                <div className="d-flex wrap align-items-start gap-3 mt-3 justify-content-center">
+                <div className="d-flex wrap align-items-start gap-3 mt-3 justify-content-center flex-wrap w-100">
                   {programs.length === 0 ? (
                     <p className="text-muted">{OUR_PROGRAM.empty}</p>
                   ) : (
-                    programs.map((p) => (
-                      <div key={p.title}>
-                        <h5 className="text-black mb-1">{p.title}</h5>
+                    programs.map((card) => (
+                      <div className="col-lg-4 col-md-6 mb-4" key={card.id}>
+                        <PromoCard
+                          data={{ ...card, saved: isSaved(card.id) }}
+                          onToggleSave={() => handleToggleSave(card)}
+                        />
                       </div>
                     ))
                   )}

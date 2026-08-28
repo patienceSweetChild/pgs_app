@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { CmsHtml, looksLikeHtml } from "@/components/CmsHtml";
+import { badgeChipStyle } from "@/components/cards/badge-chip-style";
 import { HeartToggle } from "./HeartToggle";
 import { PillTags } from "./PillTags";
 import type { ProgramCardData } from "./types";
@@ -15,6 +17,23 @@ type ProgramCardProps = {
   onToggleSave?: (saved: boolean) => void;
 };
 
+function DetailValue({ value }: { value: string }) {
+  if (looksLikeHtml(value)) {
+    return <CmsHtml as="span" html={value} preWrap={false} />;
+  }
+  const valueLines = value.split("\n").filter(Boolean);
+  return (
+    <>
+      {valueLines.map((line, i) => (
+        <span key={`${line}-${i}`}>
+          {i > 0 ? <br /> : null}
+          {line}
+        </span>
+      ))}
+    </>
+  );
+}
+
 export function ProgramCard({ data, onToggleSave }: ProgramCardProps) {
   const isCompact = data.variant === "compact";
   const showFullRail = !isCompact;
@@ -26,7 +45,10 @@ export function ProgramCard({ data, onToggleSave }: ProgramCardProps) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className="pgs-board-campus" src={data.image} alt="" />
           {data.badge ? (
-            <div className="cardbox-tag">
+            <div
+              className="cardbox-tag"
+              style={badgeChipStyle(data.badgeColor, data.badgeTextColor)}
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={data.badgeIcon ?? DEFAULT_BADGE_ICON} alt="" />
               {data.badge}
@@ -43,26 +65,22 @@ export function ProgramCard({ data, onToggleSave }: ProgramCardProps) {
         <div className="cardbox-middle">
           <h3>{data.title}</h3>
           {data.details.map((detail, index) => {
-            if (index === 0) {
+            if (detail.label === "About") {
               return (
                 <div className="cardbox-highlight" key={`${detail.label}-${index}`}>
                   <span className="cardbox-highlight-label">{detail.label}:</span>
                   <br />
-                  <span className="cardbox-highlight-value">{detail.value}</span>
+                  <span className="cardbox-highlight-value">
+                    <DetailValue value={detail.value} />
+                  </span>
                 </div>
               );
             }
-            const valueLines = detail.value.split("\n").filter(Boolean);
             return (
               <div className="cardbox-detail-stack" key={`${detail.label}-${index}`}>
                 <div className="cardbox-detail-label">{detail.label}</div>
                 <div className="cardbox-detail-value">
-                  {valueLines.map((line, i) => (
-                    <span key={`${line}-${i}`}>
-                      {i > 0 ? <br /> : null}
-                      {line}
-                    </span>
-                  ))}
+                  <DetailValue value={detail.value} />
                 </div>
               </div>
             );
@@ -71,13 +89,14 @@ export function ProgramCard({ data, onToggleSave }: ProgramCardProps) {
         </div>
 
         <div className="cardbox-right">
-          {showFullRail && (data.deadline || data.promo) ? (
+          {showFullRail ? (
             <div className="pgs-dates-rail">
               <span>{data.datesRail ?? DEFAULT_DATES_RAIL}</span>
             </div>
           ) : null}
 
           <HeartToggle
+            saved={data.saved}
             initialSaved={data.saved}
             onToggle={onToggleSave}
           />
@@ -135,7 +154,7 @@ export function ProgramCard({ data, onToggleSave }: ProgramCardProps) {
               <img className="pgs-board-qr" src={data.qrSrc} alt="" />
             ) : null}
             <Link href={data.href} className="cardbox-learn-btn">
-              Learn More
+              {data.ctaLabel || "Learn More"}
             </Link>
           </div>
 

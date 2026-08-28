@@ -1,5 +1,24 @@
 /* Upcoming Sessions + download poster — scoped to purple events pages */
 
+.pgs-purple-events .pgs-enroll-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: auto;
+  min-width: 130px;
+  max-width: 100%;
+  padding-inline: 8px;
+}
+
+.pgs-purple-events .pgs-enroll-badge__icon {
+  width: 15px;
+  height: 15px;
+  margin-left: 2px;
+  object-fit: contain;
+  flex-shrink: 0;
+  display: block;
+}
+
 .pgs-purple-events .pgs-upcoming {
   padding: 2rem 1.5rem 2.5rem;
 }

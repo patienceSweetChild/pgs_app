@@ -5,11 +5,8 @@ import Link from "next/link";
 import { HighlightsSection } from "@/components/HighlightsSection";
 import { PgsPicksSection } from "@/components/PgsPicksSection";
 import {
-  DASHBOARD_FEATURES,
-  WHAT_YOU_GET_CHECKLIST,
-  WHAT_YOU_GET_FORMS,
-  type PathwayContent,
-} from "./content";
+  type MedicalPathwayPageContent,
+} from "./page-content";
 import "./pathway.css";
 
 function ProgressStat({
@@ -45,7 +42,7 @@ function ProgressStat({
   );
 }
 
-function FaqBlock({ items }: { items: PathwayContent["faq"] }) {
+function FaqBlock({ items }: { items: MedicalPathwayPageContent["faq"] }) {
   const [open, setOpen] = useState(0);
   return (
     <section className="faq_section">
@@ -98,7 +95,8 @@ function FaqBlock({ items }: { items: PathwayContent["faq"] }) {
 }
 
 /** Shared medical pathway page — from purpleusme / purpleamc / purpleplab HTML. */
-export function PathwayPage({ content }: { content: PathwayContent }) {
+export function PathwayPage({ content }: { content: MedicalPathwayPageContent }) {
+  const { intro, track, pathway: path, dashboard, offer, meet, contact } = content;
   const [expenseOpen, setExpenseOpen] = useState(false);
   const [expenseDone, setExpenseDone] = useState(false);
   const [expenseName, setExpenseName] = useState("");
@@ -114,25 +112,22 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
             <div className="col-lg-8">
               <div className="w-75 m-auto text-center">
                 <h1 className="text-black fw-500 fs-36 pt-0 mb-1 lh-40">
-                  Get Into Your Dream University Abroad with a Structured
-                  Workflow
+                  {intro.heroTitle}
                 </h1>
                 <p className="mb-0 lh-20 fs-16">
-                  Boost Your Chances of Selection 3X with Smart, Informed
-                  University Picks
+                  {intro.heroSubtitle}
                 </p>
                 <h6 className="mb-0 text-black fs-16 mt-0">
-                  For Medical, STEM, and More—We’ve Got You Covered
+                  {intro.heroBadgeLine}
                 </h6>
                 <button
                   type="button"
                   className="btn btn-purple mt-1 bg-black-btn fs-11 mb-0"
                 >
-                  Set Up a Quick Call
+                  {intro.heroCtaLabel}
                 </button>
                 <p className="mb-0 fs-12 lh-15 mt-1">
-                  Clear All Your Doubts in 30 Minutes, Figure out your
-                  scholarship path.
+                  {intro.heroCtaSubtext}
                 </p>
               </div>
             </div>
@@ -146,7 +141,7 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
             <div className="w-877px">
               <div className="card-box-img">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/assets/img/music.png" alt="" />
+                <img src={intro.stepIntoImage} alt="" />
                 <div className="minus-5">
                   <h4 className="fnt-family mb-0 fs-95 text-black">
                     Step into
@@ -154,56 +149,39 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
                   <h4 className="mb-0 fs-95 text-black d-flex gap-3 align-items-end lh-80">
                     <span className="fnt-family">#purplepremium </span>
                     <span className="fs-28 lh-35 mb-1 fw-500">
-                      {content.id === "usmle" ? (
-                        <>
-                          Masters, STEM
-                          <br />
-                          UG, MBA & Others
-                        </>
-                      ) : (
-                        content.heroBadge
-                      )}
+                      {intro.stepIntoBadgeLine.split("\n").map((line, i) => (
+                        <span key={`${line}-${i}`}>
+                          {line}
+                          {i < intro.stepIntoBadgeLine.split("\n").length - 1 ? (
+                            <br />
+                          ) : null}
+                        </span>
+                      ))}
                     </span>
                   </h4>
                 </div>
               </div>
               <p className="text-center fs-22 mobile-pt-2">
-                Backed by experience. Trusted by students since 2006 (formerly
-                CEG).
+                {intro.stepIntoTrustLine}
               </p>
             </div>
             <div className="col-lg-9 mt-8 mobile-w-80 mobile-auto">
               <h3 className="text-black fnt-family w-80 mb-1 m-auto d-flex justify-content-center fs-38 lh-32 text-center mobile-fs-24 mobile-lh-full mobile-pt-5">
-                Why We Built #PurplePremium <br />
-                (And Why It Matters)
+                {intro.whyBuiltTitle}
               </h3>
               <div className="w-555px m-auto">
                 <h5 className="text-black fs-17 mt-2 fw-600 mb-1">
-                  The high-stakes medical pathways:
+                  {intro.whyBuiltSubtitle}
                 </h5>
                 <ul className="p-0">
-                  <li className="mb-2 text-black fs-14 d-flex gap-2 align-items-start lh-full">
-                    Is Studying Medicine Abroad Worth It? 100%—If You Do It
-                    Right. Many journey usually starts with a story. You see a
-                    medico-influencer cracking USMLE, PLAB, or AMC. Or someone
-                    confidently chasing nursing or allied health abroad. Maybe
-                    it’s a senior from your college who’s now respected for
-                    their international degree. You get inspired. So you start
-                    watching videos. Asking around. Dreaming big.
-                  </li>
-                  <li className="mb-2 text-black fs-14 d-flex gap-2 align-items-start lh-full">
-                    Looks great from the outside.
-                  </li>
-                  <li className="mb-2 text-black fs-14 d-flex gap-2 align-items-start lh-full">
-                    But here’s the part no one warns you about—Many can lose
-                    years figuring it out the wrong way. One misstep, one rushed
-                    choice or poorly researched decision, endless job
-                    applications, not building your CV enough to stand out,
-                    remember you are competing from people all over the world
-                    for limited number of positions available... and suddenly
-                    you&apos;re stuck. No offer. No progress. Just time you’ll
-                    never get back.
-                  </li>
+                  {intro.whyBuiltBullets.map((text) => (
+                    <li
+                      className="mb-2 text-black fs-14 d-flex gap-2 align-items-start lh-full"
+                      key={text.slice(0, 40)}
+                    >
+                      {text}
+                    </li>
+                  ))}
                 </ul>
               </div>
             </div>
@@ -217,11 +195,10 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
             <div className="mb-10px">
               <div className="text-center mobile-w-90 mobile-auto">
                 <h6 className="mb-1 text-black fs-20 lh-22 fw-600">
-                  This is where #purplePremium comes in.
+                  {intro.purpleMapHeadline}
                 </h6>
                 <p className="mb-0 text-black fs-14 lh-full">
-                  Because not every journey needs the same map. Explore them
-                  below.
+                  {intro.purpleMapSubhead}
                 </p>
               </div>
             </div>
@@ -231,7 +208,7 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
               <figure className="position-relative text-center mb-8 fix-object-cover-video">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/assets/img/play-book-read.png"
+                  src={intro.purpleMapImage}
                   alt=""
                   className="border-radius-6px"
                 />
@@ -244,7 +221,7 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
                   <i className="bi bi-arrow-right-short fs-40" />
                 </div>
                 <h5 className="mb-0 fs-25 lh-30 text-black bg-light-blue-1 border-radius-8px p-1 p-05 fw-400 mobile-fs-14 mobile-lh-16 mobile-p-3">
-                  For all from — STEM, Management, Design & More.
+                  {intro.purpleMapCrossLink}
                 </h5>
               </div>
               <div className="d-flex w-60 gap-3 align-items-start mt-4 m-auto mb-10 mobile-mb-0">
@@ -255,9 +232,14 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
                   alt=""
                 />
                 <h6 className="text-black fs-17 lh-22 fw-600 mb-0 pt-15 mobile-fs-14 mobile-lh-16">
-                  Your path.
-                  <br />
-                  Let’s get started.
+                  {intro.purpleMapPathTitle.split("\n").map((line, i) => (
+                    <span key={`${line}-${i}`}>
+                      {line}
+                      {i < intro.purpleMapPathTitle.split("\n").length - 1 ? (
+                        <br />
+                      ) : null}
+                    </span>
+                  ))}
                 </h6>
               </div>
             </div>
@@ -268,40 +250,25 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
               <div className="d-flex gap-5 mobile-wrap">
                 <div className="w-50 mobile-w-65 mobile-auto">
                   <h5 className="mb-3 fs-20 text-black fw-500 lh-22">
-                    Getting into a medical pathway that’s well-researched
-                    matters, a lot.
+                    {intro.cvTitle}
                   </h5>
                   <p className="text-black fs-14 lh-full mb-8">
-                    Let’s be real—studying abroad isn’t just “another phase.”
-                    And it’s not just about taking classes. You’re chasing that
-                    high-paying job, aiming to build a global network, and
-                    picking up real skills that actually make you stand out.
+                    {intro.cvBody}
                   </p>
                   <h5 className="mb-0 fs-17 text-black fw-600 lh-20">
-                    You need to start thinking like a recruiter.
+                    {intro.cvRecruiterTitle}
                   </h5>
                   <p className="text-black fs-12 fw-500 mobile-fs-14">
-                    What are they going to see when they open your CV
-                    post-graduation?
+                    {intro.cvRecruiterSubtext}
                   </p>
                   <div className="d-flex gap-3 ml-7">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/assets/img/filter-line.png" alt="" />
                     <ul className="mb-0 p-0 mobile-checklist-medical">
                       <li className="fs-14 lh-14 mb-1 fw-300 mb-5">
-                        You guessed it, it’s not just about the degree, <br />
-                        —it all stacks up.&nbsp;
+                        {intro.cvIntroLine}
                       </li>
-                      {(
-                        [
-                          ["bg-green", "Where you studied."],
-                          ["bg-red", "What you built."],
-                          ["bg-light-yellow", "Your experience level."],
-                          ["bg-light-green", "Real-world projects."],
-                          ["bg-blue", "Internships. Research papers."],
-                          ["bg-purple", "Peer-reviewed publications."],
-                        ] as const
-                      ).map(([dot, text]) => (
+                      {intro.cvChecklist.map(({ dot, text }) => (
                         <li
                           className="text-black fw-400 fs-12 d-flex gap-2 align-items-start"
                           key={text}
@@ -316,7 +283,7 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
                 <div className="w-256px">
                   <div className="card-box-study px-2">
                     <h6 className="mb-0 fs-50 text-black fw-600">
-                      Study Abroad Pathway
+                      {intro.cvCardTitle}
                     </h6>
                     <p
                       className="text-black fs-25 fw-300 mt-10 w-70 mobile-fs-20"
@@ -328,13 +295,13 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
                         backgroundPosition: "bottom",
                       }}
                     >
-                      un-planned
+                      {intro.cvCardUnplanned}
                     </p>
                     <p
                       className="text-black fs-20 fw-300 mt-10 mobile-fs-16"
                       style={{ fontFamily: "'Roboto Mono'" }}
                     >
-                      well-researched 🙌
+                      {intro.cvCardResearched}
                     </p>
                     <div
                       className="frame-set-content"
@@ -342,11 +309,7 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
                         backgroundImage: "url('/assets/img/frame-set.png')",
                       }}
                     >
-                      <h5 className="fw-500">
-                        It’s about launching your future. You owe it to yourself
-                        to do it right. And we’re here to make sure you do.{" "}
-                        <b>#pgs</b>
-                      </h5>
+                      <h5 className="fw-500">{intro.cvCardFooter}</h5>
                     </div>
                   </div>
                 </div>
@@ -366,19 +329,19 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
                 <h1 className="fnt-family text-green fs-38 d-flex align-items-center gap-2 mobile-fs-30">
                   #purplePremium{" "}
                   <span className="text-red fs-19 mobile-fs-20">
-                    MEDICAL PATHWAY
+                    {track.sectionLabel}
                   </span>
                 </h1>
                 <div className="text-center w-75 m-auto mt-6 text-black mobile-w-90 mobile-pb-10">
                   <h3 className="fnt-family mb-2 fs-38 mobile-d-flex gap-3 mobile-justify-center">
-                    <span className="mobile-fs-20">{content.trackLabel}</span>
-                    {content.trackTitle}
+                    <span className="mobile-fs-20">{track.trackLabel}</span>
+                    {track.trackTitle}
                   </h3>
                   <h6 className="fs-17 fw-400 lh-22 text-black mobile-fs-14 mobile-lh-full">
-                    {content.trackIntro}
+                    {track.trackIntro}
                   </h6>
                   <p className="text-black fs-17 lh-22 mb-1 text-start mobile-fs-14 mobile-lh-full">
-                    {content.trackBody}
+                    {track.trackBody}
                   </p>
                 </div>
                 <div className="d-flex align-items-start gap-3 mt-2 position-relative justify-content-center mobile-respo-box-1 mobile-respo-box-3">
@@ -472,34 +435,24 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
                         }}
                       >
                         <h5 className="text-black fs-17 lh-22 fw-600 mobile-fs-14 mobile-lh-full">
-                          Yes, the competition is global, but so are the rewards
-                          —stay sharp and go claim yours.
+                          {track.bottomHeadline}
                         </h5>
                         <p className="mb-0 text-dark-gray lh-19 fs-14 mobile-fs-12 mobile-lh-full">
-                          We’ve worked closely with students who’ve taken this
-                          path—and yeah, it definitely takes commitment. But with
-                          the right mentor and a clear plan, it makes all the
-                          difference. That’s why we’ve built a solid approach for
-                          each pathway, helping our students stay on track and
-                          move forward with confidence.
+                          {track.bottomBody}
                         </p>
                       </div>
                     </div>
                   </div>
                   <figure className="pgs-track1-portrait">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/assets/img/step.png" alt="" />
+                    <img src={track.portraitImage} alt="" />
                   </figure>
                 </div>
               </div>
               <div className="pgs-track1-quote d-flex gap-2">
                 <span className="fnt-family fs-40 text-black">“</span>
                 <p className="mb-0 fs-14 lh-full text-black mobile-fs-14">
-                  Everything changed when I crossed paths with my mentor, Mr.
-                  Nilmek of purpleGuide. Back when uncertainty clouded my path,
-                  they gave me more than just the right guidance—they offered
-                  unwavering support and care at every step. For me, they didn’t
-                  just make my dream possible—they made it happen.
+                  {track.testimonialQuote}
                   <span className="fnt-family fs-40 text-black d-block m-last text-end">
                     ”
                   </span>
@@ -515,11 +468,10 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
           <div className="w-990px m-auto">
             <div className="text-center">
               <h3 className="text-black mb-1 fnt-family mb-0 fs-38 mobile-fs-24 mobile-lh-full">
-                {content.pathParen}
+                {path.pathParen}
               </h3>
               <p className="text-black fs-16 lh-19 mobile-fs-14">
-                This is where real mentorship kicks in, aka #purplePremium for
-                Medical. Let’s show you how.
+                {path.pathIntro}
               </p>
             </div>
             <div className="bg-black what-is-purple-relative border-radius-10px pt-5 purple-mobile-box-1">
@@ -535,18 +487,18 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
                       get to know
                     </h4>
                     <h4 className="text-yellow fnt-family fs-100 fw-400 lh-100">
-                      {content.getToKnowTitle}
+                      {path.getToKnowTitle}
                     </h4>
                   </div>
                   <h4 className="mb-0 text-white fs-19 fw-600 text-indennt-30 mobile-fs-14 mobile-lh-full">
-                    {content.gatewayTitle}
+                    {path.gatewayTitle}
                   </h4>
                   <p className="text-white lh-19 fw-300 fs-14 px-5 mobile-fs-14 mobile-lh-full mobile-p-0">
-                    {content.gatewayBody}
+                    {path.gatewayBody}
                   </p>
                   <div className="mt-4 w-100 m-auto mb-3 mobile-none">
                     <div className="d-flex gap-2 align-items-center mobile-wrap">
-                      {content.steps.map((step) => (
+                      {path.steps.map((step) => (
                         <div className="w-145px" key={step.title}>
                           <button
                             type="button"
@@ -570,31 +522,28 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
                 <div className="w-50">
                   <div className="mobile-none">
                     <h5 className="text-green mb-0 fs-17 lh-22 fw-600">
-                      Performance Data
+                      {path.performanceLabel}
                     </h5>
                     <p className="text-white fs-14 fw-400 lh-14 mb-0">
-                      (2024* Passing%)
+                      {path.performanceNote}
                     </p>
                   </div>
                   <div className="d-flex gap-3 mt-3 mobile-none">
-                    {content.stats.map((s) => (
+                    {path.stats.map((s) => (
                       <ProgressStat key={s.label} {...s} />
                     ))}
                   </div>
                   <h5 className="box-border-mark lh-16">
-                    This pathway will tak 2-3 years of your <br /> time to
-                    complete
+                    {path.timelineNote}
                   </h5>
                   <h5 className="text-yellow fs-13 lh-15 mb-1 mobile-pt-2">
-                    Residency or Fellowship:
+                    {path.residencyTitle}
                   </h5>
                   <p className="text-white lh-16 mobile-fs-14 mobile-lh-full">
-                    Whether you stop at residency or chase a specialty
-                    you&apos;re part of the system.
+                    {path.residencyBody}
                   </p>
                   <h5 className="text-yellow fs-14 lh-16 fw-600 w-80 pt-2 mb-0">
-                    The U.S. Match system is one of the most organized and
-                    transparent residency processes worldwide.
+                    {path.matchSystemNote}
                   </h5>
                 </div>
               </div>
@@ -610,33 +559,27 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
                     />
                   </div>
                   <h1 className="fnt-family text-black fs-50 pt-1 text-center mb-2 lh-48 mobile-fs-32 mobile-lh-full mobile-text-start">
-                    What you get with #PurplePremium
-                    <br />
-                    for your {content.shortName} journey
+                    {path.whatYouGetTitle}
                   </h1>
                   <div className="d-flex purple-gray-box-1 gap-3 justify-content-center mt-5 mobile-wrap">
                     <div className="w-50">
                       <div className="mb-3 text-black">
                         <div className="w-263px m-last">
                           <h6 className="fs-17 fw-600 mb-0">
-                            Network. De-stress. Stand Out.
+                            {path.networkHeadline}
                           </h6>
                           <p className="mb-0 fs-14 lh-20">
-                            From the moment you decide to take this path,
-                            we&apos;ll help you build your plan, choose the
-                            right resources, guide you through registrations,
-                            visa steps, and even get you invites to prestigious
-                            medical meetups in the U.S. ❤️
+                            {path.networkBody}
                           </p>
                         </div>
                       </div>
                       <div className="card-box-border w-452px">
                         <div>
                           <h5 className="text-black fw-500 mobile-fs-20">
-                            📌 We guide you through all the important forms
+                            {path.formsTitle}
                           </h5>
                           <ul className="points w-65 m-last pb-4 mobile-w-80">
-                            {WHAT_YOU_GET_FORMS.map((item) => (
+                            {path.forms.map((item) => (
                               <li
                                 className="text-black fs-16 lh-20 mb-1"
                                 key={item}
@@ -650,12 +593,10 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
                       <div className="card-box-border mt-3 w-90 m-last mobile-w-95">
                         <div>
                           <h5 className="text-black fw-500 mb-2 fs-32 mobile-fs-20 mobile-lh-full">
-                            Be added to a prep group
+                            {path.prepGroupTitle}
                           </h5>
                           <p className="text-black fs-16 lh-20 mb-1 pb-5 mobile-fs-14">
-                            As students join, we group them with peers on a
-                            similar path—so they can share strategies, stay
-                            motivated, and grow together.
+                            {path.prepGroupBody}
                           </p>
                         </div>
                       </div>
@@ -663,10 +604,7 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src="/assets/img/speach.png" alt="" />
                         <h5 className="fs-17 lh-22 text-black mb-0 text-center mobile-fs-14 mobile-lh-full">
-                          As part of your profile-building, you’ll have the
-                          opportunity to showcase your research poster at
-                          medical conferences in the U.S. and we’ll guide you
-                          through every step.
+                          {path.conferenceNote}
                         </h5>
                       </div>
                     </div>
@@ -674,10 +612,10 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
                       <div className="card-box-border">
                         <div>
                           <h5 className="text-black fw-500 mobile-fs-20 mobile-lh-full">
-                            we get you a major checklist to get you on your path
+                            {path.checklistTitle}
                           </h5>
                           <ul className="w-100 m-last">
-                            {WHAT_YOU_GET_CHECKLIST.map((item) => (
+                            {path.checklist.map((item) => (
                               <li
                                 className="text-black fs-18 lh-25 mb-2 d-flex gap-2 align-items-start mobile-fs-14 mobile-lh-full"
                                 key={item}
@@ -708,16 +646,16 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
                       </div>
                       <div className="mt-8">
                         <h4 className="mb-1 fs-17 fw-600 text-black lh-15 mobile-fs-14">
-                          Get Matched for Clinical Rotations
+                          {path.rotationsTitle}
                           <span className="d-block fs-12 fw-400 text-start mt-2 mobile-fs-14">
-                            Exclusive discounts for purplePremium students,
+                            {path.rotationsSubtext}
                           </span>
                         </h4>
                         <h4 className="mb-0 fs-17 mb-2 lh-20 fw-600 text-black mobile-fs-14">
-                          VISA application help
+                          {path.visaHelpTitle}
                         </h4>
                         <h4 className="mb-0 fs-17 fw-600 lh-20 text-black mobile-fs-14">
-                          Help in building your CV
+                          {path.cvHelpTitle}
                         </h4>
                       </div>
                     </div>
@@ -727,8 +665,7 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
                       href="#offer_script"
                       className="btn btn-green-btn m-auto mobile-fs-14 mobile-lh-full"
                     >
-                      Step into the {content.shortName} grind—with
-                      #purplePremium
+                      {path.ctaLabel}
                     </a>
                   </div>
                 </div>
@@ -746,13 +683,12 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
                 <h5>
                   <span className="fnt-50">“</span>
                   <span>
-                    From your first step to your final admit or medical pathway
-                    — our expert counselors guide the entire journey with you.
+                    {content.counselorQuote}
                     <span className="fnt-50 dot-flot-1">”</span>
                   </span>
                 </h5>
                 <div className="tag-comment lt-1">
-                  <div className="tag-border">purpleguide.study</div>
+                  <div className="tag-border">{content.counselorTag}</div>
                 </div>
               </div>
             </div>
@@ -771,7 +707,14 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
               <div className="mb-10px">
                 <div className="mt-10 mobile-px-4">
                   <h2 className="mb-1 text-uppercase fnt-bab text-black fs-38 mobile-br-none mobile-fs-20 mobile-lh-20 mobile-w-60">
-                    DOCUMENTATION <br /> REQUIREMENTS FOR <br /> USCE
+                    {content.documentationTitle.split("\n").map((line, i) => (
+                      <span key={`${line}-${i}`}>
+                        {line}
+                        {i < content.documentationTitle.split("\n").length - 1 ? (
+                          <br />
+                        ) : null}
+                      </span>
+                    ))}
                   </h2>
                   <button
                     type="button"
@@ -785,28 +728,23 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
                     <span>
                       <span
                         className="btn-double-text ls-minus-05px fs-15"
-                        data-text="Request it here"
+                        data-text={content.documentationCta}
                       >
-                        Request it here
+                        {content.documentationCta}
                       </span>
                     </span>
                   </button>
                   <p className="text-black mt-3 mb-3">
-                    — we’ll send it straight to your inbox.
+                    {content.documentationInboxNote}
                   </p>
                   <p className="text-black fs-16 lh-19 mt-6 mb-30 mobile-fs-14 mobile-pb-30">
-                    Whether you&apos;re just getting started or planning ahead
-                    for all three steps, knowing the costs involved can help you
-                    make better decisions. From registration fees and travel
-                    expenses to prep materials and clinical rotations — we’ve
-                    mapped out the full journey. Just drop a request and get a
-                    clear picture of what to expect, without surprises.
+                    {content.documentationBody}
                   </p>
                 </div>
                 <figure className="about-floting-img m-0 text-center">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="/assets/img/doctor.png"
+                    src={content.documentationImage}
                     alt=""
                     className="border-radius-6px"
                   />
@@ -817,7 +755,7 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
               <figure className="request-img-box text-center">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/assets/img/insta-girl.png"
+                  src={content.documentationSideImage}
                   alt=""
                   className="border-radius-6px"
                 />
@@ -832,20 +770,19 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
           <div className="row">
             <div className="col-lg-11 m-auto mobile-p-0">
               <h3 className="text-black fnt-family w-60 fs-38 lh-full text-center m-auto mobile-fs-24 mobile-w-full">
-                Unlock the full power of your personalized <br /> dashboard with
-                Purple Premium
+                {dashboard.title}
               </h3>
               <div className="box-img-grid-gorup grid-block-size mt-4">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/assets/img/restro-img.jpg"
+                  src={dashboard.image}
                   className="border-radius-10px"
                   alt=""
                 />
               </div>
               <div className="line-active" />
               <div className="group-flex-items mt-4 d-flex wrap justify-content-space mobile-scrolling-nowrap">
-                {DASHBOARD_FEATURES.map((title) => (
+                {dashboard.features.map((title) => (
                   <div className="w-20" key={title}>
                     <div className="d-flex align-items-start gap-3 mb-5 w-202px">
                       <span className="icon-box">
@@ -880,13 +817,10 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
                 <div className="w-90 m-auto">
                   <div className="w-95 card-box-border bg-white border-black pt-4 m-auto mobile-bg-white">
                     <h1 className="fnt-family text-black w-75 fs-50 lh-45 mb-0 mobile-fs-24 mobile-lh-full mobile-pb-4">
-                      {content.offerHeadline}
+                      {offer.headline}
                     </h1>
                     <p className="text-black fs-12 lh-18 w-75 mb-0 pb-4 mobile-lh-full mobile-fs-14">
-                      Every student&apos;s journey takes time, attention, and
-                      real mentorship. That&apos;s why we limit the number of
-                      students each batch - so our experts can actually guide,
-                      not just supervise.
+                      {offer.subtext}
                     </p>
                   </div>
                   <div className="w-100 card-box-border bg-black border-liner custom-padding-100 m-auto minus-5 border-radius-0px mobile-bg-black">
@@ -899,33 +833,31 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
                           className="bg-yellow text-black px-2 py-1 border-radius-6px"
                           style={{ height: 25, lineHeight: "17px" }}
                         >
-                          35% off
+                          {offer.discountLabel}
                         </span>{" "}
                         <del className="fw-300 fs-25 mobile-fs-16">
-                          was ₹ 509,999
+                          {offer.wasPrice}
                         </del>
                       </span>
                     </h6>
                     <h2 className="mb-4 text-white fw-800 fs-50 lh-30 mobile-text-center">
-                      ₹ 65,0000
+                      {offer.price}
                     </h2>
                     <Link
                       className="btn btn-purple2 text-black fw-500 w-230px mt-2 fs-19"
                       href="/purplepremiumhome"
                     >
-                      Enroll Now
+                      {offer.enrollLabel}
                     </Link>
                   </div>
                   <h1 className="mb-0 fs-28 mt-4 fnt-family text-black mobile-fs-24">
-                    What’s Included when you sign up:
+                    {offer.includedTitle}
                   </h1>
                   <p className="fw-400 fs-12 lh-16 text-black mobile-fs-14 mobile-lh-full">
-                    A 10-point journey built by seeing what {content.shortName}{" "}
-                    aspirants really go through—and what kind of support
-                    actually makes a difference.
+                    {offer.includedIntro}
                   </p>
                   <ul className="check-list">
-                    {content.included.map((item) => (
+                    {offer.included.map((item) => (
                       <li key={item}>
                         <i className="bi bi-check-circle-fill" />
                         <div>{item}</div>
@@ -938,9 +870,7 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/assets/img/high-fiy.png" alt="" />
                 <h5 className="fw-400 text-black fs-12 lh-full mb-0">
-                  You get full access for a year—and even after that, we’re
-                  still here when you need us. From Step 1 to Step 2, we’ve got
-                  the tools, tips, and real guidance to back you up.
+                  {offer.footerNote}
                 </h5>
               </div>
             </div>
@@ -954,20 +884,14 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
             <div className="col-lg-6 mobile-w-90 mobile-auto">
               <div className="mobile-d-flex mobile-align-center mobile-pb-5">
                 <h3 className="text-black fnt-family fs-38 mb-1 mobile-fs-24 mobile-w-60">
-                  Got questions about <br />
-                  #purplePremium?{" "}
+                  {meet.title}
                 </h3>
                 <p className="text-green fs-17 fw-500 mobile-fs-14 mobile-lh-full mobile-w-50 mobile-mb-0">
-                  Let’s clear them in one quick call.
+                  {meet.subtext}
                 </p>
               </div>
               <ul className="p-0 m-0">
-                {[
-                  content.meetFitLine,
-                  "Talk about your profile (and yep, you might just score a discount depending on your journey stage)",
-                  "Figure out how to start a roadmap from exactly where you stand",
-                  "Got a “what if” or “how do I”? Clear it over the call",
-                ].map((line) => (
+                {meet.bullets.map((line) => (
                   <li
                     className="d-flex gap-2 align-items-center mb-4"
                     key={line}
@@ -988,20 +912,20 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
             <div className="col-lg-5">
               <div className="bg-black p-4 pt-4 pb-4 border-radius-10px text-white text-center">
                 <h5 className="mb-0 fs-25 lh-25 pt-3 mobile-fs-20">
-                  MEET + GREET
+                  {meet.cardTitle}
                 </h5>
                 <h4 className="mb-0 fs-32 mobile-pb-2">
-                  <b>With an Expert</b>
+                  <b>{meet.cardSubtitle}</b>
                 </h4>
                 <p className="mb-3 fs-12 fw-300">
-                  Check the available slots & book your appointment.
+                  {meet.cardBody}
                 </p>
                 <button
                   type="button"
                   className="btn btn-purple2 fs-19 fw-700"
                   style={{ width: 230 }}
                 >
-                  Schedule Now
+                  {meet.ctaLabel}
                 </button>
                 <div className="fix-object-img-w-200">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -1031,7 +955,7 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
                     </span>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/assets/img/phone.png" width={20} alt="" />
-                    91 95665 66298
+                    {contact.phone}
                   </h6>
                   <h6 className="mb-2 text-black d-flex gap-2 fs-20 fw-500">
                     <span className="w-20 ml-3 px-1 bg-yellow fs-18 d-inline-block">
@@ -1039,15 +963,12 @@ export function PathwayPage({ content }: { content: PathwayContent }) {
                     </span>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/assets/img/phone.png" width={20} alt="" />
-                    connect@purpleguide.study
+                    {contact.email}
                   </h6>
                 </div>
                 <div className="w-15">
                   <p className="text-black font-style-italic fs-15 lh-20">
-                    Reach out on our helpline for fast bookings, expert advice,
-                    and answers to all your study abroad questions. We’ve also
-                    got dedicated mentor groups for medical and non-medical
-                    courses—so you’re always connected to the right people.
+                    {contact.blurb}
                   </p>
                 </div>
               </div>

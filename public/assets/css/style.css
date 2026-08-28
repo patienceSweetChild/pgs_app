@@ -28847,11 +28847,25 @@ border-radius: 0px !important;
     background-color: #DDDDDD;
     height: 312px;
     margin-bottom: 10px !important;
+    overflow: hidden;
+    aspect-ratio: 1;
 }
 
 .founder-img-box img {
   width: 100%;
   height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.pgs-facilitators-row {
+  flex-wrap: wrap;
+}
+
+.pgs-facilitator-cell {
+  flex: 0 1 calc(50% - 0.75rem);
+  min-width: 140px;
+  max-width: 312px;
 }
 
 .founder-info p {
@@ -38531,7 +38545,16 @@ img.mobile-35px
     width: 100% !important;
     background-color: #DDDDDD;
     height: auto !important;
+    aspect-ratio: 1;
+    overflow: hidden;
     margin-bottom: 10px !important;
+}
+
+.founder-img-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
 }
 .mobile-bg-transparent
 {

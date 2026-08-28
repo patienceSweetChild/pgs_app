@@ -158,10 +158,24 @@ export function LoginPage() {
   const redirectTo = useMemo(() => {
     const raw = (searchParams.get("redirect") || "").trim();
     if (!raw || raw.startsWith("//") || /^[a-z][a-z0-9+.-]*:/i.test(raw)) {
+      const surface = (searchParams.get("surface") || "").toLowerCase();
+      if (surface === "admin") return "/admin";
+      if (surface === "operations") return "/ops";
       return "/";
     }
     return raw.startsWith("/") ? raw : `/${raw}`;
   }, [searchParams]);
+
+  const surface = useMemo(
+    () => (searchParams.get("surface") || "").toLowerCase(),
+    [searchParams],
+  );
+
+  const portalTitle = useMemo(() => {
+    if (surface === "admin") return "CMS Admin";
+    if (surface === "operations") return "Operations Portal";
+    return "Welcome";
+  }, [surface]);
 
   const [mode, setMode] = useState<Mode>(initialMode);
   const [email, setEmail] = useState(initialEmail);
@@ -278,7 +292,7 @@ export function LoginPage() {
                 id="loginForm"
               >
                 <h5 className="fnt-family fs-35 text-black mb-3 mt-15 mobile-fs-24">
-                  Welcome
+                  {portalTitle}
                 </h5>
 
                 <a

@@ -29,12 +29,19 @@ type BaseCard = {
   saved?: boolean;
   /** Bootstrap layout hint from CMS */
   col: CardCol;
+  /** Catalog entity for save/unsave (composite id is `${entityType}:${entityId}`) */
+  entityType?: "course" | "event";
+  entityId?: string;
 };
 
 export type ProgramCardData = BaseCard & {
   type: "program";
   badge?: string;
   badgeIcon?: string;
+  /** Chip background color (hex). */
+  badgeColor?: string;
+  /** Chip text color (hex). */
+  badgeTextColor?: string;
   logo?: string;
   logoAlt?: string;
   details: CardDetail[];
@@ -44,6 +51,8 @@ export type ProgramCardData = BaseCard & {
   /** Saved-mock “Dates Extended” style box */
   promo?: ProgramPromo;
   datesRail?: string;
+  /** CTA button label (defaults to Learn More) */
+  ctaLabel?: string;
   qrSrc?: string;
   showDownload?: boolean;
   downloadIcon?: string;
@@ -55,6 +64,10 @@ export type PromoCardData = BaseCard & {
   description: string;
   seatBadge?: string;
   seatBadgeIcon?: string;
+  /** Seat badge chip background (hex). */
+  seatBadgeColor?: string;
+  /** Seat badge chip text color (hex). */
+  seatBadgeTextColor?: string;
   overlayBadge?: string;
   closesOn?: string;
   extraTagCount?: number;

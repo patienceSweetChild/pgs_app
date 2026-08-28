@@ -31,7 +31,10 @@ export function UserDetailClient({
 
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>{String(user.full_name || "Student")}</h1>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem" }}>
+        <h1 style={{ marginTop: 0 }}>{String(user.full_name || "Student")}</h1>
+        <a href={`/ops/students/${String(user.id)}`}>Open in Operations</a>
+      </div>
       <div className="pgs-admin__grid">
         <div className="pgs-admin__card">
           <p>Stage</p>

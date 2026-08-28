@@ -5,6 +5,7 @@ import {
   getPremiumContentSetting,
   savePremiumContentSetting,
 } from "@/features/admin/content-actions";
+import { MediaAssetField } from "./MediaAssetField";
 
 export function PremiumContentEditor({
   settingKey,
@@ -16,6 +17,7 @@ export function PremiumContentEditor({
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
+  const [mediaAssetId, setMediaAssetId] = useState<string | null>(null);
   const [published, setPublished] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -28,6 +30,9 @@ export function PremiumContentEditor({
           setTitle(String(row.title ?? ""));
           setBody(String(row.body ?? ""));
           setLinkUrl(String(row.link_url ?? ""));
+          setMediaAssetId(
+            row.media_asset_id ? String(row.media_asset_id) : null,
+          );
           setPublished(Boolean(row.published));
         }
       } catch (err) {
@@ -46,6 +51,7 @@ export function PremiumContentEditor({
         body,
         linkUrl,
         published,
+        mediaAssetId,
       );
       setMessage("Saved.");
     } catch (err) {
@@ -79,6 +85,13 @@ export function PremiumContentEditor({
           Link / media URL
           <input value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} />
         </label>
+        <MediaAssetField
+          label="Media"
+          value={mediaAssetId}
+          accept="image"
+          folder={`premium-${settingKey}`}
+          onChange={setMediaAssetId}
+        />
         <label>
           Published
           <input
@@ -87,9 +100,15 @@ export function PremiumContentEditor({
             onChange={(e) => setPublished(e.target.checked)}
           />
         </label>
-        <button type="button" className="pgs-admin__btn" onClick={() => void save()}>
-          Save
-        </button>
+        <div className="pgs-admin__form-actions">
+          <button
+            type="button"
+            className="pgs-admin__btn"
+            onClick={() => void save()}
+          >
+            Save
+          </button>
+        </div>
       </div>
     </div>
   );

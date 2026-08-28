@@ -81,12 +81,43 @@ export async function uploadAvatar(
   return { path, publicUrl: data.publicUrl };
 }
 
+const MEDIA_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "image/svg+xml",
+  "application/pdf",
+]);
+
 export async function uploadMediaAsset(
   supabase: SupabaseClient,
   file: File,
   folder = "uploads",
+  options?: { imagesOnly?: boolean; maxBytes?: number },
 ): Promise<{ path: string; publicUrl: string; bucket: string }> {
-  const safeFolder = folder.replace(/[^a-zA-Z0-9/_-]/g, "").replace(/^\/+|\/+$/g, "") || "uploads";
+  const imagesOnly = options?.imagesOnly ?? false;
+  const maxBytes = options?.maxBytes ?? 20 * 1024 * 1024;
+  const allowed = imagesOnly
+    ? new Set([...IMAGE_TYPES, "image/svg+xml"])
+    : MEDIA_TYPES;
+
+  if (!allowed.has(file.type)) {
+    throw new Error(
+      imagesOnly
+        ? "File must be a JPEG, PNG, WebP, GIF, or SVG image."
+        : "File must be an image (JPEG, PNG, WebP, GIF, SVG) or PDF.",
+    );
+  }
+  if (file.size > maxBytes) {
+    throw new Error(
+      `File must be ${Math.round(maxBytes / (1024 * 1024))} MB or smaller.`,
+    );
+  }
+
+  const safeFolder =
+    folder.replace(/[^a-zA-Z0-9/_-]/g, "").replace(/^\/+|\/+$/g, "") ||
+    "uploads";
   const ext = extensionForMime(file.type, file.name);
   const path = `${safeFolder}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
 

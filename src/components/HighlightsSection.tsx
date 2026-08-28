@@ -13,6 +13,7 @@ export const HIGHLIGHT_IMAGES = [
 
 type HighlightsSectionProps = {
   copy?: {
+    heading?: string;
     title?: string;
     location?: string;
     body?: string;
@@ -35,6 +36,7 @@ export function HighlightsSection({ copy, images }: HighlightsSectionProps) {
   const { highlights } = useCmsShell();
   const first = highlights[0];
   const text = {
+    heading: "#higlights",
     ...DEFAULT_COPY,
     ...(first
       ? { title: first.title, body: first.body, location: "Highlights" }
@@ -77,7 +79,9 @@ export function HighlightsSection({ copy, images }: HighlightsSectionProps) {
           <div className="col-lg-8 mobile-p-0">
             <div className="d-flex justify-content-end gap-3 border-radius-10px col-lg-12 col-md-10 position-relative md-mb-50px sm-mb-40px mobile-wrap">
               <div className="w-35 overflow-hidden border-radius-10px">
-                <h3 className="mb-0 fnt-family text-black fs-38">#higlights</h3>
+                <h3 className="mb-0 fnt-family text-black fs-38">
+                  {text.heading || "#higlights"}
+                </h3>
                 <p className="mb-2 fw-400 lh-20 text-black fs-16">{text.title}</p>
                 <h6 className="text-black fs-16">
                   <i className="bi bi-geo-alt-fill" /> {text.location}

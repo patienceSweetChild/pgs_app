@@ -16,7 +16,6 @@ export type BoardCourse = {
 
 const BOARD_CAMPUS = "/assets/img/purpleboard/campus.jpg";
 const BOARD_LOGO = "/assets/img/purpleboard/rcsed-logo.jpg";
-const BOARD_QR = "/assets/img/purpleboard/qr.png";
 
 export function boardCourseToProgramCard(course: BoardCourse): ProgramCardData {
   return {
@@ -31,16 +30,21 @@ export function boardCourseToProgramCard(course: BoardCourse): ProgramCardData {
     logo: BOARD_LOGO,
     logoAlt: "The Royal College of Surgeons of Edinburgh",
     details: [
-      { label: "Duration", value: course.duration },
-      { label: "Perks", value: `${course.perkTitle}\n${course.perkDetail}` },
+      {
+        label: "About",
+        value: `${course.perkTitle}\n${course.perkDetail}`,
+      },
+      { label: "Location", value: course.duration },
+      { label: "Mode", value: "On Campus" },
     ],
     variant: "full",
-    deadline: {
-      days: course.deadlineDays,
-      date: course.deadlineDate,
+    datesRail: "Dates You Should Be Aware off.",
+    promo: {
+      title: "Deadline In",
+      subtitle: `${course.deadlineDays}\ndays`,
+      date: course.deadlineDate.replace(/^\*/, ""),
     },
-    qrSrc: BOARD_QR,
-    showDownload: true,
+    ctaLabel: "Learn More",
     closed: course.closed,
   };
 }
@@ -56,7 +60,7 @@ export const BOARD_COURSES: BoardCourse[] = [
     badge: "Filling Fast",
     deadlineDays: "24",
     deadlineDate: "*28th June 2025",
-    href: "/cvreadyprogram",
+    href: "/programsfull",
   },
   {
     id: "closed-1",
@@ -69,7 +73,7 @@ export const BOARD_COURSES: BoardCourse[] = [
     deadlineDays: "24",
     deadlineDate: "*28th June 2025",
     closed: "Closed on June 15 – 46 students registered",
-    href: "/cvreadyprogram",
+    href: "/programsfull",
   },
   {
     id: "open-2",
@@ -81,7 +85,7 @@ export const BOARD_COURSES: BoardCourse[] = [
     badge: "Filling Fast",
     deadlineDays: "24",
     deadlineDate: "*28th June 2025",
-    href: "/cvreadyprogram",
+    href: "/programsfull",
   },
   {
     id: "closed-2",
@@ -94,7 +98,7 @@ export const BOARD_COURSES: BoardCourse[] = [
     deadlineDays: "24",
     deadlineDate: "*28th June 2025",
     closed: "Closed on June 15 – 46 students registered",
-    href: "/cvreadyprogram",
+    href: "/programsfull",
   },
   {
     id: "open-3",
@@ -106,7 +110,7 @@ export const BOARD_COURSES: BoardCourse[] = [
     badge: "Filling Fast",
     deadlineDays: "24",
     deadlineDate: "*28th June 2025",
-    href: "/cvreadyprogram",
+    href: "/programsfull",
   },
 ];
 

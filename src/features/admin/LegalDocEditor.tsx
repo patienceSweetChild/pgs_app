@@ -89,9 +89,15 @@ export function LegalDocEditor({
             onChange={(e) => setBody(e.target.value)}
           />
         </label>
-        <button type="button" className="pgs-admin__btn" onClick={() => void save()}>
-          Save
-        </button>
+        <div className="pgs-admin__form-actions">
+          <button
+            type="button"
+            className="pgs-admin__btn"
+            onClick={() => void save()}
+          >
+            Save
+          </button>
+        </div>
       </div>
     </div>
   );

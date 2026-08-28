@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { BumpPremiumModal } from "@/components/BumpPremiumModal";
+import { CmsHtml, looksLikeHtml } from "@/components/CmsHtml";
 import { HighlightsSection } from "@/components/HighlightsSection";
 import { useCmsShell } from "@/components/layout/cms-shell";
 import {
+  DEFAULT_SECTION_LABELS,
   DOWNLOAD_COPY,
   EVENT_TESTIMONIALS,
   FAQ_ITEMS,
@@ -17,9 +19,25 @@ import {
   SOCIAL_SHARE,
   UPCOMING_SESSIONS,
   type SessionDetail,
+  type SessionPageLabels,
   type UpcomingSession,
 } from "./content";
+import {
+  badgeChipStyle,
+  DEFAULT_EVENT_BADGE_ICON,
+} from "@/components/cards/badge-chip-style";
 import "./purple-events.css";
+
+function pageLabel(
+  session: SessionDetail | undefined,
+  key: keyof SessionPageLabels,
+): string {
+  const fromSession = session?.labels?.[key];
+  if (typeof fromSession === "string" && fromSession.trim()) {
+    return fromSession.trim();
+  }
+  return DEFAULT_SECTION_LABELS[key];
+}
 
 function SessionCard({ session }: { session: UpcomingSession }) {
   return (
@@ -53,15 +71,19 @@ function SessionCard({ session }: { session: UpcomingSession }) {
           {session.whoFor ? (
             <div>
               <h5>Who&apos;s It For?</h5>
-              <p>{session.whoFor}</p>
+              <CmsHtml as="div" html={session.whoFor} />
             </div>
           ) : null}
           {session.topics && session.topics.length > 0 ? (
             <div className="pgs-session-card__topics">
               <h5>Topics Covered</h5>
-              {session.topics.map((t, i) => (
-                <h6 key={`topic-${session.id}-${i}`}>{t}</h6>
-              ))}
+              {session.topics.length === 1 && looksLikeHtml(session.topics[0]) ? (
+                <CmsHtml as="div" html={session.topics[0]} />
+              ) : (
+                session.topics.map((t, i) => (
+                  <h6 key={`topic-${session.id}-${i}`}>{t}</h6>
+                ))
+              )}
             </div>
           ) : null}
           <Link
@@ -82,8 +104,10 @@ function SessionCard({ session }: { session: UpcomingSession }) {
 
 function UpcomingSessions({
   sessions = UPCOMING_SESSIONS,
+  title,
 }: {
   sessions?: UpcomingSession[];
+  title?: string;
 }) {
   const list = sessions.length > 0 ? sessions : UPCOMING_SESSIONS;
   const [index, setIndex] = useState(0);
@@ -111,7 +135,9 @@ function UpcomingSessions({
 
   return (
     <section className="pgs-upcoming">
-      <h1 className="pgs-upcoming__title">Upcoming Sessions</h1>
+      <h1 className="pgs-upcoming__title">
+        {title || DEFAULT_SECTION_LABELS.upcoming}
+      </h1>
       <div className="pgs-upcoming__row">
         <div className="pgs-upcoming__nav">
           <button type="button" onClick={prev} aria-label="Previous slide">
@@ -131,7 +157,17 @@ function UpcomingSessions({
   );
 }
 
-function FaqBlock() {
+function FaqBlock({
+  items,
+  title,
+}: {
+  items?: { q: string; a: string }[];
+  title?: string;
+}) {
+  const faqItems =
+    items && items.length > 0
+      ? items
+      : FAQ_ITEMS.map((f) => ({ q: f.q, a: f.a }));
   const [tab, setTab] = useState<(typeof FAQ_TABS)[number]["id"]>("tab_1");
   const [openQ, setOpenQ] = useState(0);
 
@@ -140,7 +176,9 @@ function FaqBlock() {
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-lg-11">
-            <h5 className="text-black fs-25 mb-4">Frequently Asked Questions</h5>
+            <h5 className="text-black fs-25 mb-4">
+              {title || DEFAULT_SECTION_LABELS.faq}
+            </h5>
             <div className="d-flex gap-5">
               <div className="w-25">
                 <div className="group-of-button-div">
@@ -168,14 +206,14 @@ function FaqBlock() {
                 {tab === "tab_1" ? (
                   <div className="grid-item tab_1 transition-inner-all w-100">
                     <div className="accordion accordion-style-02">
-                      {FAQ_ITEMS.map((item, i) => {
+                      {faqItems.map((item, i) => {
                         const open = openQ === i;
                         return (
                           <div
                             className={`accordion-item border-bottom${
                               open ? " active-accordion" : ""
                             }${i === 0 ? " pt-0" : ""}`}
-                            key={item.q}
+                            key={`${item.q}-${i}`}
                           >
                             <div
                               className={`accordion-header border-color-extra-medium-gray${
@@ -206,7 +244,11 @@ function FaqBlock() {
                             {open ? (
                               <div className="accordion-collapse collapse show">
                                 <div className="accordion-body last-paragraph-no-margin border-color-light-medium-gray">
-                                  <p className="fw-400">{item.a}</p>
+                                  <CmsHtml
+                                    as="div"
+                                    className="fw-400"
+                                    html={item.a}
+                                  />
                                 </div>
                               </div>
                             ) : null}
@@ -231,21 +273,27 @@ function FaqBlock() {
   );
 }
 
-function Testimonials() {
+function Testimonials({
+  items,
+}: {
+  items?: SessionDetail["testimonials"];
+}) {
   const { testimonials } = useCmsShell();
   const [index, setIndex] = useState(0);
-  const items =
-    testimonials.length > 0
-      ? testimonials.map((t) => ({
-          quote: t.quote,
-          name: t.name,
-          role: t.role,
-          location: "",
-          image: "/assets/img/selfe.jpg",
-        }))
-      : [...EVENT_TESTIMONIALS];
-  const len = Math.max(1, items.length);
-  const item = items[index % len];
+  const resolved =
+    items && items.length > 0
+      ? items
+      : testimonials.length > 0
+        ? testimonials.map((t) => ({
+            quote: t.quote,
+            name: t.name,
+            role: t.role,
+            location: "",
+            image: "/assets/img/selfe.jpg",
+          }))
+        : [...EVENT_TESTIMONIALS];
+  const len = Math.max(1, resolved.length);
+  const item = resolved[index % len];
 
   useEffect(() => {
     const id = window.setInterval(() => {
@@ -365,11 +413,14 @@ function SessionHero({
           <div className="col-lg-12 col-sm-12 mt-1 col-md-5 position-relative">
             <div className="sop-card-unique left-13 full-box-content full-box-content-height border-none d-flex align-items-start justify-content-end gap-3 mobile-wrap">
               <div className="w-30 mobile-w-full">
-                <div className="sop-top-label h-30px w-130px fs-14 label-flot-update">
+                <div
+                  className="sop-top-label h-30px w-130px fs-14 label-flot-update pgs-enroll-badge"
+                  style={badgeChipStyle(session.badgeColor, session.badgeTextColor)}
+                >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="/assets/img/red-hours.gif"
-                    className="w-15 ml-2"
+                    src={session.badgeIcon || DEFAULT_EVENT_BADGE_ICON}
+                    className="pgs-enroll-badge__icon"
                     alt=""
                   />
                   &nbsp;{session.enrollLabel ?? "Enroll Now"}
@@ -407,7 +458,7 @@ function SessionHero({
                   </h1>
                 </div>
                 <div className="mt-2 mb-4">
-                  <span className="fs-14">Host : </span>
+                  <span className="fs-14">{pageLabel(session, "hostPrefix")}</span>
                   <span className="text-dark-gray fs-14">{session.host}</span>
                 </div>
                 <div className="d-flex gap-3 mt-2">
@@ -438,12 +489,16 @@ function SessionHero({
                     </div>
                   </div>
                   <div className="content-p mobile-w-50">
-                    <h5 className="mb-2 text-black fs-25 fw-500 w-300px lh-30 mobile-w-full">
-                      {session.subtitle}
-                    </h5>
-                    <p className="mb-0 text-black fs-12 lh-12">
-                      {session.description}
-                    </p>
+                    <CmsHtml
+                      as="div"
+                      className="mb-2 text-black fs-25 fw-500 w-300px lh-30 mobile-w-full"
+                      html={session.subtitle}
+                    />
+                    <CmsHtml
+                      as="div"
+                      className="mb-0 text-black fs-12 lh-12"
+                      html={session.description}
+                    />
                   </div>
                 </div>
                 {session.tags && session.tags.length > 0 ? (
@@ -486,20 +541,27 @@ function SessionHero({
                   className="bg-light-green-200 p-1"
                   style={{ whiteSpace: "nowrap" }}
                 >
-                  Who’s It For?
+                  {pageLabel(session, "whoFor")}
                 </span>
               </h3>
               {mode === "listing" ? (
                 <>
                   <div className="d-flex align-items-start gap-1 mb-3">
-                    <h4 className="bg-light-green-200 mb-0 fs-24 lh-full p-1 text-black w-344px fw-500 overflow-hidden text-blue mobile-fs-14">
-                      {session.whoForLines.slice(0, 3).map((line, i) => (
-                        <span key={`who-${i}`}>
-                          {line}
-                          {i < 2 ? <br /> : null}
-                        </span>
-                      ))}
-                    </h4>
+                    {session.whoForLines.length === 1 &&
+                    looksLikeHtml(session.whoForLines[0]) ? (
+                      <div className="bg-light-green-200 mb-0 fs-24 lh-full p-1 text-black w-344px fw-500 overflow-hidden text-blue mobile-fs-14">
+                        <CmsHtml as="div" html={session.whoForLines[0]} />
+                      </div>
+                    ) : (
+                      <h4 className="bg-light-green-200 mb-0 fs-24 lh-full p-1 text-black w-344px fw-500 overflow-hidden text-blue mobile-fs-14">
+                        {session.whoForLines.slice(0, 3).map((line, i) => (
+                          <span key={`who-${i}`}>
+                            {line}
+                            {i < 2 ? <br /> : null}
+                          </span>
+                        ))}
+                      </h4>
+                    )}
                   </div>
                   <div className="mb-3">
                     <h4 className="bg-light-green-200 mb-0 fs-24 lh-full p-1 text-black w-344px fw-500 overflow-hidden text-blue mobile-fs-14">
@@ -509,9 +571,18 @@ function SessionHero({
                 </>
               ) : (
                 <div className="bg-light-green-200 p-1">
-                  <p className="mb-0 fs-24 lh-full text-black w-344px fw-500 mobile-fs-14">
-                    {session.whoForLines.join(" ")}
-                  </p>
+                  {session.whoForLines.length === 1 &&
+                  looksLikeHtml(session.whoForLines[0]) ? (
+                    <CmsHtml
+                      as="div"
+                      className="mb-0 fs-24 lh-full text-black w-344px fw-500 mobile-fs-14"
+                      html={session.whoForLines[0]}
+                    />
+                  ) : (
+                    <p className="mb-0 fs-24 lh-full text-black w-344px fw-500 mobile-fs-14">
+                      {session.whoForLines.join(" ")}
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -521,18 +592,25 @@ function SessionHero({
                   className="bg-light-green-200 p-1"
                   style={{ whiteSpace: "nowrap" }}
                 >
-                  Session Topics
+                  {pageLabel(session, "sessionTopics")}
                 </span>
               </h3>
               <div className="mb-3">
-                {session.sessionTopics.map((topic, i) => (
-                  <h4
-                    className="bg-light-green-200 mb-0 fs-24 lh-full p-1 text-black w-344px fw-500 overflow-hidden text-blue mobile-fs-14"
-                    key={`st-${i}`}
-                  >
-                    {topic}
-                  </h4>
-                ))}
+                {session.sessionTopics.length === 1 &&
+                looksLikeHtml(session.sessionTopics[0]) ? (
+                  <div className="bg-light-green-200 mb-0 fs-24 lh-full p-1 text-black w-344px fw-500 overflow-hidden text-blue mobile-fs-14">
+                    <CmsHtml as="div" html={session.sessionTopics[0]} />
+                  </div>
+                ) : (
+                  session.sessionTopics.map((topic, i) => (
+                    <h4
+                      className="bg-light-green-200 mb-0 fs-24 lh-full p-1 text-black w-344px fw-500 overflow-hidden text-blue mobile-fs-14"
+                      key={`st-${i}`}
+                    >
+                      {topic}
+                    </h4>
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -544,11 +622,18 @@ function SessionHero({
 
 function SessionBody({
   session,
-  showAbout,
 }: {
   session: SessionDetail;
-  showAbout?: boolean;
 }) {
+  const roadmap = session.roadmap ?? ROADMAP;
+  const footer = roadmap.footer || ROADMAP.footer;
+  const footerParts = footer.split(/get started\./i);
+  const footerLead = footerParts[0] ?? "";
+  const footerBold =
+    footerParts.length > 1
+      ? `get started.${footerParts.slice(1).join("get started.")}`
+      : "";
+
   return (
     <>
       <section className="pt-5">
@@ -556,25 +641,34 @@ function SessionBody({
           <div className="row justify-content-center">
             <div className="col-lg-12 mobile-box-4 mobile-box-style-2">
               <h1 className="text-black fnt-family fw-500 fs-40 pt-0 text-center mobile-fs-24">
-                What We’ll Cover in This Session:
+                {pageLabel(session, "whatWeCover")}
               </h1>
               <div className="group-flex-items mt-5 d-flex wrap justify-content-center">
-                {session.coverItems.map((item, i) => (
-                  <div className="w-211px column-flex" key={`cover-${i}`}>
-                    <div className="d-flex align-items-start gap-3 mb-5">
-                      <span className="icon-box">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/assets/img/icon-traingal.png" alt="" />
-                      </span>
-                      <h4 className="text-black mb-0 fs-50 lh-50 fw-500">
-                        {String(i + 1).padStart(2, "0")}
-                      </h4>
+                {session.coverItems.length === 1 &&
+                looksLikeHtml(session.coverItems[0]) ? (
+                  <CmsHtml
+                    as="div"
+                    className="text-black fs-16 lh-24 w-80"
+                    html={session.coverItems[0]}
+                  />
+                ) : (
+                  session.coverItems.map((item, i) => (
+                    <div className="w-211px column-flex" key={`cover-${i}`}>
+                      <div className="d-flex align-items-start gap-3 mb-5">
+                        <span className="icon-box">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src="/assets/img/icon-traingal.png" alt="" />
+                        </span>
+                        <h4 className="text-black mb-0 fs-50 lh-50 fw-500">
+                          {String(i + 1).padStart(2, "0")}
+                        </h4>
+                      </div>
+                      <h6 className="mb-0 fs-14 text-center lh-20 text-black">
+                        {item}
+                      </h6>
                     </div>
-                    <h6 className="mb-0 fs-14 text-center lh-20 text-black">
-                      {item}
-                    </h6>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -585,18 +679,40 @@ function SessionBody({
         <div className="">
           <div className="d-flex justify-content-center align-items-center gap-5 mobile-wrap">
             <div className="d-flex align-items-start gap-1 mb-3 w-344px mobile-w-70 mobile-auto mobile-pb-4">
-              <h4 className="bg-light-green-200 mb-0 fs-24 mobile-fs-22 lh-28 w-344px p-1 text-black fw-500 overflow-hidden text-blue m-border-1">
-                {session.whoForLines.slice(0, 3).map((line, i) => (
-                  <span key={`perk-who-${i}`}>
-                    {line}
-                    {i < 2 ? <br /> : null}
-                  </span>
-                ))}
-              </h4>
+              {(() => {
+                const asideLines =
+                  session.benefitsAsideLines &&
+                  session.benefitsAsideLines.length > 0
+                    ? session.benefitsAsideLines
+                    : session.whoForLines;
+                if (
+                  asideLines.length === 1 &&
+                  looksLikeHtml(asideLines[0])
+                ) {
+                  return (
+                    <div className="bg-light-green-200 mb-0 fs-24 mobile-fs-22 lh-28 w-344px p-1 text-black fw-500 overflow-hidden text-blue m-border-1">
+                      <CmsHtml as="div" html={asideLines[0]} />
+                    </div>
+                  );
+                }
+                return (
+                  <h4 className="bg-light-green-200 mb-0 fs-24 mobile-fs-22 lh-28 w-344px p-1 text-black fw-500 overflow-hidden text-blue m-border-1">
+                    {asideLines.slice(0, 3).map((line, i) => (
+                      <span key={`perk-who-${i}`}>
+                        {line}
+                        {i < Math.min(asideLines.length, 3) - 1 ? <br /> : null}
+                      </span>
+                    ))}
+                  </h4>
+                );
+              })()}
             </div>
             <div className="w-25 mobile-w-50">
               <ul className="todo-update-list p-0">
-                {SESSION_PERKS.map((perk) => (
+                {(session.benefits && session.benefits.length > 0
+                  ? session.benefits
+                  : [...SESSION_PERKS]
+                ).map((perk) => (
                   <li
                     className="fs-16 text-black mb-2 fw-600 d-flex gap-2 align-items-start mobile-lh-full mobile-fs-15 mobile-pb-4"
                     key={perk}
@@ -617,16 +733,27 @@ function SessionBody({
           <div className="row justify-content-center align-items-center gap-5">
             <div className="w-650px p-0 mobile-w-full">
               <h4 className="text-black fs-40 text-center lh-50 mobile-fs-22 mobile-br-none mobile-lg-full mobile-mb-0">
-                <span className="fs-32"> Meet Your</span> <br />{" "}
-                <span className="italic-texts fw-800">Facilitators</span>
+                {(() => {
+                  const label = pageLabel(session, "facilitators");
+                  const parts = label.split(/\s+/);
+                  if (parts.length >= 3 && /^meet$/i.test(parts[0])) {
+                    return (
+                      <>
+                        <span className="fs-32"> {parts.slice(0, -1).join(" ")}</span>{" "}
+                        <br />{" "}
+                        <span className="italic-texts fw-800">
+                          {parts[parts.length - 1]}
+                        </span>
+                      </>
+                    );
+                  }
+                  return <span className="italic-texts fw-800">{label}</span>;
+                })()}
               </h4>
-              <div
-                className="d-flex gap-3 justify-content-center flex-nowrap"
-                style={{ flexWrap: "nowrap" }}
-              >
+              <div className="d-flex gap-3 justify-content-center flex-wrap pgs-facilitators-row">
                 {session.facilitators.map((f) => (
                   <div
-                    className="w-50 mobile-w-50 mobile-mt-0 mobile-pt-0"
+                    className="pgs-facilitator-cell mobile-w-50 mobile-mt-0 mobile-pt-0"
                     key={f.name}
                   >
                     <div className="founder-img-box border-radius-4px mb-2 w-full border-radius-20px">
@@ -661,7 +788,7 @@ function SessionBody({
                         <i className="bi bi-circle" />
                       </span>
                       <h5 className="mb-0 text-uppercase fs-20 mobile-fs-12">
-                        note
+                        {pageLabel(session, "note")}
                       </h5>
                       <span>
                         <i className="bi bi-file-earmark-pdf" />
@@ -676,47 +803,70 @@ function SessionBody({
                 </div>
                 <div className="w-40 px-4 mb-4 mobile-d-flex mobile-gap-2">
                   <h5 className="mb-2 fs-22 fw-700 lh-30 text-black mobile-font-400 mobile-w-50 mobile-lh-16">
-                    {ROADMAP.title}
+                    {roadmap.title}
                   </h5>
                   <p className="mb-0 fs-22 fw-400 lh-30 text-black mobile-w-50 mobile-lh-16">
-                    {ROADMAP.body}
+                    {roadmap.body}
                   </p>
                 </div>
               </div>
               <div className="w-60 m-auto mt-4 mobile-last-auto mobile-w-48 mobile-auto-last">
                 <p className="mb-0 text-black fs-20 lh-full w-80 m-auto mt-3 lt-0.2 mobile-p-0 mobile-w-full mobile-fs-14 mobile-lh-16">
-                  {ROADMAP.footer.split("get started.")[0]}
-                  <br />
-                  <b>get started. Get your seat locked.</b>
+                  {footerLead}
+                  {footerBold ? (
+                    <>
+                      <br />
+                      <b>{footerBold}</b>
+                    </>
+                  ) : null}
                 </p>
               </div>
             </div>
           </div>
         </div>
       </section>
-
-      {showAbout ? (
-        <section className="pt-5">
-          <div className="container">
-            <div className="row justify-content-center">
-              <div className="col-lg-8">
-                <h3 className="text-black fs-28 fw-700 mb-3">About This Session</h3>
-                <div
-                  className="text-black fs-16 lh-24"
-                  style={{ whiteSpace: "pre-wrap" }}
-                >
-                  {session.about}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      ) : null}
     </>
   );
 }
 
-function SharedTail() {
+function SharedTail({
+  session,
+}: {
+  session?: SessionDetail;
+} = {}) {
+  const poster = session?.poster ?? {
+    title: DOWNLOAD_COPY.title,
+    body: DOWNLOAD_COPY.body,
+    inviteTitle: DOWNLOAD_COPY.inviteTitle,
+    inviteBody: DOWNLOAD_COPY.inviteBody,
+    live: DOWNLOAD_COPY.live,
+    topics: [...DOWNLOAD_COPY.topics],
+    qrUrl: "/assets/img/qr-2.png",
+    bgUrl: "/assets/img/green-1.png",
+  };
+  const cta = session?.cta ?? {
+    eyebrow: "Let's Go",
+    title: pageLabel(session, "cta"),
+    body: "Let’s chart your study abroad path, together with Team #PGS.",
+    buttonLabel: "Start Your Journey",
+    buttonHref: "/contact",
+  };
+  const highlightCopy =
+    session?.highlights &&
+    (session.highlights.title.trim() || session.highlights.body.trim())
+      ? {
+          heading:
+            session.highlights.heading || pageLabel(session, "highlights"),
+          title: session.highlights.title,
+          location: session.highlights.location,
+          body: session.highlights.body,
+        }
+      : undefined;
+  const highlightImages =
+    session?.highlights?.images && session.highlights.images.length > 0
+      ? session.highlights.images
+      : undefined;
+
   return (
     <>
       <section className="pgs-download">
@@ -728,13 +878,8 @@ function SharedTail() {
               className="pgs-download__arrow mobile-none"
               alt=""
             />
-            <h4>{DOWNLOAD_COPY.title}</h4>
-            <p>
-              Help us spread the word, and you might just win a{" "}
-              <b>Purple Hamper</b> and{" "}
-              <b>get free guidance on one research project.</b> Become a
-              #PurpleAmbassador.
-            </p>
+            <h4>{poster.title || pageLabel(session, "download")}</h4>
+            <CmsHtml as="div" html={poster.body || DOWNLOAD_COPY.body} />
             <div className="pgs-download__socials">
               {SOCIAL_SHARE.map((s) => (
                 <a href={s.href} key={s.alt}>
@@ -746,7 +891,12 @@ function SharedTail() {
           </div>
 
           <div className="pgs-download__poster-wrap">
-            <div className="pgs-download__poster">
+            <div
+              className="pgs-download__poster"
+              style={{
+                backgroundImage: `url(${poster.bgUrl || "/assets/img/green-1.png"})`,
+              }}
+            >
               <div className="pgs-poster-block position-relative">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -756,9 +906,7 @@ function SharedTail() {
                 />
                 <br />
                 <h5 className="pgs-poster-label">invitation for</h5>
-                <h5 className="pgs-poster-aspirants">
-                  {DOWNLOAD_COPY.inviteTitle}
-                </h5>
+                <h5 className="pgs-poster-aspirants">{poster.inviteTitle}</h5>
                 <button type="button" className="pgs-download__dl" aria-label="Download poster">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/assets/img/download.png" alt="" />
@@ -766,10 +914,10 @@ function SharedTail() {
               </div>
 
               <div className="pgs-poster-block pgs-poster-block--wide">
-                <h5 className="pgs-poster-body">{DOWNLOAD_COPY.inviteBody}</h5>
+                <h5 className="pgs-poster-body">{poster.inviteBody}</h5>
               </div>
               <div className="pgs-poster-block pgs-poster-block--pill">
-                <h5 className="pgs-poster-live">{DOWNLOAD_COPY.live}</h5>
+                <h5 className="pgs-poster-live">{poster.live}</h5>
               </div>
 
               <div className="pgs-poster-footer">
@@ -777,10 +925,18 @@ function SharedTail() {
                   {[0, 1].map((i) => (
                     <div className="pgs-poster-date-col" key={`poster-date-${i}`}>
                       <div className="pgs-poster-date-box">
-                        <span className="day">31</span>
-                        <span className="month">Dec 25</span>
+                        <span className="day">
+                          {session?.start.day || "31"}
+                        </span>
+                        <span className="month">
+                          {session?.start.month || "Dec 25"}
+                        </span>
                       </div>
-                      <p>12pm to 2 pm</p>
+                      <p>
+                        {session?.start.time && session?.end.time
+                          ? `${session.start.time} to ${session.end.time}`
+                          : "12pm to 2 pm"}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -791,11 +947,14 @@ function SharedTail() {
                       <img src="/assets/img/join-btn.png" alt="JOIN HERE" />
                     </button>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/assets/img/qr-2.png" alt="QR code" />
+                    <img
+                      src={poster.qrUrl || "/assets/img/qr-2.png"}
+                      alt="QR code"
+                    />
                   </div>
                   <div className="pgs-poster-join__topics">
                     <h5>Topics Covered</h5>
-                    {DOWNLOAD_COPY.topics.map((t) => (
+                    {poster.topics.map((t) => (
                       <h6 key={t}>{t}</h6>
                     ))}
                   </div>
@@ -806,8 +965,8 @@ function SharedTail() {
         </div>
       </section>
 
-      <HighlightsSection />
-      <Testimonials />
+      <HighlightsSection copy={highlightCopy} images={highlightImages} />
+      <Testimonials items={session?.testimonials} />
 
       <section className="half-section overlap-height position-relative overflow-hidden">
         <div className="container overlap-gap-section p-0">
@@ -815,25 +974,27 @@ function SharedTail() {
             <div className="mb-10px gap-5">
               <div className="text-center mb-2">
                 <span className="small-caption" style={{ color: "#6A5ED9" }}>
-                  Let&apos;s Go
+                  {cta.eyebrow}
                 </span>
                 <h5 className="w-100 text-black fs-40 mb-2 fw-700 m-auto">
-                  Ready to get started?
+                  {cta.title}
                 </h5>
-                <p className="w-40 text-center m-auto">
-                  Let’s chart your study abroad path, together with Team #PGS.
-                </p>
+                <CmsHtml
+                  as="p"
+                  className="w-40 text-center m-auto"
+                  html={cta.body}
+                />
                 <Link
-                  href="/contact"
+                  href={cta.buttonHref || "/contact"}
                   style={{ padding: "8px 30px", backgroundColor: "#6A5ED9" }}
                   className="mb-2 btn btn-small-large border-radius-10px text-white btn-rounded btn-switch-text d-inline-flex me-20px sm-me-10px align-middle left-icon mt-15px"
                 >
                   <span>
                     <span
                       className="btn-double-text ls-minus-05px"
-                      data-text="Start Your Journey"
+                      data-text={cta.buttonLabel}
                     >
-                      Start Your Journey
+                      {cta.buttonLabel}
                     </span>
                   </span>
                 </Link>
@@ -843,7 +1004,10 @@ function SharedTail() {
         </div>
       </section>
 
-      <FaqBlock />
+      <FaqBlock
+        items={session?.faqItems}
+        title={pageLabel(session, "faq")}
+      />
     </>
   );
 }
@@ -878,8 +1042,11 @@ export function PurpleEventsPage({
         onBook={() => setBookOpen(true)}
       />
       <SessionBody session={featured} />
-      <UpcomingSessions sessions={list} />
-      <SharedTail />
+      <UpcomingSessions
+        sessions={list}
+        title={pageLabel(featured, "upcoming")}
+      />
+      <SharedTail session={featured} />
       <BookSeatModal open={bookOpen} onClose={() => setBookOpen(false)} />
     </div>
   );
@@ -896,14 +1063,25 @@ export function EventSessionPage({
   sessions?: UpcomingSession[];
 }) {
   const detail = detailProp ?? getSessionById(sessionId);
-  const list = sessions && sessions.length > 0 ? sessions : UPCOMING_SESSIONS;
+  const showUpcoming = detail.showUpcomingSessions !== false;
+  const list =
+    sessions && sessions.length > 0
+      ? sessions
+      : showUpcoming
+        ? UPCOMING_SESSIONS
+        : [];
 
   return (
     <div className="wrapper-content pgs-purple-events">
       <SessionHero session={detail} mode="detail" />
-      <SessionBody session={detail} showAbout />
-      <UpcomingSessions sessions={list} />
-      <SharedTail />
+      <SessionBody session={detail} />
+      {showUpcoming ? (
+        <UpcomingSessions
+          sessions={list}
+          title={pageLabel(detail, "upcoming")}
+        />
+      ) : null}
+      <SharedTail session={detail} />
     </div>
   );
 }

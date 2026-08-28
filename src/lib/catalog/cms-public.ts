@@ -1,5 +1,10 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import {
+  publicObjectUrl,
+  STORAGE_BUCKETS,
+  type StorageBucket,
+} from "@/lib/supabase/storage";
 import type {
   CmsDeadlineRow,
   CmsFact,
@@ -17,6 +22,8 @@ import type {
   CmsUniversity,
   CmsWeeklyWall,
 } from "./cms-types";
+import type { CountryPageContent } from "@/features/countries/content";
+import type { PathwayPageContent, PathwayTemplate } from "@/features/pathway/page-content";
 
 export type {
   CmsDeadlineRow,
@@ -34,11 +41,35 @@ export type {
   CmsTestimonial,
   CmsUniversity,
   CmsWeeklyWall,
+  CmsCountryRow,
 } from "./cms-types";
+
+type MediaJoin = { bucket: string; path: string } | null;
+
+function normalizeMediaJoin(media: unknown): MediaJoin {
+  if (!media) return null;
+  if (Array.isArray(media)) {
+    const first = media[0];
+    if (!first || typeof first !== "object") return null;
+    return first as MediaJoin;
+  }
+  if (typeof media === "object") return media as MediaJoin;
+  return null;
+}
 
 async function sb() {
   if (!isSupabaseConfigured()) return null;
   return createSupabaseServerClient();
+}
+
+function mediaUrl(
+  client: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  media: MediaJoin,
+  fallback: string,
+): string {
+  if (!media?.path) return fallback;
+  const bucket = (media.bucket || STORAGE_BUCKETS.media) as StorageBucket;
+  return publicObjectUrl(client, bucket, media.path) || fallback;
 }
 
 function dateParts(iso: string | null | undefined) {
@@ -71,13 +102,18 @@ export async function listPublishedTestimonials(): Promise<CmsTestimonial[]> {
   if (!client) return [];
   const { data } = await client
     .from("testimonials")
-    .select("name, role_label, quote")
+    .select("name, role_label, quote, image_asset:media_assets(bucket, path)")
     .eq("published", true)
     .order("display_order", { ascending: true });
   return (data ?? []).map((r) => ({
     name: r.name,
     role: r.role_label || "",
     quote: r.quote,
+    image: mediaUrl(
+      client,
+      normalizeMediaJoin(r.image_asset),
+      "/assets/img/avatar.jpg",
+    ),
   }));
 }
 
@@ -88,7 +124,7 @@ export async function listContentPeople(
   if (!client) return [];
   const { data } = await client
     .from("content_people")
-    .select("name, title, biography")
+    .select("name, title, biography, image_asset:media_assets(bucket, path)")
     .eq("person_type", personType)
     .eq("published", true)
     .order("display_order", { ascending: true });
@@ -96,7 +132,11 @@ export async function listContentPeople(
     name: r.name,
     title: r.title || "",
     biography: r.biography || "",
-    image: "/assets/img/founder.png",
+    image: mediaUrl(
+      client,
+      normalizeMediaJoin(r.image_asset),
+      "/assets/img/founder.png",
+    ),
   }));
 }
 
@@ -105,13 +145,17 @@ export async function listPublishedHighlights(): Promise<CmsHighlight[]> {
   if (!client) return [];
   const { data } = await client
     .from("highlights")
-    .select("title, body")
+    .select("title, body, image_asset:media_assets(bucket, path)")
     .eq("published", true)
     .order("display_order", { ascending: true });
   return (data ?? []).map((r) => ({
     title: r.title,
     body: r.body || "",
-    image: "/assets/img/g-1.jpg",
+    image: mediaUrl(
+      client,
+      normalizeMediaJoin(r.image_asset),
+      "/assets/img/g-1.jpg",
+    ),
   }));
 }
 
@@ -120,12 +164,13 @@ export async function listWeeklyWall(): Promise<CmsWeeklyWall[]> {
   if (!client) return [];
   const { data } = await client
     .from("weekly_wall_items")
-    .select("title, body")
+    .select("title, body, image_asset:media_assets(bucket, path)")
     .eq("published", true)
     .order("display_order", { ascending: true });
   return (data ?? []).map((r) => ({
     title: r.title,
     body: r.body || "",
+    image: mediaUrl(client, normalizeMediaJoin(r.image_asset), ""),
   }));
 }
 
@@ -268,16 +313,23 @@ export async function listSocialLinks(): Promise<CmsSocial[]> {
 export async function listActiveMarquee(): Promise<CmsNotice[]> {
   const client = await sb();
   if (!client) return [];
+  const now = new Date().toISOString();
   const { data } = await client
     .from("site_notices")
-    .select("text, link_url")
+    .select("text, link_url, starts_at, ends_at")
     .eq("notice_type", "marquee")
     .eq("active", true)
     .order("display_order", { ascending: true });
-  return (data ?? []).map((r) => ({
-    text: r.text,
-    linkUrl: r.link_url,
-  }));
+  return (data ?? [])
+    .filter((r) => {
+      if (r.starts_at && r.starts_at > now) return false;
+      if (r.ends_at && r.ends_at < now) return false;
+      return true;
+    })
+    .map((r) => ({
+      text: r.text,
+      linkUrl: r.link_url,
+    }));
 }
 
 export async function getLegalDocument(
@@ -300,7 +352,9 @@ export async function listPublishedUniversities(): Promise<CmsUniversity[]> {
   if (!client) return [];
   const { data } = await client
     .from("universities")
-    .select("id, name, slug, summary, location")
+    .select(
+      "id, name, slug, summary, location, image_asset:media_assets(bucket, path)",
+    )
     .eq("published", true)
     .order("name", { ascending: true });
   return (data ?? []).map((r) => ({
@@ -309,6 +363,11 @@ export async function listPublishedUniversities(): Promise<CmsUniversity[]> {
     slug: r.slug,
     summary: r.summary || "",
     location: r.location || "",
+    image: mediaUrl(
+      client,
+      normalizeMediaJoin(r.image_asset),
+      "/assets/img/library.jpg",
+    ),
   }));
 }
 
@@ -342,7 +401,7 @@ export async function getUnivMeetSlots() {
     slot2_date: b.date,
     slot2_month: b.month,
     course_id: data[0]?.course_id ?? null,
-    href: data[0]?.booking_url || "/cvreadyprogram",
+    href: data[0]?.booking_url || "/programsfull",
   };
 }
 
@@ -353,7 +412,7 @@ export async function getPublishedPremiumContent(
   if (!client) return null;
   const { data } = await client
     .from("premium_content_settings")
-    .select("title, body, link_url")
+    .select("title, body, link_url, media_asset:media_assets(bucket, path)")
     .eq("key", key)
     .eq("published", true)
     .maybeSingle();
@@ -362,5 +421,49 @@ export async function getPublishedPremiumContent(
     title: data.title || "",
     body: data.body || "",
     linkUrl: data.link_url || "",
+    mediaUrl: mediaUrl(client, normalizeMediaJoin(data.media_asset), ""),
+  };
+}
+
+export async function getPublishedCountryBySlug(
+  slug: string,
+): Promise<CountryPageContent | null> {
+  const client = await sb();
+  if (!client) return null;
+  const { data, error } = await client
+    .from("countries")
+    .select("name, slug, page_content")
+    .eq("slug", slug)
+    .eq("published", true)
+    .maybeSingle();
+  if (error || !data?.page_content) return null;
+  const content = data.page_content as CountryPageContent;
+  return {
+    ...content,
+    slug: (data.slug || content.slug) as CountryPageContent["slug"],
+    name: data.name || content.name,
+  };
+}
+
+export async function getPublishedPathwayBySlug(slug: string): Promise<{
+  name: string;
+  slug: string;
+  template: PathwayTemplate;
+  page_content: PathwayPageContent;
+} | null> {
+  const client = await sb();
+  if (!client) return null;
+  const { data, error } = await client
+    .from("pathways")
+    .select("name, slug, template, page_content")
+    .eq("slug", slug)
+    .eq("published", true)
+    .maybeSingle();
+  if (error || !data?.page_content) return null;
+  return {
+    name: data.name,
+    slug: data.slug,
+    template: data.template as PathwayTemplate,
+    page_content: data.page_content as PathwayPageContent,
   };
 }

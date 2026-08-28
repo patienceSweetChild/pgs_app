@@ -18,7 +18,7 @@ import "./userprofile.css";
  */
 export function UserProfilePage() {
   const { refreshSession, isLoggedIn, ready: authReady } = useExperience();
-  const [avatarSrc, setAvatarSrc] = useState(PROFILE_CARD.avatar);
+  const [avatarSrc, setAvatarSrc] = useState<string>(PROFILE_CARD.avatar);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [cardName, setCardName] = useState("");
   const [cardId, setCardId] = useState("");

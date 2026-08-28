@@ -1,0 +1,102 @@
+/* Loaded last from AdminShell — hard overrides against ThemeZaa global input rules */
+html.pgs-admin-html .pgs-admin input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
+html.pgs-admin-html .pgs-admin select,
+html.pgs-admin-html .pgs-admin textarea {
+  box-sizing: border-box !important;
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+  text-indent: 0 !important;
+  margin: 0 !important;
+  max-width: 100% !important;
+}
+
+html.pgs-admin-html .pgs-admin .pgs-admin-tags {
+  box-sizing: border-box !important;
+  padding: 14px 16px !important;
+}
+
+html.pgs-admin-html .pgs-admin .pgs-admin-tags__head {
+  padding: 0 2px 4px !important;
+  margin: 0 !important;
+}
+
+html.pgs-admin-html .pgs-admin .pgs-admin-tags__box {
+  box-sizing: border-box !important;
+  padding: 10px 12px !important;
+  gap: 8px !important;
+  min-height: 44px !important;
+}
+
+html.pgs-admin-html .pgs-admin .pgs-admin-tags__input {
+  padding: 6px 8px !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  width: auto !important;
+  min-width: 7rem !important;
+}
+
+html.pgs-admin-html .pgs-admin .pgs-admin-tags__chip {
+  padding: 4px 8px 4px 10px !important;
+}
+
+html.pgs-admin-html .pgs-admin .pgs-admin__media-field-body {
+  box-sizing: border-box !important;
+  padding: 14px 16px !important;
+}
+
+html.pgs-admin-html .pgs-admin .pgs-admin-rich__textarea {
+  padding: 12px 16px !important;
+}
+
+html.pgs-admin-html .pgs-admin .pgs-admin-rich__toolbar {
+  gap: 8px !important;
+  padding: 4px 0 2px !important;
+}
+
+html.pgs-admin-html .pgs-admin .pgs-admin-rich__tool {
+  padding: 6px 10px !important;
+}
+
+html.pgs-admin-html .pgs-admin .pgs-event-cms__section {
+  box-sizing: border-box !important;
+  padding: 18px 20px 20px !important;
+}
+
+html.pgs-admin-html .pgs-admin .pgs-event-cms__form-inner {
+  box-sizing: border-box !important;
+  padding: 18px 20px 28px !important;
+}
+
+html.pgs-admin-html .pgs-admin .pgs-event-cms__section-title {
+  margin: 0 0 6px !important;
+  padding: 0 2px !important;
+}
+
+html.pgs-admin-html .pgs-admin .pgs-event-cms__section label {
+  gap: 8px !important;
+  padding: 0 2px !important;
+}
+
+html.pgs-admin-html .pgs-admin .pgs-admin-visual {
+  box-sizing: border-box !important;
+  padding: 18px 20px 28px !important;
+}
+
+html.pgs-admin-html .pgs-admin .pgs-admin-visual__summary,
+html.pgs-admin-html .pgs-admin .pgs-admin-visual__select {
+  box-sizing: border-box !important;
+  padding: 18px 20px !important;
+}
+
+html.pgs-admin-html .pgs-admin .pgs-admin-visual__panel-head {
+  box-sizing: border-box !important;
+  padding: 12px 18px !important;
+}
+
+html.pgs-admin-html .pgs-admin .pgs-admin-visual__panel-body {
+  box-sizing: border-box !important;
+  padding: 22px 24px 24px !important;
+}

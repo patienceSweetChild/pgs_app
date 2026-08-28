@@ -16,8 +16,8 @@ export function PillTags({
 
   return (
     <div className={className}>
-      {tags.map((tag) => (
-        <span className={tagClassName} key={tag}>
+      {tags.map((tag, index) => (
+        <span className={tagClassName} key={`${tag}-${index}`}>
           {tag}
         </span>
       ))}

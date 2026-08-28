@@ -34,6 +34,7 @@ export default async function AdminLayout({
     <AdminShell
       staffName={actor.staff.displayName || actor.email || "Admin"}
       roleKey={actor.staff.roleKey}
+      permissions={actor.staff.permissions}
     >
       {children}
     </AdminShell>

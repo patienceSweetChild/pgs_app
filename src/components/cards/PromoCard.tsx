@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { CmsHtml } from "@/components/CmsHtml";
+import { badgeChipStyle } from "@/components/cards/badge-chip-style";
 import { HeartToggle } from "./HeartToggle";
 import { PillTags } from "./PillTags";
 import type { PromoCardData } from "./types";
@@ -18,7 +20,10 @@ export function PromoCard({ data, onToggleSave }: PromoCardProps) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={data.image} alt={data.title} />
           {data.seatBadge ? (
-            <div className="sop-top-label">
+            <div
+              className="sop-top-label"
+              style={badgeChipStyle(data.seatBadgeColor, data.seatBadgeTextColor)}
+            >
               {data.seatBadgeIcon ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={data.seatBadgeIcon} alt="" />
@@ -31,6 +36,7 @@ export function PromoCard({ data, onToggleSave }: PromoCardProps) {
           ) : null}
           <div className="sop-heart-icon pgs-promo-heart">
             <HeartToggle
+              saved={data.saved}
               initialSaved={data.saved}
               onToggle={onToggleSave}
               className="pgs-promo-heart-btn"
@@ -41,7 +47,7 @@ export function PromoCard({ data, onToggleSave }: PromoCardProps) {
         <div className="sop-content">
           <div className="sop-title">{data.title}</div>
           {data.description ? (
-            <div className="sop-subtext">{data.description}</div>
+            <CmsHtml as="div" className="sop-subtext" html={data.description} />
           ) : null}
           <PillTags
             tags={data.tags}

@@ -24,7 +24,7 @@ export const SAVED_ITEMS: SavedCardData[] = [
     id: "saved-program-1",
     type: "program",
     col: "full",
-    href: "/cvreadyprogram",
+    href: "/programsfull",
     image: CAMPUS,
     title: "MSC AUTOMOTIVE ENGINEERING PRACTISE",
     tags: ["#UK", "#Engineering", "#Scholarship"],

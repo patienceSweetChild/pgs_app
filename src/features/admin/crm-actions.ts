@@ -78,23 +78,20 @@ export async function reviewPremiumApplication(
 
   revalidatePath("/admin/premium");
   revalidatePath("/admin");
+  revalidatePath("/admin/premium-dashboard");
+  revalidatePath("/ops/students");
+  revalidatePath("/ops/access");
 }
 
 export async function assignMentor(studentId: string, mentorId: string) {
   const actor = await requirePerm("students.manage");
   const supabase = await createSupabaseServerClient();
 
-  await supabase
-    .from("mentor_assignments")
-    .update({ status: "ended", ended_at: new Date().toISOString() })
-    .eq("student_id", studentId)
-    .eq("status", "active");
-
-  const { error } = await supabase.from("mentor_assignments").insert({
-    student_id: studentId,
-    mentor_id: mentorId,
-    assigned_by: actor.userId,
-    status: "active",
+  const { error } = await supabase.rpc("set_mentor_assignment", {
+    target_student: studentId,
+    target_mentor: mentorId,
+    target_active: true,
+    event_reason: "Assigned from CMS admin",
   });
   if (error) throw new Error(error.message);
 

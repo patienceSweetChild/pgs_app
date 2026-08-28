@@ -1,13 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import type { ProgramCardData } from "@/components/cards/types";
 import { ProgramCard } from "@/components/cards/ProgramCard";
-import {
-  BOARD_COURSES,
-  BOARD_HERO,
-  WEEKLY_WALL,
-  boardCourseToProgramCard,
-} from "./content";
+import "@/components/cards/cards.css";
+import { useCardSave } from "@/features/saved/useCardSave";
+import { BOARD_COURSES, BOARD_HERO, WEEKLY_WALL, boardCourseToProgramCard } from "./content";
 import "./purple-board.css";
 
 /**
@@ -16,14 +14,20 @@ import "./purple-board.css";
 export function PurpleBoardPage({
   courses: coursesProp,
   weeklyWall,
+  initialSavedIds = [],
 }: {
-  courses?: typeof BOARD_COURSES;
+  courses?: ProgramCardData[];
   weeklyWall?: readonly { title: string }[];
+  initialSavedIds?: string[];
 } = {}) {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(0);
+  const { isSaved, handleToggleSave, loginPopup } = useCardSave(initialSavedIds);
+
   const source =
-    coursesProp && coursesProp.length > 0 ? coursesProp : BOARD_COURSES;
+    coursesProp && coursesProp.length > 0
+      ? coursesProp
+      : BOARD_COURSES.map(boardCourseToProgramCard);
   const wall =
     weeklyWall && weeklyWall.length > 0 ? weeklyWall : WEEKLY_WALL;
 
@@ -43,6 +47,7 @@ export function PurpleBoardPage({
 
   return (
     <div className="wrapper-content pgs-purpleboard">
+      {loginPopup}
       <section className="pt-0 about-section half-section overlap-height position-relative minus-5 mobile-scholarship-cart mobile-ml-80">
         <div className="container overlap-gap-section p-0">
           <div className="row justify-content-center">
@@ -85,7 +90,11 @@ export function PurpleBoardPage({
             visible.map((course) => (
               <ProgramCard
                 key={course.id}
-                data={boardCourseToProgramCard(course)}
+                data={{
+                  ...course,
+                  saved: isSaved(course.id),
+                }}
+                onToggleSave={() => handleToggleSave(course)}
               />
             ))
           )}

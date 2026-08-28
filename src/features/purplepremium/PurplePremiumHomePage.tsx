@@ -29,7 +29,7 @@ function TestimonialsCarousel() {
           quote: t.quote,
           name: t.name,
           role: t.role,
-          image: "/assets/img/selfe.jpg",
+          image: t.image || "/assets/img/selfe.jpg",
         }))
       : [...TESTIMONIALS];
   const len = Math.max(1, source.length);

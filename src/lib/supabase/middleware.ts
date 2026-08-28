@@ -67,6 +67,35 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
+  if (pathname.startsWith("/ops")) {
+    if (!user) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("surface", "operations");
+      url.searchParams.set("redirect", pathname);
+      return NextResponse.redirect(url);
+    }
+
+    try {
+      const { data: staff } = await supabase
+        .from("staff_profiles")
+        .select("user_id, status")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .maybeSingle();
+
+      if (!staff) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/";
+        return NextResponse.redirect(url);
+      }
+    } catch {
+      const url = request.nextUrl.clone();
+      url.pathname = "/";
+      return NextResponse.redirect(url);
+    }
+  }
+
   if (pathname.startsWith("/portal")) {
     if (!user) {
       const url = request.nextUrl.clone();

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   type CountryPageContent,
   type CountryTab,
@@ -534,8 +534,30 @@ function TabPanel({ tab }: { tab: CountryTab }) {
  * Country detail — from standalone-html/countries*.html
  * (non-USA HTML currently shares USA body with title/label overrides)
  */
-export function CountryPage({ content }: { content: CountryPageContent }) {
+export function CountryPage({
+  content,
+  activeTabId,
+  onTabChange,
+}: {
+  content: CountryPageContent;
+  /** CMS preview: sync tab bar to editor top tab (ignores "page"). */
+  activeTabId?: CountryTab["id"] | "page";
+  onTabChange?: (id: CountryTab["id"]) => void;
+}) {
   const [tabId, setTabId] = useState<CountryTab["id"]>("study101");
+
+  useEffect(() => {
+    if (!activeTabId || activeTabId === "page") return;
+    if (content.tabs.some((t) => t.id === activeTabId)) {
+      setTabId(activeTabId);
+    }
+  }, [activeTabId, content.tabs]);
+
+  function selectTab(id: CountryTab["id"]) {
+    setTabId(id);
+    onTabChange?.(id);
+  }
+
   const active = content.tabs.find((t) => t.id === tabId) ?? content.tabs[0];
 
   return (
@@ -618,7 +640,7 @@ export function CountryPage({ content }: { content: CountryPageContent }) {
                         href={`#${tab.id}`}
                         onClick={(e) => {
                           e.preventDefault();
-                          setTabId(tab.id);
+                          selectTab(tab.id);
                         }}
                       >
                         {tab.id === "tracks" ? (

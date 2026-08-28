@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type MouseEvent } from "react";
+import { LoginRequiredPopup } from "@/components/auth/LoginRequiredPopup";
 import { useExperience, DEFAULT_AVATAR } from "@/lib/auth/experience";
 import { SIDEBAR_LINKS, UNIVMEET } from "@/lib/content/univmeet";
 import { useShellUi } from "./shell-ui";
@@ -10,57 +11,6 @@ import "./sidebar-extras.css";
 
 function pathActive(pathname: string, target: string) {
   return pathname.toLowerCase() === target.toLowerCase();
-}
-
-function LoginRequiredPopup({
-  open,
-  onClose,
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
-  useEffect(() => {
-    if (!open) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
-
-  return (
-    <div
-      className={`pgs-login-popup-overlay${open ? " show" : ""}`}
-      id="pgsLoginPopup"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div
-        className="pgs-login-popup-box"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="pgsLoginPopupTitle"
-      >
-        <button
-          type="button"
-          className="pgs-login-popup-close"
-          onClick={onClose}
-          aria-label="Close"
-        >
-          &times;
-        </button>
-        <div className="pgs-login-popup-icon">
-          <i className="bi bi-lock-fill" />
-        </div>
-        <h4 id="pgsLoginPopupTitle">Login Required</h4>
-        <p>Please login to access this option.</p>
-        <Link href="/login" className="pgs-login-popup-btn" onClick={onClose}>
-          Login Now
-        </Link>
-      </div>
-    </div>
-  );
 }
 
 function UnivMeetWidget({ meet }: { meet: typeof UNIVMEET }) {
@@ -419,7 +369,7 @@ export function Sidebar({
               </li>
               <li>
                 <Link
-                  href="/purplenonmedical"
+                  href="/pathways/stem"
                   className="pp-mobile-link"
                   onClick={closeMobileDrawer}
                 >
@@ -428,7 +378,7 @@ export function Sidebar({
               </li>
               <li>
                 <Link
-                  href="/purplenonmedical"
+                  href="/pathways/mba"
                   className="pp-mobile-link"
                   onClick={closeMobileDrawer}
                 >
@@ -437,7 +387,7 @@ export function Sidebar({
               </li>
               <li>
                 <Link
-                  href="/purpleusme"
+                  href="/pathways/usmle"
                   className="pp-mobile-link"
                   onClick={closeMobileDrawer}
                 >
@@ -446,7 +396,7 @@ export function Sidebar({
               </li>
               <li>
                 <Link
-                  href="/purpleplab"
+                  href="/pathways/plab"
                   className="pp-mobile-link"
                   onClick={closeMobileDrawer}
                 >
@@ -455,7 +405,7 @@ export function Sidebar({
               </li>
               <li>
                 <Link
-                  href="/purpleamc"
+                  href="/pathways/amc"
                   className="pp-mobile-link"
                   onClick={closeMobileDrawer}
                 >
@@ -464,7 +414,7 @@ export function Sidebar({
               </li>
               <li>
                 <Link
-                  href="/purplenonmedical"
+                  href="/pathways/stem"
                   className="pp-mobile-link"
                   onClick={closeMobileDrawer}
                 >

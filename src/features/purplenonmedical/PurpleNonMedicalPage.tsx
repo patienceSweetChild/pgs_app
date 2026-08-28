@@ -5,17 +5,12 @@ import Link from "next/link";
 import { HighlightsSection } from "@/components/HighlightsSection";
 import { PgsPicksSection } from "@/components/PgsPicksSection";
 import {
-  CV_CHECKLIST,
-  DASHBOARD_FEATURES,
-  FAQ_ITEMS,
-  MEET_BULLETS,
-  OFFER_INCLUDED,
-  STUDENT_CAPTION,
-  TESTIMONIAL_QUOTE,
-  WHY_BUILT_BULLETS,
-} from "./content";
+  getNonMedicalPathwayContent,
+  type NonMedicalPathwayPageContent,
+  type PathwayFaq,
+} from "@/features/pathway/page-content";
 
-function FaqBlock() {
+function FaqBlock({ items }: { items: PathwayFaq[] }) {
   const [open, setOpen] = useState(0);
   return (
     <section className="faq_section">
@@ -23,7 +18,7 @@ function FaqBlock() {
         <div className="bg-very-light-green xl-p-4 md-p-50px sm-p-30px mobile-p-0">
           <h2 className="fac-title">FAQ’s</h2>
           <div className="accordion accordion-style-02">
-            {FAQ_ITEMS.map((item, i) => {
+            {items.map((item, i) => {
               const isOpen = open === i;
               return (
                 <div
@@ -70,7 +65,12 @@ function FaqBlock() {
 /**
  * Non-medical #purplePremium page — from standalone-html/purplenonmedical.html
  */
-export function PurpleNonMedicalPage() {
+export function PurpleNonMedicalPage({
+  content = getNonMedicalPathwayContent("stem")!,
+}: {
+  content?: NonMedicalPathwayPageContent;
+}) {
+  const { intro, track, program, dashboard, offer, meet, contact } = content;
   const [modalOpen, setModalOpen] = useState(false);
   const [modalDone, setModalDone] = useState(false);
   const [name, setName] = useState("");
@@ -97,27 +97,20 @@ export function PurpleNonMedicalPage() {
               <div className="col-lg-8">
                 <div className="w-75 m-auto text-center">
                   <h1 className="text-black fw-500 fs-36 pt-0 mb-1 lh-40">
-                    Get Into Your Dream University Abroad with a Structured
-                    Workflow
+                    {intro.heroTitle}
                   </h1>
-                  <p className="mb-0 lh-20 fs-16">
-                    Boost Your Chances of Selection 3X with Smart, Informed
-                    University Picks
-                  </p>
+                  <p className="mb-0 lh-20 fs-16">{intro.heroSubtitle}</p>
                   <h6 className="mb-0 text-black fs-16 mt-0">
-                    For Medical, STEM, and More—We’ve Got You Covered
+                    {intro.heroBadgeLine}
                   </h6>
                   <button
                     type="button"
                     className="btn btn-purple mt-1 bg-black-btn fs-11 mb-0"
                     onClick={openModal}
                   >
-                    Set Up a Quick Call
+                    {intro.heroCtaLabel}
                   </button>
-                  <p className="mb-0 fs-12 lh-15 mt-1">
-                    Clear All Your Doubts in 30 Minutes, Figure out your
-                    scholarship path.
-                  </p>
+                  <p className="mb-0 fs-12 lh-15 mt-1">{intro.heroCtaSubtext}</p>
                 </div>
               </div>
             </div>
@@ -130,37 +123,38 @@ export function PurpleNonMedicalPage() {
               <div className="w-877px">
                 <div className="card-box-img">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/assets/img/music.png" alt="" />
+                  <img src={intro.stepIntoImage} alt="" />
                   <div className="minus-5">
-                    <h4 className="fnt-family mb-0 fs-95 text-black">
-                      Step into
-                    </h4>
+                    <h4 className="fnt-family mb-0 fs-95 text-black">Step into</h4>
                     <h4 className="mb-0 fs-95 text-black d-flex gap-3 align-items-end lh-80">
                       <span className="fnt-family">#purplepremium </span>
                       <span className="fs-28 lh-35 mb-1 fw-500">
-                        Masters, STEM
-                        <br />
-                        UG, MBA & Others
+                        {intro.stepIntoBadgeLine.split("\n").map((line, i) => (
+                          <span key={`${line}-${i}`}>
+                            {line}
+                            {i < intro.stepIntoBadgeLine.split("\n").length - 1 ? (
+                              <br />
+                            ) : null}
+                          </span>
+                        ))}
                       </span>
                     </h4>
                   </div>
                 </div>
                 <p className="text-center fs-22 mobile-pt-2">
-                  Backed by experience. Trusted by students since 2006 (formerly
-                  CEG).
+                  {intro.stepIntoTrustLine}
                 </p>
               </div>
               <div className="col-lg-9 mt-8 mobile-w-80 mobile-auto">
                 <h3 className="text-black fnt-family w-80 mb-1 m-auto d-flex justify-content-center fs-38 lh-32 text-center mobile-fs-24 mobile-lh-full mobile-pt-5">
-                  Why We Built #PurplePremium <br />
-                  (And Why It Matters)
+                  {intro.whyBuiltTitle}
                 </h3>
                 <div className="w-555px m-auto">
                   <h5 className="text-black fs-17 mt-2 fw-600 mb-1">
-                    The high-stakes medical pathways:
+                    {intro.whyBuiltSubtitle}
                   </h5>
                   <ul className="p-0">
-                    {WHY_BUILT_BULLETS.map((text) => (
+                    {intro.whyBuiltBullets.map((text) => (
                       <li
                         className="mb-2 text-black fs-14 d-flex gap-2 align-items-start lh-full"
                         key={text.slice(0, 40)}
@@ -181,11 +175,10 @@ export function PurpleNonMedicalPage() {
               <div className="mb-10px">
                 <div className="text-center mobile-w-90 mobile-auto">
                   <h6 className="mb-1 text-black fs-20 lh-22 fw-600">
-                    This is where #purplePremium comes in.
+                    {intro.purpleMapHeadline}
                   </h6>
                   <p className="mb-0 text-black fs-14 lh-full">
-                    Because not every journey needs the same map. Explore them
-                    below.
+                    {intro.purpleMapSubhead}
                   </p>
                 </div>
               </div>
@@ -195,7 +188,7 @@ export function PurpleNonMedicalPage() {
                 <figure className="position-relative text-center mb-8 fix-object-cover-video">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="/assets/img/play-book-read.png"
+                    src={intro.purpleMapImage}
                     alt=""
                     className="border-radius-6px"
                   />
@@ -208,20 +201,24 @@ export function PurpleNonMedicalPage() {
                     <i className="bi bi-arrow-right-short fs-40" />
                   </div>
                   <h5 className="mb-0 fs-25 lh-30 text-black bg-light-blue-1 border-radius-8px p-1 p-05 fw-400 mobile-fs-14 mobile-lh-16 mobile-p-3">
-                    For all from — STEM, Management, Design & More.
+                    {intro.purpleMapCrossLink}
                   </h5>
                 </div>
                 <div className="d-flex w-60 gap-3 align-items-start mt-4 m-auto mb-10 mobile-mb-0">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src="/assets/img/dots-top-arrow.png"
                     className="pb-10"
                     alt=""
                   />
                   <h6 className="text-black fs-17 lh-22 fw-600 mb-0 pt-15 mobile-fs-14 mobile-lh-16">
-                    Your path.
-                    <br />
-                    Let’s get started.
+                    {intro.purpleMapPathTitle.split("\n").map((line, i) => (
+                      <span key={`${line}-${i}`}>
+                        {line}
+                        {i < intro.purpleMapPathTitle.split("\n").length - 1 ? (
+                          <br />
+                        ) : null}
+                      </span>
+                    ))}
                   </h6>
                 </div>
                 <br />
@@ -234,33 +231,22 @@ export function PurpleNonMedicalPage() {
                 <div className="d-flex gap-5 mobile-wrap">
                   <div className="w-50 mobile-w-65 mobile-auto">
                     <h5 className="mb-3 fs-20 text-black fw-500 lh-22">
-                      Getting into a medical pathway that’s well-researched
-                      matters, a lot.
+                      {intro.cvTitle}
                     </h5>
-                    <p className="text-black fs-14 lh-full mb-8">
-                      Let’s be real—studying abroad isn’t just “another phase.”
-                      And it’s not just about taking classes. You’re chasing
-                      that high-paying job, aiming to build a global network,
-                      and picking up real skills that actually make you stand
-                      out.
-                    </p>
+                    <p className="text-black fs-14 lh-full mb-8">{intro.cvBody}</p>
                     <h5 className="mb-0 fs-17 text-black fw-600 lh-20">
-                      You need to start thinking like a recruiter.
+                      {intro.cvRecruiterTitle}
                     </h5>
                     <p className="text-black fs-12 fw-500 mobile-fs-14">
-                      What are they going to see when they open your CV
-                      post-graduation?
+                      {intro.cvRecruiterSubtext}
                     </p>
                     <div className="d-flex gap-3 ml-7">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src="/assets/img/filter-line.png" alt="" />
                       <ul className="mb-0 p-0 mobile-checklist-medical">
                         <li className="fs-14 lh-14 mb-1 fw-300 mb-5">
-                          You guessed it, it’s not just about the degree,{" "}
-                          <br />
-                          —it all stacks up.&nbsp;
+                          {intro.cvIntroLine}
                         </li>
-                        {CV_CHECKLIST.map(({ dot, text }) => (
+                        {intro.cvChecklist.map(({ dot, text }) => (
                           <li
                             className="text-black fw-400 fs-12 d-flex gap-2 align-items-start"
                             key={text}
@@ -275,7 +261,7 @@ export function PurpleNonMedicalPage() {
                   <div className="w-256px">
                     <div className="card-box-study px-2">
                       <h6 className="mb-0 fs-50 text-black fw-600">
-                        Study Abroad Pathway
+                        {intro.cvCardTitle}
                       </h6>
                       <p
                         className="text-black fs-25 fw-300 mt-10 w-70 mobile-fs-20"
@@ -287,13 +273,13 @@ export function PurpleNonMedicalPage() {
                           backgroundPosition: "bottom",
                         }}
                       >
-                        un-planned
+                        {intro.cvCardUnplanned}
                       </p>
                       <p
                         className="text-black fs-20 fw-300 mt-10 mobile-fs-16"
                         style={{ fontFamily: "'Roboto Mono'" }}
                       >
-                        well-researched 🙌
+                        {intro.cvCardResearched}
                       </p>
                       <div
                         className="frame-set-content"
@@ -301,11 +287,7 @@ export function PurpleNonMedicalPage() {
                           backgroundImage: "url('/assets/img/frame-set.png')",
                         }}
                       >
-                        <h5 className="fw-500">
-                          It’s about launching your future. You owe it to
-                          yourself to do it right. And we’re here to make sure
-                          you do. <b>#pgs</b>
-                        </h5>
+                        <h5 className="fw-500">{intro.cvCardFooter}</h5>
                       </div>
                     </div>
                   </div>
@@ -322,19 +304,17 @@ export function PurpleNonMedicalPage() {
                 <div className="purple-gray-box ht-786px">
                   <h1 className="fnt-family text-green fs-38 d-flex align-items-center gap-2 mobile-fs-30 mobile-lh-full mobile-mb-0 mobile-justify-center mobile-w-full">
                     #purplePremium{" "}
-                    <span className="text-red fs-19">MEDICAL PATHWAY</span>
+                    <span className="text-red fs-19">{track.sectionLabel}</span>
                   </h1>
                   <div className="text-center mobile-text-start w-75 m-auto mt-6 mobile-w-80 mobile-mt-0">
                     <h3 className="fnt-family mb-1 fs-38 text-black mobile-fs-20 mobile-text-center">
-                      Study Abroad Deadlines Sneak Up Fast
+                      {track.title}
                     </h3>
                     <h6 className="fs-17 lh-22 fw-400 text-black mb-3 mobile-fs-14 mobile-text-center">
-                      Fall 2025 Is Already Ticking
+                      {track.subtitle}
                     </h6>
                     <h6 className="fs-14 lh-19 fw-400 lh-22 text-black mb-1 mobile-fs-14">
-                      If you haven’t sorted your profile, picked your countries
-                      and unis, <br /> or planned your SOP yet… hey, no
-                      stress—but it’s definitely time to move!
+                      {track.body}
                     </h6>
                     <p className="fs-17 lh-22 mb-1 text-center mobile-text-start pb-2 mobile-fs-14 mobile-lh-full">
                       Good News: #purplePremium Will Guide You the Rest of the
@@ -344,7 +324,7 @@ export function PurpleNonMedicalPage() {
                       href="#offer_script"
                       className="btn btn-green-btn mb-5 fs-16 fw-600 mobile-fs-14"
                     >
-                      Start Your #purplePremium Journey
+                      {track.ctaLabel}
                     </Link>
                   </div>
                   <div className="d-flex align-items-start gap-3 mt-2 position-relative justify-content-center mobile-respo-box-1">
@@ -436,7 +416,7 @@ export function PurpleNonMedicalPage() {
                       <div className="d-flex gap-2 mt-10 mb-10 w-65 m-last mobile-top-new">
                         <span className="fnt-family fs-40 text-black">“</span>
                         <p className="mb-0 fs-12 lh-full text-black">
-                          {TESTIMONIAL_QUOTE}
+                          {track.testimonialQuote}
                           <span className="fnt-family fs-40 text-black d-block m-last text-end">
                             ”
                           </span>
@@ -455,15 +435,15 @@ export function PurpleNonMedicalPage() {
                             <div className="d-flex position-relative z-100 justify-content-space px-4">
                               <div>
                                 <h5 className="fs-35 lh-30 fnt-family text-white mb-0">
-                                  {STUDENT_CAPTION.name}
+                                  {track.studentName}
                                 </h5>
                                 <p className="mb-0 fs-15 text-white mb-0">
-                                  {STUDENT_CAPTION.label}
+                                  {track.studentLabel}
                                 </p>
                               </div>
                               <div>
                                 <h5 className="fs-35 lh-30 fnt-family text-white mb-0 mobile-nowrap">
-                                  {STUDENT_CAPTION.country}
+                                  {track.studentCountry}
                                 </h5>
                               </div>
                             </div>
@@ -484,24 +464,22 @@ export function PurpleNonMedicalPage() {
               <div className="bg-black what-is-purple border-radius-10px pt-5">
                 <div className="w-80 mobile-w-full">
                   <h5 className="text_purple fs-50 fw-500 mobile-fs-24 mobile-lh-full">
-                    <span className="mobile-fs-20 mobile-d-block">What</span> Is
-                    #purplePremium?
+                    {program.title}
                     <span className="fnt-family fs-19 lh-22 text-red mobile-fs-32 mobile-non-title">
-                      for non medical
+                      {program.badge}
                     </span>
                   </h5>
                   <h6 className="text-white now fs-16 fw-300 mb-1 d-flex gap-3 ">
                     <b className="nowrap fw-600 mobile-nowrap mobile-fs-14">
-                      Short answer?
+                      {program.shortAnswerLabel}
                     </b>
-                    It’s your full study abroad counseling service.
+                    {program.shortAnswer}
                   </h6>
                   <h6 className="text-white now fs-16 fw-300 mb-1 d-flex gap-3 lh-19">
                     <b className="nowrap fw-600 mobile-nowrap mobile-fs-14">
-                      Real answer?&nbsp;&nbsp;
+                      {program.realAnswerLabel}&nbsp;&nbsp;
                     </b>
-                    It’s the only support system you’ll need to get from “Where
-                    do I start?” to “I just landed at my dream university.
+                    {program.realAnswer}
                   </h6>
                 </div>
                 <div className="d-flex align-items-center justify-content-end gap-4 w-80 mt-3 mb-3 m-auto position-relative mobile-wrap mobile-reverse mobile-w-60 mobile-last">
@@ -513,10 +491,10 @@ export function PurpleNonMedicalPage() {
                   />
                   <div className="mobile-d-block mobile-w-full mobile-text-end">
                     <h5 className="mb-0 text_purple fs-19 fw-500 lh-22 mobile-fs-14 mobile-lh-full">
-                      Here’s what you’re getting out of it—
+                      {program.gettingHeadline}
                     </h5>
                     <p className="mb-0 fw-300 text_purple fs-17 mobile-fs-14 mobile-lh-full">
-                      (And this is where we stand out)
+                      {program.gettingSubhead}
                     </p>
                   </div>
                 </div>
@@ -525,37 +503,24 @@ export function PurpleNonMedicalPage() {
                   <div className="w-60 mobile-w-full">
                     <div>
                       <h4 className="mb-0 text-white fs-19 lh-22 fw-600 mb-2 mobile-fs-14 mobile-lh-14">
-                        🎯 1. AI + Human Profile Analysis
+                        {program.aiTitle}
                       </h4>
                       <p className="text-white lh-20 fw-300 fs-16 px-5 mobile-fs-14 mobile-lh-16">
-                        Our custom-built AI agents go through your CV, goals, and
-                        requirements—quickly identifying strengths, concerns,
-                        and what else can boost your profile. Then our
-                        experienced counselors step in to cross-check those
-                        insights, verify them against your documents, and build
-                        a detailed profile tailored for your journey—bringing
-                        human expertise where it counts.
+                        {program.aiBody}
                       </p>
 
                       <div className="mb-5 desktop-none">
                         <h4 className="mb-0 text-white fs-19 lh-22 fw-600 mb-2 mobile-fs-14 mobile-lh-14">
-                          🧩 2. A Pathway Made Just for You
+                          {program.pathwayTitle}
                         </h4>
                         <p className="text-white lh-20 fw-300 fs-16 px-5 mobile-fs-14 mobile-lh-16">
-                          We don’t believe in one-size-fits-all. You’ll either
-                          be guided through one of our proven admission pathways
-                          or we’ll design a custom route that fits your academic
-                          goals, timelines, and personal preferences.
+                          {program.pathwayBody}
                         </p>
                       </div>
 
                       <div className="mt-4 w-70 m-auto mb-3">
                         <h4 className="text-yellow fs-18 lh-25 mobile-fs-12 mobile-lh-12 mobile-text-center">
-                          We use AI to assist—not{" "}
-                          <span className="desktop-none">
-                            <br />
-                          </span>{" "}
-                          replace—real experience.
+                          {program.aiTagline}
                         </h4>
                         <div className="d-flex gap-3">
                           <div className="w-40">
@@ -579,27 +544,20 @@ export function PurpleNonMedicalPage() {
                     </div>
                     <div className="mobile-none">
                       <h4 className="mb-0 text-white fs-19 lh-22 fw-600 mb-2 mobile-fs-14 mobile-lh-14">
-                        🌍 4. A Growing Student Community
+                        {program.communityTitle}
                       </h4>
                       <p className="text-white lh-20 fw-300 fs-16 px-5 mobile-fs-14 mobile-lh-16">
-                        we’re building a secure forum where students can
-                        connect, share their journeys, and support one
-                        another—created for all our past, present, and future
-                        students. As a #purplePremium student, you’ll be among
-                        the first to join, at no extra cost.
+                        {program.communityBody}
                       </p>
                     </div>
                   </div>
                   <div className="w-60 mobile-w-full">
                     <div className="mb-5 mobile-none">
                       <h4 className="mb-0 text-white fs-19 lh-22 fw-600 mb-2 mobile-fs-14 mobile-lh-14">
-                        🧩 2. A Pathway Made Just for You
+                        {program.pathwayTitle}
                       </h4>
                       <p className="text-white lh-20 fw-300 fs-16 px-5 mobile-fs-14 mobile-lh-16">
-                        We don’t believe in one-size-fits-all. You’ll either be
-                        guided through one of our proven admission pathways or
-                        we’ll design a custom route that fits your academic
-                        goals, timelines, and personal preferences.
+                        {program.pathwayBody}
                       </p>
                     </div>
                     <br />
@@ -608,8 +566,7 @@ export function PurpleNonMedicalPage() {
                       <div className="d-flex gap-2">
                         <div className="w-50 mobile-w-50 mobile-box-bg">
                           <h4 className="text-white fs-19 lh-22 fw-500 mb-2 mobile-fs-14 mobile-lh-full mobile-pb-4">
-                            📌 3. End-to-End Support for Your Study Abroad
-                            Journey—Every Step, Covered.
+                            {program.supportTitle}
                           </h4>
                           <div className="d-flex justify-content-end align-items-start gap-2">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -625,27 +582,17 @@ export function PurpleNonMedicalPage() {
                           </div>
                         </div>
                         <p className="text-white lh-19 fw-400 fs-14 px-2 w-50 mb-1 mobile-w-50 mobile-pt-2 mobile-fs-14">
-                          #purplePremium isn’t just about helping with the
-                          application. We’ll be with you every step of the
-                          way—from shortlisting universities to help craft your
-                          SOP, guiding you through visa steps, and even helping
-                          with your packing list. All the way until you’re
-                          settled in at your university—and beyond that, if you
-                          ever need us.
+                          {program.supportBody}
                         </p>
                       </div>
                     </div>
 
                     <div className="desktop-none">
                       <h4 className="mb-0 text-white fs-19 lh-22 fw-600 mb-2 mobile-fs-14 mobile-lh-14">
-                        🌍 4. A Growing Student Community
+                        {program.communityTitle}
                       </h4>
                       <p className="text-white lh-20 fw-300 fs-16 px-5 mobile-fs-14 mobile-lh-16">
-                        we’re building a secure forum where students can
-                        connect, share their journeys, and support one
-                        another—created for all our past, present, and future
-                        students. As a #purplePremium student, you’ll be among
-                        the first to join, at no extra cost.
+                        {program.communityBody}
                       </p>
                     </div>
 
@@ -657,8 +604,7 @@ export function PurpleNonMedicalPage() {
                         </div>
                         <div className="bg-black-light p-2 border-radius-10px">
                           <h5 className="text-yellow fnt-family fs-19 lh-20 mb-0">
-                            Whatever your stream; design, STEM, or management
-                            —this is your launchpad.
+                            {program.launchpadHeadline}
                           </h5>
                         </div>
                       </div>
@@ -678,14 +624,12 @@ export function PurpleNonMedicalPage() {
                   <h5>
                     <span className="fnt-50">“</span>
                     <span>
-                      From your first step to your final admit or medical
-                      pathway — our expert counselors guide the entire journey
-                      with you.
+                      {content.counselorQuote}
                       <span className="fnt-50 dot-flot-1">”</span>
                     </span>
                   </h5>
                   <div className="tag-comment lt-1">
-                    <div className="tag-border">purpleguide.study</div>
+                    <div className="tag-border">{content.counselorTag}</div>
                   </div>
                 </div>
               </div>
@@ -698,20 +642,18 @@ export function PurpleNonMedicalPage() {
             <div className="row">
               <div className="col-lg-11 m-auto mobile-p-0">
                 <h3 className="text-black fnt-family w-60 fs-38 lh-full text-center m-auto mobile-fs-24 mobile-w-full">
-                  Unlock the full power of your personalized <br /> dashboard
-                  with Purple Premium
+                  {dashboard.title}
                 </h3>
                 <div className="box-img-grid-gorup grid-block-size mt-4">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="/assets/img/restro-img.jpg"
+                    src={dashboard.image}
                     className="border-radius-10px"
                     alt=""
                   />
                 </div>
                 <div className="line-active" />
                 <div className="group-flex-items mt-4 d-flex wrap justify-content-space mobile-scrolling-nowrap">
-                  {DASHBOARD_FEATURES.map((title) => (
+                  {dashboard.features.map((title) => (
                     <div className="w-20" key={title}>
                       <div className="d-flex align-items-start gap-3 mb-5 w-202px">
                         <span className="icon-box">
@@ -744,30 +686,25 @@ export function PurpleNonMedicalPage() {
                     <div className="w-50 mobile-w-full mobile-pt-0">
                       <div>
                         <h4 className="mb-3 fs-28 text-black lh-35 fw-500 mobile-fs-14 mobile-lh-full">
-                          If you&apos;re aiming for one of those globally ranked
-                          universities
+                          {program.universitiesTitle}
                         </h4>
                         <p className="mb-5 text-black lh-28 fs-22 mobile-fs-14 mobile-lh-full">
-                          You already know it’s a whole different game. Grades
-                          and test scores aren’t enough. They’re after
-                          originality, leadership, depth, and purpose. In short:
-                          the full package.
+                          {program.universitiesBody1}
                         </p>
                         <p className="fw-500 text-black mb-10 fs-19 lh-25 mobile-fs-14 mobile-lh-full mobile-mb-0">
-                          We’ll help you build exactly that—step by step.
+                          {program.universitiesBody2}
                         </p>
                       </div>
                       <br />
                       <h3 className="text-black fnt-family mb-3 mt-5 fs-38 fw-400 lh-full mobile-fs-24 mobile-text-center mobile-br-none">
-                        Get your profile reviewed for <br /> entry into
-                        world-class <br /> institutions.
+                        {program.profileReviewTitle}
                       </h3>
                       <button
                         type="button"
                         className="btn btn-black border-radius-10px fw-400 mobile-auto mobile-d-block"
                         onClick={openModal}
                       >
-                        Evaluate Your Profile Today
+                        {program.profileReviewCta}
                       </button>
                     </div>
                     <div className="w-50 position-relative mobile-w-full">
@@ -781,7 +718,7 @@ export function PurpleNonMedicalPage() {
                         />
                         <div className="bg-black p-3 border-radius-10px mobile-w-60">
                           <h2 className="mb-0 fnt-family text-white fs-38 mobile-fs-28">
-                            We open limited slots each month
+                            {program.limitedSlotsHeadline}
                           </h2>
                         </div>
                       </div>
@@ -827,13 +764,10 @@ export function PurpleNonMedicalPage() {
                   <div className="w-90 m-auto">
                     <div className="w-95 card-box-border bg-white border-black pt-4 m-auto mobile-bg-white">
                       <h1 className="fnt-family text-black w-75 fs-50 lh-45 mb-0 mobile-fs-24 mobile-lh-full mobile-pb-4">
-                        START YOUR USMLE JOURNEY WITH #PURPLEPREMIUM
+                        {offer.headline}
                       </h1>
                       <p className="text-black fs-12 lh-18 w-75 mb-0 pb-4 mobile-lh-full mobile-fs-14">
-                        Every student&apos;s journey takes time, attention, and
-                        real mentorship. That&apos;s why we limit the number of
-                        students each batch - so our experts can actually guide,
-                        not just supervise.
+                        {offer.subtext}
                       </p>
                     </div>
                     <div className="w-100 card-box-border bg-black border-liner custom-padding-100 m-auto minus-5 border-radius-0px mobile-bg-black">
@@ -846,33 +780,31 @@ export function PurpleNonMedicalPage() {
                             className="bg-yellow text-black px-2 py-1 border-radius-6px"
                             style={{ height: 25, lineHeight: "17px" }}
                           >
-                            35% off
+                            {offer.discountLabel}
                           </span>{" "}
                           <del className="fw-300 fs-25 mobile-fs-16">
-                            was ₹ 509,999
+                            {offer.wasPrice}
                           </del>
                         </span>
                       </h6>
                       <h2 className="mb-4 text-white fw-800 fs-50 lh-30 mobile-text-center">
-                        ₹ 65,0000
+                        {offer.price}
                       </h2>
                       <Link
                         className="btn btn-purple2 text-black fw-500 w-230px mt-2 fs-19"
                         href="/purplepremiumhome"
                       >
-                        Enroll Now
+                        {offer.enrollLabel}
                       </Link>
                     </div>
                     <h1 className="mb-0 fs-28 mt-4 fnt-family text-black mobile-fs-24">
-                      What’s Included when you sign up:
+                      {offer.includedTitle}
                     </h1>
                     <p className="fw-400 fs-12 lh-16 text-black mobile-fs-14 mobile-lh-full">
-                      A 10-point journey built by seeing what USMLE aspirants
-                      really go through—and what kind of support actually makes
-                      a difference.
+                      {offer.includedIntro}
                     </p>
                     <ul className="check-list">
-                      {OFFER_INCLUDED.map((item) => (
+                      {content.offerIncluded.map((item) => (
                         <li key={item.main}>
                           <i className="bi bi-check-circle-fill" />
                           <div>
@@ -897,9 +829,7 @@ export function PurpleNonMedicalPage() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/assets/img/high-fiy.png" alt="" />
                   <h5 className="fw-400 text-black fs-12 lh-full mb-0">
-                    You get full access for a year—and even after that, we’re
-                    still here when you need us. From Step 1 to Step 2, we’ve
-                    got the tools, tips, and real guidance to back you up.
+                    {offer.footerNote}
                   </h5>
                 </div>
               </div>
@@ -913,15 +843,14 @@ export function PurpleNonMedicalPage() {
               <div className="col-lg-6 mobile-w-90 mobile-auto">
                 <div className="mobile-d-flex mobile-align-center mobile-pb-5">
                   <h3 className="text-black fnt-family fs-38 mb-1 mobile-fs-24 mobile-w-60">
-                    Got questions about <br />
-                    #purplePremium?{" "}
+                    {meet.title}
                   </h3>
                   <p className="text-green fs-17 fw-500 mobile-fs-14 mobile-lh-full mobile-w-50 mobile-mb-0">
-                    Let’s clear them in one quick call.
+                    {meet.subtext}
                   </p>
                 </div>
                 <ul className="p-0 m-0">
-                  {MEET_BULLETS.map((line) => (
+                  {meet.bullets.map((line) => (
                     <li
                       className="d-flex gap-2 align-items-center mb-4"
                       key={line}
@@ -942,21 +871,19 @@ export function PurpleNonMedicalPage() {
               <div className="col-lg-5">
                 <div className="bg-black p-4 pt-4 pb-4 border-radius-10px text-white text-center">
                   <h5 className="mb-0 fs-25 lh-25 pt-3 mobile-fs-20">
-                    MEET + GREET
+                    {meet.cardTitle}
                   </h5>
                   <h4 className="mb-0 fs-32 mobile-pb-2">
-                    <b>With an Expert</b>
+                    <b>{meet.cardSubtitle}</b>
                   </h4>
-                  <p className="mb-3 fs-12 fw-300">
-                    Check the available slots & book your appointment.
-                  </p>
+                  <p className="mb-3 fs-12 fw-300">{meet.cardBody}</p>
                   <button
                     type="button"
                     className="btn btn-purple2 fs-19 fw-700"
                     style={{ width: 230 }}
                     onClick={openModal}
                   >
-                    Schedule Now
+                    {meet.ctaLabel}
                   </button>
                   <div className="fix-object-img-w-200">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -968,7 +895,7 @@ export function PurpleNonMedicalPage() {
           </div>
         </section>
 
-        <FaqBlock />
+        <FaqBlock items={content.faq} />
 
         <section className="pt-0 mobile-pgs-info">
           <div className="container">
@@ -986,24 +913,19 @@ export function PurpleNonMedicalPage() {
                       </span>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src="/assets/img/phone.png" width={20} alt="" />
-                      91 95665 66298
+                      {contact.phone}
                     </h6>
                     <h6 className="mb-2 text-black d-flex gap-2 fs-20 fw-500">
                       <span className="w-20 ml-3 px-1 bg-yellow fs-18 d-inline-block">
                         Email Us
                       </span>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src="/assets/img/phone.png" width={20} alt="" />
-                      connect@purpleguide.study
+                      {contact.email}
                     </h6>
                   </div>
                   <div className="w-15">
                     <p className="text-black font-style-italic fs-15 lh-20">
-                      Reach out on our helpline for fast bookings, expert
-                      advice, and answers to all your study abroad questions.
-                      We’ve also got dedicated mentor groups for medical and
-                      non-medical courses—so you’re always connected to the
-                      right people.
+                      {contact.blurb}
                     </p>
                   </div>
                 </div>

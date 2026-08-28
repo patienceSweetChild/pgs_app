@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { resolveActorContext, staffHasPermission } from "@/lib/auth/actor-context";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { CONTENT_ENTITIES } from "./content-registry";
+import { CONTENT_ENTITIES, type ContentField } from "./content-registry";
 
 async function requireContentStaff(permission = "content.manage") {
   const actor = await resolveActorContext();
@@ -14,6 +14,99 @@ async function requireContentStaff(permission = "content.manage") {
       staffHasPermission(actor.staff, "cms.publish"));
   if (!ok) throw new Error("Forbidden");
   return actor;
+}
+
+const FK_NUMBER_KEYS = new Set([
+  "country_id",
+  "course_id",
+  "category_id",
+  "university_id",
+  "display_order",
+]);
+
+function pickContentWritable(
+  fields: ContentField[],
+  defaultValues: Record<string, unknown> | undefined,
+  payload: Record<string, unknown>,
+) {
+  const allowed = new Set(fields.map((f) => f.key));
+  for (const key of Object.keys(defaultValues ?? {})) {
+    if (!(key in payload) || payload[key] === undefined) continue;
+    allowed.add(key);
+  }
+  const fieldByKey = new Map(fields.map((f) => [f.key, f]));
+  const next: Record<string, unknown> = {};
+
+  for (const key of allowed) {
+    if (key === "id") continue;
+    if (!(key in payload) && !(defaultValues && key in defaultValues)) continue;
+    let value = key in payload ? payload[key] : defaultValues?.[key];
+    const field = fieldByKey.get(key);
+    const nullable = Boolean(field?.nullable);
+
+    if (
+      nullable &&
+      (value === "" ||
+        value === undefined ||
+        ((key === "country_id" ||
+          key === "course_id" ||
+          key === "university_id" ||
+          key === "category_id") &&
+          (value === 0 || value === "0")))
+    ) {
+      value = null;
+    } else if (field?.type === "number" || FK_NUMBER_KEYS.has(key)) {
+      if (value === "" || value === null || value === undefined) {
+        value = nullable ? null : 0;
+      } else {
+        value = Number(value);
+      }
+    } else if (nullable && value === "") {
+      value = null;
+    }
+
+    if (value !== undefined) next[key] = value;
+  }
+
+  if (defaultValues) {
+    for (const [k, v] of Object.entries(defaultValues)) {
+      if (!(k in next) && (k === "person_type" || k === "notice_type")) {
+        next[k] = v;
+      }
+    }
+  }
+
+  return next;
+}
+
+export async function listContentFkOptions(
+  source: "countries" | "universities" | "courses",
+): Promise<{ value: string; label: string }[]> {
+  await requireContentStaff();
+  const supabase = await createSupabaseServerClient();
+  if (source === "countries") {
+    const { data, error } = await supabase
+      .from("countries")
+      .select("id, name")
+      .order("name", { ascending: true });
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((r) => ({ value: String(r.id), label: r.name }));
+  }
+  if (source === "universities") {
+    const { data, error } = await supabase
+      .from("universities")
+      .select("id, name")
+      .order("name", { ascending: true });
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((r) => ({ value: String(r.id), label: r.name }));
+  }
+  const { data, error } = await supabase
+    .from("courses")
+    .select("id, title")
+    .order("title", { ascending: true })
+    .limit(500);
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((r) => ({ value: String(r.id), label: r.title }));
 }
 
 export async function listContentRows(entityKey: string) {
@@ -49,14 +142,19 @@ export async function upsertContentRow(
   const supabase = await createSupabaseServerClient();
   const idKey = config.idKey ?? "id";
   const id = payload[idKey];
-  const merged = { ...(config.defaultValues ?? {}), ...payload };
+  const rest = pickContentWritable(
+    config.fields,
+    config.defaultValues,
+    payload,
+  );
 
   if (id !== undefined && id !== null && id !== "") {
-    const { [idKey]: _drop, ...rest } = merged;
-    const { error } = await supabase.from(config.table).update(rest).eq(idKey, id);
+    const { error } = await supabase
+      .from(config.table)
+      .update(rest)
+      .eq(idKey, id);
     if (error) throw new Error(error.message);
   } else {
-    const { [idKey]: _drop, ...rest } = merged;
     const { error } = await supabase.from(config.table).insert(rest);
     if (error) throw new Error(error.message);
   }
@@ -72,6 +170,7 @@ export async function upsertContentRow(
   revalidatePath("/scholarship");
   revalidatePath("/purpleevents");
   revalidatePath("/purplepremiumhome");
+  revalidatePath("/explorecountries");
 }
 
 export async function deleteContentRow(entityKey: string, id: string | number) {
@@ -181,6 +280,7 @@ export async function savePremiumContentSetting(
   body: string,
   linkUrl: string,
   published: boolean,
+  mediaAssetId?: string | null,
 ) {
   const actor = await requireContentStaff();
   const supabase = await createSupabaseServerClient();
@@ -189,6 +289,7 @@ export async function savePremiumContentSetting(
     title,
     body,
     link_url: linkUrl || null,
+    media_asset_id: mediaAssetId || null,
     published,
     updated_by: actor.userId,
     updated_at: new Date().toISOString(),
@@ -220,12 +321,36 @@ export async function listPremiumWorkspaces() {
     !actor.staff ||
     !(
       staffHasPermission(actor.staff, "students.manage") ||
-      staffHasPermission(actor.staff, "premium.manage")
+      staffHasPermission(actor.staff, "premium.manage") ||
+      staffHasPermission(actor.staff, "student_workspace.read")
     )
   ) {
     throw new Error("Forbidden");
   }
   const supabase = await createSupabaseServerClient();
+
+  if (
+    actor.staff.roleKey === "mentor" &&
+    !staffHasPermission(actor.staff, "students.manage") &&
+    !staffHasPermission(actor.staff, "student_workspace.read_all")
+  ) {
+    const { data: assignments } = await supabase
+      .from("mentor_assignments")
+      .select("student_id")
+      .eq("mentor_id", actor.userId!)
+      .eq("status", "active");
+    const studentIds = (assignments ?? []).map((a) => a.student_id);
+    if (studentIds.length === 0) return [];
+    const { data, error } = await supabase
+      .from("premium_workspace_profiles")
+      .select("*, profiles(full_name)")
+      .in("student_id", studentIds)
+      .order("updated_at", { ascending: false })
+      .limit(200);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  }
+
   const { data, error } = await supabase
     .from("premium_workspace_profiles")
     .select("*, profiles(full_name)")

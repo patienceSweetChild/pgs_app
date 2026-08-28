@@ -10,6 +10,15 @@
   max-width: 996px;
 }
 
+.pgs-purpleboard .pgs-board-list .pgs-cards .cardbox {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.pgs-purpleboard .pgs-board-list .pgs-cards .cardbox-right {
+  flex: 0 1 312px;
+}
+
 .pgs-purpleboard .pgs-board-wall {
   max-width: 1079px;
 }

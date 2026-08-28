@@ -7,9 +7,14 @@ export type CmsPerson = {
   biography: string;
   image: string;
 };
-export type CmsTestimonial = { name: string; role: string; quote: string };
+export type CmsTestimonial = {
+  name: string;
+  role: string;
+  quote: string;
+  image?: string;
+};
 export type CmsHighlight = { title: string; body: string; image: string };
-export type CmsWeeklyWall = { title: string; body: string };
+export type CmsWeeklyWall = { title: string; body: string; image?: string };
 export type CmsKeyDate = {
   title: string;
   day: string;
@@ -28,6 +33,7 @@ export type CmsPremiumContent = {
   title: string;
   body: string;
   linkUrl: string;
+  mediaUrl?: string;
 };
 export type CmsStat = { label: string; value: string };
 export type CmsFact = { title: string; body: string };
@@ -40,6 +46,34 @@ export type CmsUniversity = {
   slug: string;
   summary: string;
   location: string;
+  image?: string;
+};
+
+import type { CountryPageContent } from "@/features/countries/content";
+
+export type { CountryPageContent };
+
+export type CmsCountryRow = {
+  id: number;
+  name: string;
+  slug: string;
+  published: boolean;
+  display_order: number;
+  page_content: CountryPageContent | null;
+};
+
+import type { PathwayPageContent } from "@/features/pathway/page-content";
+
+export type { PathwayPageContent };
+
+export type CmsPathwayRow = {
+  id: number;
+  name: string;
+  slug: string;
+  template: "medical" | "nonmedical";
+  published: boolean;
+  display_order: number;
+  page_content: PathwayPageContent | null;
 };
 
 export const SOCIAL_ICON_MAP: Record<string, string> = {

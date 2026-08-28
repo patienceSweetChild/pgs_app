@@ -3,12 +3,12 @@ export const PATH_LINKS: {
   href: string;
   multiline?: boolean;
 }[] = [
-  { label: "USMLE", href: "/purpleusme" },
-  { label: "PLAB", href: "/purpleplab" },
-  { label: "AMC", href: "/purpleamc" },
+  { label: "USMLE", href: "/pathways/usmle" },
+  { label: "PLAB", href: "/pathways/plab" },
+  { label: "AMC", href: "/pathways/amc" },
   {
     label: "Masters, STEM UG, MBA & Others",
-    href: "/purplenonmedical",
+    href: "/pathways/stem",
     multiline: true,
   },
 ];

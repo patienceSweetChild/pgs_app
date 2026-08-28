@@ -1,0 +1,113 @@
+/* Loaded from OpsShell — hard overrides against ThemeZaa / Bootstrap global rules */
+
+html.pgs-ops-html .pgs-ops h2 {
+  font-size: 1.05rem !important;
+  margin: 0 0 1rem !important;
+  line-height: 1.2 !important;
+}
+
+html.pgs-ops-html .pgs-ops h3 {
+  font-size: 0.88rem !important;
+  line-height: 1.3 !important;
+}
+
+html.pgs-ops-html .pgs-ops dl {
+  margin-bottom: 0 !important;
+}
+
+html.pgs-ops-html .pgs-ops .pgs-ops__facts dt {
+  font-weight: 600 !important;
+}
+
+html.pgs-ops-html .pgs-ops section.pgs-ops__detail-panel,
+html.pgs-ops-html .pgs-ops section.pgs-ops__workspace-panel {
+  padding: 1.25rem 1.35rem !important;
+}
+
+html.pgs-ops-html .pgs-ops input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
+html.pgs-ops-html .pgs-ops select,
+html.pgs-ops-html .pgs-ops textarea {
+  box-sizing: border-box !important;
+  padding: 0.45rem 0.65rem !important;
+  text-indent: 0 !important;
+  margin: 0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: #120d1f !important;
+  color: #f5f0ff !important;
+  border-radius: 8px !important;
+  font-size: 0.9rem !important;
+  line-height: 1.35 !important;
+  transition: border-color 0.15s ease !important;
+}
+
+html.pgs-ops-html .pgs-ops input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]):focus,
+html.pgs-ops-html .pgs-ops select:focus,
+html.pgs-ops-html .pgs-ops textarea:focus {
+  border-color: rgba(139, 92, 246, 0.55) !important;
+  box-shadow: none !important;
+  outline: none !important;
+  color: #f5f0ff !important;
+}
+
+html.pgs-ops-html .pgs-ops button.pgs-ops__btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: auto !important;
+  max-width: none !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  border-radius: 8px !important;
+  font-family: inherit !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+}
+
+html.pgs-ops-html .pgs-ops .pgs-ops__action-bar .pgs-ops__btn,
+html.pgs-ops-html .pgs-ops .pgs-ops__action-bar form .pgs-ops__btn {
+  width: 100% !important;
+}
+
+html.pgs-ops-html .pgs-ops .pgs-ops__form-toolbar,
+html.pgs-ops-html .pgs-ops .pgs-ops__form-inline {
+  display: flex !important;
+  flex-wrap: wrap !important;
+}
+
+html.pgs-ops-html .pgs-ops .pgs-ops__form-inline {
+  align-items: flex-end !important;
+  gap: 0.75rem !important;
+  max-width: 36rem !important;
+}
+
+html.pgs-ops-html .pgs-ops .pgs-ops__form-toolbar {
+  align-items: flex-end !important;
+  gap: 0.75rem !important;
+}
+
+html.pgs-ops-html .pgs-ops .pgs-ops__form-inline label,
+html.pgs-ops-html .pgs-ops .pgs-ops__form-toolbar label,
+html.pgs-ops-html .pgs-ops .pgs-ops__form-grid label,
+html.pgs-ops-html .pgs-ops .pgs-ops__field {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.35rem !important;
+  min-width: 0 !important;
+}
+
+html.pgs-ops-html .pgs-ops .pgs-ops__form-inline label {
+  flex: 1 1 200px !important;
+  max-width: 280px !important;
+}
+
+html.pgs-ops-html .pgs-ops .pgs-ops__form-toolbar label {
+  flex: 1 1 160px !important;
+  max-width: 240px !important;
+}
+
+html.pgs-ops-html .pgs-ops .pgs-ops__form-inline .pgs-ops__btn,
+html.pgs-ops-html .pgs-ops .pgs-ops__form-toolbar .pgs-ops__btn,
+html.pgs-ops-html .pgs-ops .pgs-ops__form-grid .pgs-ops__btn {
+  flex: 0 0 auto !important;
+  align-self: flex-end !important;
+}

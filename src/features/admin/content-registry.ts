@@ -1,10 +1,24 @@
-export type FieldType = "text" | "textarea" | "checkbox" | "select" | "number" | "date" | "datetime";
+export type FieldType =
+  | "text"
+  | "textarea"
+  | "checkbox"
+  | "select"
+  | "number"
+  | "date"
+  | "datetime"
+  | "media";
 
 export type ContentField = {
   key: string;
   label: string;
   type?: FieldType;
   options?: { value: string; label: string }[];
+  /** Load options at runtime from a related table. */
+  optionsSource?: "countries" | "universities" | "courses";
+  /** Empty string is coerced to null on save. */
+  nullable?: boolean;
+  /** For type "media": images only, or images + PDF. */
+  mediaAccept?: "image" | "document";
 };
 
 export type ContentEntityConfig = {
@@ -19,6 +33,16 @@ export type ContentEntityConfig = {
   filters?: Record<string, string | boolean | number>;
   orderBy?: { column: string; ascending?: boolean };
 };
+
+const SOCIAL_PLATFORMS = [
+  { value: "instagram", label: "Instagram" },
+  { value: "facebook", label: "Facebook" },
+  { value: "youtube", label: "YouTube" },
+  { value: "linkedin", label: "LinkedIn" },
+  { value: "threads", label: "Threads" },
+  { value: "twitter", label: "Twitter / X" },
+  { value: "tiktok", label: "TikTok" },
+];
 
 export const CONTENT_ENTITIES: Record<string, ContentEntityConfig> = {
   course_categories: {
@@ -53,9 +77,29 @@ export const CONTENT_ENTITIES: Record<string, ContentEntityConfig> = {
       { key: "slug", label: "Slug" },
       { key: "summary", label: "Summary", type: "textarea" },
       { key: "location", label: "Location" },
+      {
+        key: "country_id",
+        label: "Country",
+        type: "select",
+        optionsSource: "countries",
+        nullable: true,
+      },
+      {
+        key: "image_asset_id",
+        label: "Image",
+        type: "media",
+        mediaAccept: "image",
+        nullable: true,
+      },
       { key: "published", label: "Published", type: "checkbox" },
     ],
-    defaultValues: { published: false, summary: "", location: "" },
+    defaultValues: {
+      published: false,
+      summary: "",
+      location: "",
+      country_id: null,
+      image_asset_id: null,
+    },
     orderBy: { column: "updated_at", ascending: false },
   },
   university_meeting_slots: {
@@ -64,12 +108,25 @@ export const CONTENT_ENTITIES: Record<string, ContentEntityConfig> = {
     columns: ["label", "starts_at", "booking_url", "published", "display_order"],
     fields: [
       { key: "label", label: "Label" },
-      { key: "starts_at", label: "Starts at", type: "datetime" },
-      { key: "booking_url", label: "Booking URL" },
+      { key: "starts_at", label: "Starts at", type: "datetime", nullable: true },
+      {
+        key: "course_id",
+        label: "Linked course",
+        type: "select",
+        optionsSource: "courses",
+        nullable: true,
+      },
+      { key: "booking_url", label: "Booking URL", nullable: true },
       { key: "published", label: "Published", type: "checkbox" },
       { key: "display_order", label: "Order", type: "number" },
     ],
-    defaultValues: { published: false, display_order: 0 },
+    defaultValues: {
+      published: false,
+      display_order: 0,
+      course_id: null,
+      booking_url: null,
+      starts_at: null,
+    },
   },
   key_dates: {
     table: "key_dates",
@@ -77,12 +134,17 @@ export const CONTENT_ENTITIES: Record<string, ContentEntityConfig> = {
     columns: ["title", "occurs_on", "published", "display_order"],
     fields: [
       { key: "title", label: "Title" },
-      { key: "occurs_on", label: "Date", type: "date" },
+      { key: "occurs_on", label: "Date", type: "date", nullable: true },
       { key: "description", label: "Description", type: "textarea" },
       { key: "published", label: "Published", type: "checkbox" },
       { key: "display_order", label: "Order", type: "number" },
     ],
-    defaultValues: { published: false, display_order: 0, description: "" },
+    defaultValues: {
+      published: false,
+      display_order: 0,
+      description: "",
+      occurs_on: null,
+    },
   },
   urgent_deadlines: {
     table: "urgent_deadlines",
@@ -90,12 +152,17 @@ export const CONTENT_ENTITIES: Record<string, ContentEntityConfig> = {
     columns: ["title", "due_at", "published", "display_order"],
     fields: [
       { key: "title", label: "Title" },
-      { key: "due_at", label: "Due at", type: "datetime" },
+      { key: "due_at", label: "Due at", type: "datetime", nullable: true },
       { key: "description", label: "Description", type: "textarea" },
       { key: "published", label: "Published", type: "checkbox" },
       { key: "display_order", label: "Order", type: "number" },
     ],
-    defaultValues: { published: false, display_order: 0, description: "" },
+    defaultValues: {
+      published: false,
+      display_order: 0,
+      description: "",
+      due_at: null,
+    },
   },
   pgs_stats: {
     table: "pgs_stats",
@@ -147,10 +214,23 @@ export const CONTENT_ENTITIES: Record<string, ContentEntityConfig> = {
       { key: "name", label: "Name" },
       { key: "role_label", label: "Role" },
       { key: "quote", label: "Quote", type: "textarea" },
+      {
+        key: "image_asset_id",
+        label: "Image",
+        type: "media",
+        mediaAccept: "image",
+        nullable: true,
+      },
       { key: "published", label: "Published", type: "checkbox" },
       { key: "display_order", label: "Order", type: "number" },
     ],
-    defaultValues: { published: false, display_order: 0, role_label: "", quote: "" },
+    defaultValues: {
+      published: false,
+      display_order: 0,
+      role_label: "",
+      quote: "",
+      image_asset_id: null,
+    },
   },
   founder: {
     table: "content_people",
@@ -161,6 +241,13 @@ export const CONTENT_ENTITIES: Record<string, ContentEntityConfig> = {
       { key: "name", label: "Name" },
       { key: "title", label: "Title" },
       { key: "biography", label: "Biography", type: "textarea" },
+      {
+        key: "image_asset_id",
+        label: "Image",
+        type: "media",
+        mediaAccept: "image",
+        nullable: true,
+      },
       { key: "published", label: "Published", type: "checkbox" },
       { key: "display_order", label: "Order", type: "number" },
     ],
@@ -170,6 +257,7 @@ export const CONTENT_ENTITIES: Record<string, ContentEntityConfig> = {
       display_order: 0,
       title: "",
       biography: "",
+      image_asset_id: null,
     },
   },
   advisory: {
@@ -181,6 +269,13 @@ export const CONTENT_ENTITIES: Record<string, ContentEntityConfig> = {
       { key: "name", label: "Name" },
       { key: "title", label: "Title" },
       { key: "biography", label: "Biography", type: "textarea" },
+      {
+        key: "image_asset_id",
+        label: "Image",
+        type: "media",
+        mediaAccept: "image",
+        nullable: true,
+      },
       { key: "published", label: "Published", type: "checkbox" },
       { key: "display_order", label: "Order", type: "number" },
     ],
@@ -190,6 +285,7 @@ export const CONTENT_ENTITIES: Record<string, ContentEntityConfig> = {
       display_order: 0,
       title: "",
       biography: "",
+      image_asset_id: null,
     },
   },
   weekly_wall: {
@@ -199,10 +295,22 @@ export const CONTENT_ENTITIES: Record<string, ContentEntityConfig> = {
     fields: [
       { key: "title", label: "Title" },
       { key: "body", label: "Body", type: "textarea" },
+      {
+        key: "image_asset_id",
+        label: "Image",
+        type: "media",
+        mediaAccept: "image",
+        nullable: true,
+      },
       { key: "published", label: "Published", type: "checkbox" },
       { key: "display_order", label: "Order", type: "number" },
     ],
-    defaultValues: { published: false, display_order: 0, body: "" },
+    defaultValues: {
+      published: false,
+      display_order: 0,
+      body: "",
+      image_asset_id: null,
+    },
   },
   highlights: {
     table: "highlights",
@@ -211,22 +319,43 @@ export const CONTENT_ENTITIES: Record<string, ContentEntityConfig> = {
     fields: [
       { key: "title", label: "Title" },
       { key: "body", label: "Body", type: "textarea" },
+      {
+        key: "image_asset_id",
+        label: "Image",
+        type: "media",
+        mediaAccept: "image",
+        nullable: true,
+      },
       { key: "published", label: "Published", type: "checkbox" },
       { key: "display_order", label: "Order", type: "number" },
     ],
-    defaultValues: { published: false, display_order: 0, body: "" },
+    defaultValues: {
+      published: false,
+      display_order: 0,
+      body: "",
+      image_asset_id: null,
+    },
   },
   social: {
     table: "site_social_links",
     title: "Social Media Links",
     columns: ["platform", "url", "published", "display_order"],
     fields: [
-      { key: "platform", label: "Platform" },
+      {
+        key: "platform",
+        label: "Platform",
+        type: "select",
+        options: SOCIAL_PLATFORMS,
+      },
       { key: "url", label: "URL" },
       { key: "published", label: "Published", type: "checkbox" },
       { key: "display_order", label: "Order", type: "number" },
     ],
-    defaultValues: { published: false, display_order: 0 },
+    defaultValues: {
+      published: false,
+      display_order: 0,
+      platform: "instagram",
+    },
   },
   marquee: {
     table: "site_notices",
@@ -235,8 +364,10 @@ export const CONTENT_ENTITIES: Record<string, ContentEntityConfig> = {
     filters: { notice_type: "marquee" },
     fields: [
       { key: "text", label: "Text" },
-      { key: "link_url", label: "Link URL" },
+      { key: "link_url", label: "Link URL", nullable: true },
       { key: "active", label: "Active", type: "checkbox" },
+      { key: "starts_at", label: "Starts at", type: "datetime", nullable: true },
+      { key: "ends_at", label: "Ends at", type: "datetime", nullable: true },
       { key: "display_order", label: "Order", type: "number" },
     ],
     defaultValues: {
@@ -244,6 +375,40 @@ export const CONTENT_ENTITIES: Record<string, ContentEntityConfig> = {
       active: false,
       display_order: 0,
       text: "",
+      link_url: null,
+      starts_at: null,
+      ends_at: null,
+    },
+  },
+  catalog_tags: {
+    table: "catalog_tags",
+    title: "Catalog Tags",
+    columns: ["name", "slug", "tag_type", "published"],
+    fields: [
+      { key: "name", label: "Name" },
+      { key: "slug", label: "Slug" },
+      { key: "tag_type", label: "Tag type" },
+      { key: "published", label: "Published", type: "checkbox" },
+    ],
+    defaultValues: { published: false, tag_type: "general" },
+  },
+  countries: {
+    table: "countries",
+    title: "Countries",
+    columns: ["name", "slug", "iso_code", "published", "display_order"],
+    fields: [
+      { key: "name", label: "Name" },
+      { key: "slug", label: "Slug" },
+      { key: "iso_code", label: "ISO code", nullable: true },
+      { key: "dial_code", label: "Dial code", nullable: true },
+      { key: "published", label: "Published", type: "checkbox" },
+      { key: "display_order", label: "Order", type: "number" },
+    ],
+    defaultValues: {
+      published: false,
+      display_order: 0,
+      iso_code: null,
+      dial_code: null,
     },
   },
 };

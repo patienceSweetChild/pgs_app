@@ -17,14 +17,16 @@ export const PARTNER_LOGOS = Array.from({ length: 6 }, (_, i) => {
 
 export const PROGRAM_INTRO = {
   heading: "'#purpleSelected' Explore Our Most Wanted Course",
-  empty: 'No featured courses yet. Mark courses as "show in picks" in admin.',
+  empty:
+    "No featured courses yet. Enable a page surface in the visual template (Purple Board or CV Ready).",
 } as const;
 
 export const OUR_PROGRAM = {
   headingPrefix: "Discover ",
   headingAccent: "Our Programs",
   searchPlaceholder: "Search programs by name or tags...",
-  empty: "No programs yet. Check back later.",
+  empty:
+    "No programs yet. Enable a page surface in the visual template (Purple Board or CV Ready).",
   sectionLabel: "Section 1",
 } as const;
 
