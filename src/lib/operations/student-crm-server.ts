@@ -10,6 +10,7 @@ import {
   type StudentCrmTag,
 } from "@/lib/operations/student-crm";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { formatDisplayPgsId } from "@/lib/operations/student-registry";
 
 type CrmProfileRpcRow = {
   id: string;
@@ -49,7 +50,7 @@ function parseTags(value: CrmProfileRpcRow["tags"]): StudentCrmTag[] {
 function mapCrmRow(row: CrmProfileRpcRow): StudentCrmProfile {
   return {
     id: row.id,
-    pgsCode: row.pgs_code,
+    pgsCode: formatDisplayPgsId({ pgsCode: row.pgs_code, createdAt: row.created_at }),
     fullName: row.full_name || "Student",
     studyLevel: row.study_level,
     preferredStudyCountry: row.preferred_study_country,
@@ -94,7 +95,7 @@ async function loadCrmProfileFallback(
 
   return {
     id: profile.id,
-    pgsCode: profile.pgs_code || profile.id.slice(0, 8),
+    pgsCode: formatDisplayPgsId({ pgsCode: profile.pgs_code, createdAt: profile.created_at }),
     fullName: profile.full_name || "Student",
     studyLevel: profile.study_level ?? null,
     preferredStudyCountry: profile.preferred_study_country ?? null,

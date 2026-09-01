@@ -2,6 +2,7 @@ import "server-only";
 
 import { staffHasPermission, type StaffContext } from "@/lib/auth/actor-context";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { convertStoredPgsCodeToDisplay } from "@/lib/operations/student-registry";
 
 export const STAFF_SEARCH_MIN_LENGTH = 2;
 
@@ -38,7 +39,7 @@ export async function searchOperations(
         results: data.map((row) => ({
           id: row.id,
           label: row.full_name || "Student",
-          description: row.pgs_code || "",
+          description: convertStoredPgsCodeToDisplay(row.pgs_code) || "",
           href: `/ops/students/${row.id}`,
         })),
       });

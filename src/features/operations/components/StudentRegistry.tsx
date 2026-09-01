@@ -76,7 +76,7 @@ export function StudentRegistry({
           );
         }}
       >
-        <input name="q" defaultValue={query.q ?? ""} placeholder="Search name or PGS ID" />
+        <input name="q" defaultValue={query.q ?? ""} placeholder="Search name or ID (20261101)" />
         <select name="plan" defaultValue={query.plan ?? ""}>
           <option value="">All plans</option>
           <option value="premium">Premium</option>

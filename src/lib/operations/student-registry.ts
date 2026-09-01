@@ -83,6 +83,67 @@ export type RegistryQueryCapabilities = {
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+/** Display IDs are `yyyy1101`: current/join year + constant `11` + 2-digit sequence. */
+export const PGS_DISPLAY_ID_INFIX = "11";
+const DISPLAY_PGS_ID_PATTERN = /^(\d{4})11(\d{2,})$/;
+const STORED_PGS_CODE_PATTERN = /^PGS(\d{2})(\d{4})$/i;
+/** Stored codes start at 1111; display sequence 01 = stored 1111. */
+const STORED_PGS_SEQUENCE_BASE = 1110;
+
+function pgsCalendarYear(at: Date): number {
+  return Number(
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: PGS_JOIN_TIMEZONE,
+      year: "numeric",
+    }).format(at),
+  );
+}
+
+export function isSupabaseUuid(value: string): boolean {
+  return UUID_PATTERN.test(value.trim());
+}
+
+function looksLikeSupabaseId(value: string): boolean {
+  return isSupabaseUuid(value) || /^[0-9a-f]{8}$/i.test(value.trim());
+}
+
+export function convertStoredPgsCodeToDisplay(pgsCode?: string | null): string | null {
+  const code = (pgsCode ?? "").trim();
+  if (!code) return null;
+  if (DISPLAY_PGS_ID_PATTERN.test(code)) return code;
+  if (looksLikeSupabaseId(code)) return null;
+  const stored = STORED_PGS_CODE_PATTERN.exec(code);
+  if (!stored) return null;
+  const year = 2000 + Number(stored[1]);
+  const rawSeq = Number(stored[2]);
+  const seq = rawSeq > STORED_PGS_SEQUENCE_BASE ? rawSeq - STORED_PGS_SEQUENCE_BASE : rawSeq;
+  return `${year}${PGS_DISPLAY_ID_INFIX}${String(seq).padStart(2, "0")}`;
+}
+
+export function formatDisplayPgsId(input: {
+  pgsCode?: string | null;
+  createdAt?: string | null;
+  sequence?: number | null;
+  now?: Date;
+}): string {
+  const converted = convertStoredPgsCodeToDisplay(input.pgsCode);
+  if (converted) return converted;
+  const year = pgsCalendarYear(input.now ?? new Date());
+  const seq = Math.max(1, Math.floor(Number(input.sequence) || 1));
+  return `${year}${PGS_DISPLAY_ID_INFIX}${String(seq).padStart(2, "0")}`;
+}
+
+/** If staff search for `20261101`, match the stored `PGS261111` code. */
+export function registrySearchText(query: string | null): string | null {
+  if (!query) return null;
+  const trimmed = query.trim();
+  const display = DISPLAY_PGS_ID_PATTERN.exec(trimmed);
+  if (!display) return trimmed;
+  const yy = display[1].slice(-2);
+  const seq = Number(display[2]) + STORED_PGS_SEQUENCE_BASE;
+  return `PGS${yy}${String(seq).padStart(4, "0")}`;
+}
+
 function firstParam(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
 }

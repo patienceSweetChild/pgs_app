@@ -4,6 +4,7 @@ import { requireStaffPermission } from "@/lib/auth/student-access";
 import { staffHasPermission, type ActorContext } from "@/lib/auth/actor-context";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { rpcMissing } from "@/lib/operations/role-matrix";
+import { formatDisplayPgsId } from "@/lib/operations/student-registry";
 import {
   resolveStaffTargetsScope,
   type StaffTarget,
@@ -149,7 +150,7 @@ export async function loadStaffTargetOptions(actor: ActorContext) {
     students: students.map((row) => ({
       id: row.id,
       name: row.full_name || "Student",
-      pgsCode: row.pgs_code || "",
+      pgsCode: formatDisplayPgsId({ pgsCode: row.pgs_code || "" }),
     })),
   };
 }

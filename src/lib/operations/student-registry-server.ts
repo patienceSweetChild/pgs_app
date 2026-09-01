@@ -7,9 +7,12 @@ import { isCrmStage, isCrmStream, parseCrmTargetYear } from "@/lib/operations/st
 import { rpcMissing } from "@/lib/operations/role-matrix";
 import {
   REGISTRY_PAGE_SIZE,
+  formatDisplayPgsId,
   formatRegistryJoinedAt,
+  isSupabaseUuid,
   parseRegistryQuery,
   parseSavedRegistryQuery,
+  registrySearchText,
   type NormalizedRegistryQuery,
   type RegistryMentorOption,
   type RegistrySavedView,
@@ -48,10 +51,15 @@ function emptyResult(page: number, error = false): StudentRegistryResult {
   return { rows: [], totalCount: 0, page, pageSize: REGISTRY_PAGE_SIZE, error };
 }
 
-function mapRow(row: Record<string, unknown>): StudentRegistryRow {
+function mapRow(row: Record<string, unknown>, sequence: number): StudentRegistryRow {
+  const createdAt = String(row.created_at ?? row.joinedAt ?? new Date().toISOString());
   return {
     id: String(row.id),
-    pgsCode: String(row.pgs_code ?? row.pgsCode ?? "").slice(0, 12) || String(row.id).slice(0, 8),
+    pgsCode: formatDisplayPgsId({
+      pgsCode: String(row.pgs_code ?? row.pgsCode ?? ""),
+      createdAt,
+      sequence,
+    }),
     fullName: String(row.full_name ?? row.fullName ?? "Student"),
     studyLevel: (row.study_level as string | null) ?? null,
     stream: isCrmStream(row.crm_stream as string) ? (row.crm_stream as StudentRegistryRow["stream"]) : null,
@@ -60,12 +68,17 @@ function mapRow(row: Record<string, unknown>): StudentRegistryRow {
     plan: row.plan === "Premium" || row.plan === "premium" ? "Premium" : "Standard",
     mentorName: String(row.mentor_name ?? row.mentorName ?? "Unassigned"),
     mentorId: (row.mentor_id as string | null) ?? null,
-    joinedAt: formatRegistryJoinedAt(String(row.created_at ?? row.joinedAt ?? new Date().toISOString())),
+    joinedAt: formatRegistryJoinedAt(createdAt),
     completion: row.profile_completed_at || row.completion === "Complete" ? "Complete" : "Incomplete",
     canOpenWorkspace: Boolean(row.can_open_workspace ?? row.canOpenWorkspace),
     totalCount: Number(row.total_count ?? 0),
     preferredStudyCountry: (row.preferred_study_country as string | null) ?? null,
   };
+}
+
+function mapRegistryRows(data: Record<string, unknown>[], page: number): StudentRegistryRow[] {
+  const offset = (page - 1) * REGISTRY_PAGE_SIZE;
+  return data.map((row, index) => mapRow(row, offset + index + 1));
 }
 
 export async function loadStaffStudentRegistry(
@@ -77,7 +90,7 @@ export async function loadStaffStudentRegistry(
   const offset = (query.page - 1) * REGISTRY_PAGE_SIZE;
 
   const v2 = await supabase.rpc("staff_student_registry_v2", {
-    search_text: query.q,
+    search_text: registrySearchText(query.q),
     plan_filter: query.plan,
     mentor_filter: query.mentor,
     study_level_filter: query.studyLevel,
@@ -93,7 +106,7 @@ export async function loadStaffStudentRegistry(
   });
 
   if (!v2.error && v2.data) {
-    const rows = (v2.data as Record<string, unknown>[]).map(mapRow);
+    const rows = mapRegistryRows(v2.data as Record<string, unknown>[], query.page);
     return {
       rows,
       totalCount: rows[0]?.totalCount ?? rows.length,
@@ -104,7 +117,7 @@ export async function loadStaffStudentRegistry(
   }
 
   const v1 = await supabase.rpc("staff_student_registry", {
-    search_text: query.q ?? null,
+    search_text: registrySearchText(query.q),
     plan_filter: query.plan ?? null,
     mentor_filter: query.mentor ?? null,
     crm_stage_filter: query.stage ?? null,
@@ -116,7 +129,7 @@ export async function loadStaffStudentRegistry(
     return emptyResult(query.page, true);
   }
 
-  let rows = (v1.data as Record<string, unknown>[]).map(mapRow);
+  let rows = mapRegistryRows(v1.data as Record<string, unknown>[], query.page);
   if (query.stream) rows = rows.filter((row) => row.stream === query.stream);
   if (query.studyLevel) rows = rows.filter((row) => row.studyLevel === query.studyLevel);
   if (query.completion) {
@@ -147,7 +160,7 @@ export async function loadStudentRegistry(query: {
   const page = query.page ?? 1;
   const pageSize = query.pageSize ?? 25;
   const { data, error } = await supabase.rpc("staff_student_registry", {
-    search_text: query.search ?? null,
+    search_text: registrySearchText(query.search ?? null),
     plan_filter: query.plan && query.plan !== "all" ? query.plan : null,
     mentor_filter: query.mentor && query.mentor !== "all" ? query.mentor : null,
     crm_stage_filter: query.crmStage && query.crmStage !== "all" ? query.crmStage : null,
@@ -155,7 +168,7 @@ export async function loadStudentRegistry(query: {
     page_size: pageSize,
   });
   if (error) throw new Error(error.message);
-  return ((data ?? []) as Record<string, unknown>[]).map(mapRow);
+  return mapRegistryRows((data ?? []) as Record<string, unknown>[], page);
 }
 
 export async function loadMentorOptions(): Promise<RegistryMentorOption[]> {
@@ -198,6 +211,74 @@ export async function loadRegistrySavedViews(staff: StaffContext): Promise<Regis
     name: row.name,
     query: parseSavedRegistryQuery(row.query, capabilities),
   }));
+}
+
+export async function loadStudentDisplayIdMap(
+  studentIds: string[],
+): Promise<Map<string, string>> {
+  const unique = [...new Set(studentIds.map((id) => id.trim()).filter(isSupabaseUuid))];
+  const map = new Map<string, string>();
+  if (!unique.length) return map;
+
+  const supabase = await createSupabaseServerClient();
+  let { data } = await supabase
+    .from("profiles")
+    .select("id, pgs_code, created_at")
+    .in("id", unique);
+  let rows = data ?? [];
+
+  if (rows.length < unique.length) {
+    try {
+      const { createSupabaseAdminClient } = await import("@/lib/supabase/admin");
+      const admin = createSupabaseAdminClient();
+      const adminResult = await admin
+        .from("profiles")
+        .select("id, pgs_code, created_at")
+        .in("id", unique);
+      if (adminResult.data?.length) rows = adminResult.data;
+    } catch {
+      // Keep whatever the user-scoped query returned.
+    }
+  }
+
+  const { data: ordered } = await supabase
+    .from("profiles")
+    .select("id")
+    .order("created_at", { ascending: true })
+    .order("id", { ascending: true })
+    .limit(5000);
+
+  const sequenceById = new Map<string, number>();
+  if (ordered?.length) {
+    ordered.forEach((row, index) => sequenceById.set(row.id, index + 1));
+  } else {
+    [...rows]
+      .sort(
+        (left, right) =>
+          String(left.created_at).localeCompare(String(right.created_at)) ||
+          String(left.id).localeCompare(String(right.id)),
+      )
+      .forEach((row, index) => sequenceById.set(row.id, index + 1));
+  }
+
+  for (const row of rows) {
+    const display = formatDisplayPgsId({
+      pgsCode: row.pgs_code,
+      createdAt: row.created_at,
+      sequence: sequenceById.get(row.id) ?? 1,
+    });
+    map.set(row.id, display);
+    map.set(row.id.toLowerCase(), display);
+  }
+
+  unique.forEach((id, index) => {
+    if (map.has(id) || map.has(id.toLowerCase())) return;
+    const display = formatDisplayPgsId({ sequence: index + 1 });
+    map.set(id, display);
+    map.set(id.toLowerCase(), display);
+  });
+
+  return map;
 }
 
 export function resolveRegistryQueryFromRequest(

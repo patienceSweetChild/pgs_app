@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { cmsHref, loginPathForSurface } from "@pgs/shared";
 import {
   resolveActorContext,
   staffHasPermission,
@@ -24,7 +25,7 @@ export default async function DashLayout({
 
   const actor = await resolveActorContext();
   if (!actor.userId || !actor.isStaff || !actor.staff) {
-    redirect("/login?surface=operations&redirect=/dash");
+    redirect(loginPathForSurface("cms", cmsHref("/dash")));
   }
 
   if (

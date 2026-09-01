@@ -54,6 +54,12 @@ next-env.d.ts
 /audit/
 /-- WARNING_ Thi.txt
 /Table -cms_e.txt
+
+# Cursor local skills (optional — keep out of repo)
+.cursor/
 *.sql
 *.sql.gz
 *.dump
+!supabase/migrations/**/*.sql
+!supabase/seed.sql
+!supabase/tests/**/*.sql

@@ -1,0 +1,219 @@
+#!/usr/bin/env node
+/**
+ * Generates thin route-bridge files under apps/* that re-export monolith routes
+ * from src/app. Pattern: Turborepo multi-app + keep shared src/features in repo root.
+ *
+ * Run: node scripts/scaffold-app-routes.mjs
+ */
+import fs from "node:fs";
+import path from "node:path";
+
+const ROOT = process.cwd();
+
+/** @typedef {{ from: string; to: string; importBase: string; stripPrefix?: string }} SourceMap */
+
+/** @type {Record<string, { sources: SourceMap[] }>} */
+const APP_SOURCES = {
+  ops: {
+    sources: [
+      { from: "src/app/ops", to: "apps/ops/src/app/(staff)", importBase: "@/app/ops", stripPrefix: "src/app/ops" },
+      { from: "src/app/api/ops", to: "apps/ops/src/app/api/ops", importBase: "@/app/api/ops" },
+      { from: "src/app/api/staff", to: "apps/ops/src/app/api/staff", importBase: "@/app/api/staff" },
+      { from: "src/app/api/ai/ops", to: "apps/ops/src/app/api/ai/ops", importBase: "@/app/api/ai/ops" },
+      { from: "src/app/(auth)/login", to: "apps/ops/src/app/login", importBase: "@/app/(auth)/login" },
+      { from: "src/app/(auth)/forgot_password", to: "apps/ops/src/app/forgot_password", importBase: "@/app/(auth)/forgot_password" },
+      { from: "src/app/(auth)/reset_password", to: "apps/ops/src/app/reset_password", importBase: "@/app/(auth)/reset_password" },
+      { from: "src/app/(auth)/change_password", to: "apps/ops/src/app/change_password", importBase: "@/app/(auth)/change_password" },
+      { from: "src/app/auth", to: "apps/ops/src/app/auth", importBase: "@/app/auth" },
+    ],
+  },
+  admin: {
+    sources: [
+      { from: "src/app/admin", to: "apps/admin/src/app/(staff)", importBase: "@/app/admin", stripPrefix: "src/app/admin" },
+      { from: "src/app/(auth)/login", to: "apps/admin/src/app/login", importBase: "@/app/(auth)/login" },
+      { from: "src/app/(auth)/forgot_password", to: "apps/admin/src/app/forgot_password", importBase: "@/app/(auth)/forgot_password" },
+      { from: "src/app/(auth)/reset_password", to: "apps/admin/src/app/reset_password", importBase: "@/app/(auth)/reset_password" },
+      { from: "src/app/(auth)/change_password", to: "apps/admin/src/app/change_password", importBase: "@/app/(auth)/change_password" },
+      { from: "src/app/auth", to: "apps/admin/src/app/auth", importBase: "@/app/auth" },
+      { from: "src/app/cms-preview", to: "apps/admin/src/app/(staff)/cms-preview", importBase: "@/app/cms-preview" },
+    ],
+  },
+  cms: {
+    sources: [
+      { from: "src/app/dash", to: "apps/cms/src/app/(staff)", importBase: "@/app/dash", stripPrefix: "src/app/dash" },
+      { from: "src/app/(auth)/login", to: "apps/cms/src/app/login", importBase: "@/app/(auth)/login" },
+      { from: "src/app/(auth)/forgot_password", to: "apps/cms/src/app/forgot_password", importBase: "@/app/(auth)/forgot_password" },
+      { from: "src/app/(auth)/reset_password", to: "apps/cms/src/app/reset_password", importBase: "@/app/(auth)/reset_password" },
+      { from: "src/app/(auth)/change_password", to: "apps/cms/src/app/change_password", importBase: "@/app/(auth)/change_password" },
+      { from: "src/app/auth", to: "apps/cms/src/app/auth", importBase: "@/app/auth" },
+    ],
+  },
+  web: {
+    sources: [
+      { from: "src/app/(public)", to: "apps/web/src/app", importBase: "@/app/(public)" },
+      { from: "src/app/(auth)", to: "apps/web/src/app", importBase: "@/app/(auth)" },
+      { from: "src/app/portal", to: "apps/web/src/app/portal", importBase: "@/app/portal" },
+      { from: "src/app/auth", to: "apps/web/src/app/auth", importBase: "@/app/auth" },
+    ],
+  },
+};
+
+const ROUTE_FILES = new Set(["page.tsx", "page.ts", "layout.tsx", "layout.ts", "route.ts", "loading.tsx", "error.tsx", "not-found.tsx"]);
+
+function ensureDir(dir) {
+  fs.mkdirSync(dir, { recursive: true });
+}
+
+const ROUTE_HANDLER_EXPORTS = new Set([
+  "GET",
+  "POST",
+  "PUT",
+  "PATCH",
+  "DELETE",
+  "HEAD",
+  "OPTIONS",
+  "dynamic",
+  "runtime",
+  "revalidate",
+  "fetchCache",
+  "preferredRegion",
+  "maxDuration",
+  "config",
+]);
+
+function getRouteHandlerExports(sourceFilePath) {
+  const content = fs.readFileSync(sourceFilePath, "utf8");
+  const names = new Set();
+
+  for (const key of ROUTE_HANDLER_EXPORTS) {
+    if (new RegExp(`export\\s+(async\\s+)?function\\s+${key}\\b`).test(content)) {
+      names.add(key);
+    }
+    if (new RegExp(`export\\s+const\\s+${key}\\b`).test(content)) {
+      names.add(key);
+    }
+  }
+
+  for (const match of content.matchAll(/export\s*\{\s*([^}]+)\s*\}/g)) {
+    for (const part of match[1].split(",")) {
+      const name = part.trim().split(/\s+as\s+/)[0].trim();
+      if (ROUTE_HANDLER_EXPORTS.has(name)) names.add(name);
+    }
+  }
+
+  return [...names];
+}
+
+function writeBridge(targetFile, importPath, isRouteHandler, sourceFilePath) {
+  ensureDir(path.dirname(targetFile));
+  let content;
+  if (isRouteHandler) {
+    const names = getRouteHandlerExports(sourceFilePath);
+    content =
+      names.length > 0
+        ? `/* Auto-generated by scripts/scaffold-app-routes.mjs — do not edit */\nexport { ${names.join(", ")} } from "${importPath}";\n`
+        : `/* Auto-generated by scripts/scaffold-app-routes.mjs — do not edit */\nexport * from "${importPath}";\n`;
+  } else {
+    content = `/* Auto-generated by scripts/scaffold-app-routes.mjs — do not edit */\nexport { default } from "${importPath}";\nexport * from "${importPath}";\n`;
+  }
+  fs.writeFileSync(targetFile, content, "utf8");
+}
+
+function walkAndBridge(sourceMap) {
+  const absFrom = path.join(ROOT, sourceMap.from);
+  if (!fs.existsSync(absFrom)) {
+    console.warn(`skip missing: ${sourceMap.from}`);
+    return 0;
+  }
+
+  let count = 0;
+
+  function walk(dir) {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const abs = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(abs);
+        continue;
+      }
+      if (!ROUTE_FILES.has(entry.name)) continue;
+      if (entry.name.startsWith("layout.") && sourceMap.stripPrefix) continue;
+
+      const relFromSource = path.relative(absFrom, abs);
+      let relTo = relFromSource;
+
+      if (sourceMap.stripPrefix) {
+        // already relative to strip folder
+      }
+
+      const targetFile = path.join(ROOT, sourceMap.to, relTo);
+      const importSub = relFromSource
+        .replace(/\.(tsx?|ts)$/, "")
+        .replace(/\\/g, "/");
+      const correctImport = `${sourceMap.importBase}/${importSub}`;
+
+      writeBridge(
+        targetFile,
+        correctImport,
+        entry.name === "route.ts" || entry.name === "route.tsx",
+        abs,
+      );
+      count += 1;
+    }
+  }
+
+  walk(absFrom);
+  return count;
+}
+
+function linkPublic(appName) {
+  const publicTarget = path.join(ROOT, "apps", appName, "public");
+  const publicSource = path.join(ROOT, "public");
+  if (fs.existsSync(publicTarget)) {
+    const stat = fs.lstatSync(publicTarget);
+    if (stat.isSymbolicLink() || stat.isDirectory()) return;
+  }
+  try {
+    fs.symlinkSync(publicSource, publicTarget, "junction");
+  } catch {
+    // Copy minimal marker if symlink fails
+    ensureDir(publicTarget);
+    fs.writeFileSync(
+      path.join(publicTarget, ".gitkeep"),
+      "Symlink to ../../public recommended for assets.\n",
+    );
+  }
+}
+
+function pruneStaleStaffRoutes(appName) {
+  const appRoot = path.join(ROOT, "apps", appName, "src", "app");
+  if (!fs.existsSync(appRoot)) return;
+  const keep = new Set([
+    "(staff)",
+    "auth",
+    "login",
+    "forgot_password",
+    "reset_password",
+    "change_password",
+    "api",
+  ]);
+  for (const entry of fs.readdirSync(appRoot, { withFileTypes: true })) {
+    if (entry.name === "layout.tsx") continue;
+    if (keep.has(entry.name)) continue;
+    fs.rmSync(path.join(appRoot, entry.name), { recursive: true, force: true });
+    console.log(`  pruned apps/${appName}/src/app/${entry.name}`);
+  }
+}
+
+let total = 0;
+for (const [appName, config] of Object.entries(APP_SOURCES)) {
+  for (const source of config.sources) {
+    total += walkAndBridge(source);
+  }
+  linkPublic(appName);
+  if (appName === "ops" || appName === "admin" || appName === "cms") {
+    pruneStaleStaffRoutes(appName);
+  }
+  console.log(`✓ ${appName}: bridged routes`);
+}
+
+console.log(`Done — ${total} route bridge files.`);

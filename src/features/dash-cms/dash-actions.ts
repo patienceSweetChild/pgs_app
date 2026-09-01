@@ -11,6 +11,7 @@ import {
   canQueryStudentRegistry,
   loadStaffStudentRegistry,
 } from "@/lib/operations/student-registry-server";
+import { formatDisplayPgsId } from "@/lib/operations/student-registry";
 import { assertStaffPreviewWritable } from "@/lib/operations/staff-preview-server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
@@ -125,7 +126,7 @@ function mapListedStudent(row: Record<string, unknown>): ListedStudent {
   return {
     id: String(row.id ?? row.student_id),
     fullName: String(row.full_name ?? row.fullName ?? "Student"),
-    pgsCode: String(row.pgs_code ?? row.pgsCode ?? "").slice(0, 12),
+    pgsCode: formatDisplayPgsId({ pgsCode: String(row.pgs_code ?? row.pgsCode ?? "") }),
   };
 }
 
@@ -265,7 +266,7 @@ export async function listDashboardStudents(input?: {
     return {
       studentId: student.id,
       fullName: student.fullName,
-      pgsCode: student.pgsCode || student.id.slice(0, 8),
+      pgsCode: formatDisplayPgsId({ pgsCode: student.pgsCode }),
       pathwayLabel: String(profile?.pathway_label ?? ""),
       published: Boolean(profile?.dashboard_published),
       hasDraft: Boolean(profile?.cms_draft),

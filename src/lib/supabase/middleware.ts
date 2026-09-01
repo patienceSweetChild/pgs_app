@@ -1,4 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
+import {
+  mergeSupabaseCookieOptions,
+  PGS_AUTH_SURFACE_HEADER,
+  resolveAuthSurface,
+  supabaseAuthCookieOptions,
+} from "@pgs/shared";
 import { NextResponse, type NextRequest } from "next/server";
 import { getSupabasePublicConfig } from "@/lib/supabase/config";
 import { isDashCmsPath } from "@/lib/dash-cms-path";
@@ -9,14 +15,30 @@ function safeRedirectPath(value: string | null): string {
 }
 
 export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({ request });
   const config = getSupabasePublicConfig();
+  const pathname = request.nextUrl.pathname;
+  const surfaceParam = request.nextUrl.searchParams.get("surface");
+  const authSurface = config
+    ? resolveAuthSurface(pathname, surfaceParam)
+    : null;
 
-  if (!config) {
+  const requestHeaders = new Headers(request.headers);
+  if (authSurface) {
+    requestHeaders.set(PGS_AUTH_SURFACE_HEADER, authSurface);
+  }
+
+  let response = NextResponse.next({
+    request: { headers: requestHeaders },
+  });
+
+  if (!config || !authSurface) {
     return response;
   }
 
+  const cookieOptions = supabaseAuthCookieOptions(config.url, authSurface);
+
   const supabase = createServerClient(config.url, config.key, {
+    cookieOptions,
     cookies: {
       getAll() {
         return request.cookies.getAll();
@@ -25,9 +47,11 @@ export async function updateSession(request: NextRequest) {
         cookiesToSet.forEach(({ name, value }) => {
           request.cookies.set(name, value);
         });
-        response = NextResponse.next({ request });
+        response = NextResponse.next({
+          request: { headers: requestHeaders },
+        });
         cookiesToSet.forEach(({ name, value, options }) => {
-          response.cookies.set(name, value, options);
+          response.cookies.set(name, value, mergeSupabaseCookieOptions(options ?? {}));
         });
       },
     },
@@ -36,8 +60,6 @@ export async function updateSession(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
-  const pathname = request.nextUrl.pathname;
 
   if (pathname.startsWith("/admin")) {
     if (!user) {
@@ -72,7 +94,10 @@ export async function updateSession(request: NextRequest) {
     if (!user) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
-      url.searchParams.set("surface", "operations");
+      url.searchParams.set(
+        "surface",
+        isDashCmsPath(pathname) ? "cms" : "operations",
+      );
       url.searchParams.set("redirect", pathname);
       return NextResponse.redirect(url);
     }
@@ -107,7 +132,6 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  // Preserve redirect query sanity for login links leaving middleware
   const redirectParam = request.nextUrl.searchParams.get("redirect");
   if (redirectParam && safeRedirectPath(redirectParam) !== redirectParam) {
     const url = request.nextUrl.clone();

@@ -2,13 +2,30 @@
   "name": "pgs_app",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:web": "npm run dev -w @pgs/app-web",
+    "dev:ops": "npm run dev -w @pgs/app-ops",
+    "dev:admin": "npm run dev -w @pgs/app-admin",
+    "dev:cms": "npm run dev -w @pgs/app-cms",
     "build": "next build",
+    "build:web": "npm run build -w @pgs/app-web",
+    "build:ops": "npm run build -w @pgs/app-ops",
+    "build:admin": "npm run build -w @pgs/app-admin",
+    "build:cms": "npm run build -w @pgs/app-cms",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:shared": "npm run test -w @pgs/shared",
+    "scaffold:apps": "node scripts/scaffold-app-routes.mjs",
+    "sync:env": "node scripts/sync-env-to-apps.mjs"
   },
   "dependencies": {
+    "@pgs/next-config": "*",
+    "@pgs/shared": "*",
     "@supabase/ssr": "^0.12.5",
     "@supabase/supabase-js": "^2.112.4",
     "next": "^15.1.11",

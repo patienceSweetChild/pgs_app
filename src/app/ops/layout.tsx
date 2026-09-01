@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { loginPathForSurface, opsHref } from "@pgs/shared";
 import {
   resolveActorContext,
   staffHasPermission,
@@ -24,7 +25,7 @@ export default async function OpsLayout({
 
   const actor = await resolveActorContext();
   if (!actor.userId || !actor.isStaff || !actor.staff) {
-    redirect("/login?surface=operations&redirect=/ops");
+    redirect(loginPathForSurface("ops", opsHref("/ops")));
   }
 
   if (

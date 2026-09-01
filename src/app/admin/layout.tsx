@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { adminHref, loginPathForSurface } from "@pgs/shared";
 import { resolveActorContext, staffHasPermission } from "@/lib/auth/actor-context";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { AdminShell } from "@/features/admin/AdminShell";
@@ -23,7 +24,7 @@ export default async function AdminLayout({
 
   const actor = await resolveActorContext();
   if (!actor.userId || !actor.isStaff || !actor.staff) {
-    redirect("/login?surface=admin&redirect=/admin");
+    redirect(loginPathForSurface("admin", adminHref("/admin")));
   }
 
   if (!staffHasPermission(actor.staff, "overview.read")) {

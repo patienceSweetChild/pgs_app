@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { opsHref, staffPortalLink } from "@pgs/shared";
 import { OPS_NAV } from "./nav";
 import { AskPgsPanel } from "./components/AskPgsPanel";
 import "./operations.css";
@@ -37,9 +38,13 @@ export function OpsShell({
   notificationUnreadCount?: number;
   aiEnabled?: boolean;
 }) {
-  const pathname = usePathname() || "/ops";
+  const pathname = usePathname() || opsHref("/ops");
   const router = useRouter();
   const permSet = useMemo(() => new Set(permissions), [permissions]);
+  const navItems = useMemo(
+    () => OPS_NAV.map((item) => ({ ...item, href: opsHref(item.href) })),
+    [],
+  );
   const [query, setQuery] = useState("");
   const [groups, setGroups] = useState<
     Array<{
@@ -72,7 +77,7 @@ export function OpsShell({
     return () => window.clearTimeout(handle);
   }, [query]);
 
-  const nav = OPS_NAV.filter((item) => {
+  const nav = navItems.filter((item) => {
     const keys = item.anyOf ?? (item.permission ? [item.permission] : []);
     if (keys.length && !keys.some((key) => permSet.has(key))) return false;
     if (item.mentorHidden && (roleKey === "mentor" || preview?.mode === "mentor")) return false;
@@ -94,7 +99,7 @@ export function OpsShell({
               className={isActive(pathname, item.href, item.exact) ? "is-active" : undefined}
             >
               {item.label}
-              {item.href === "/ops/notifications" && notificationUnreadCount > 0 ? (
+              {item.href === opsHref("/ops/notifications") && notificationUnreadCount > 0 ? (
                 <span className="pgs-ops__nav-badge">{notificationUnreadCount}</span>
               ) : null}
             </Link>
@@ -150,12 +155,12 @@ export function OpsShell({
           <div className="pgs-ops__top-actions">
             {aiEnabled ? <AskPgsPanel /> : null}
             {showDashLink ? (
-              <Link href="/dash" className="pgs-ops__portal-link">
+              <Link href={staffPortalLink("cms")} className="pgs-ops__portal-link">
                 Dashboard CMS
               </Link>
             ) : null}
             {showCmsLink ? (
-              <Link href="/admin" className="pgs-ops__portal-link">
+              <Link href={staffPortalLink("admin")} className="pgs-ops__portal-link">
                 CMS Admin
               </Link>
             ) : null}
