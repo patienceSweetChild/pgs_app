@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { crossSurfaceLink, opsHref } from "@pgs/shared";
 import {
   resolveActorContext,
   staffHasPermission,
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
   }
 
   const jar = await cookies();
-  const redirectTo = request.nextUrl.searchParams.get("redirect") ?? "/ops";
+  const redirectTo = request.nextUrl.searchParams.get("redirect") ?? opsHref("/ops");
 
   if (action === "clear") {
     jar.delete(PREVIEW_COOKIE);
@@ -66,8 +67,11 @@ export async function POST(request: NextRequest) {
   );
 
   if (mode === "student") {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    const dashboardUrl = crossSurfaceLink("web", "/dashboard");
+    return NextResponse.redirect(
+      dashboardUrl.startsWith("http") ? dashboardUrl : new URL(dashboardUrl, request.url),
+    );
   }
 
-  return NextResponse.redirect(new URL("/ops/students", request.url));
+  return NextResponse.redirect(new URL(opsHref("/ops/students"), request.url));
 }

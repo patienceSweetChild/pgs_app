@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cmsStudentHref, opsHref } from "@pgs/shared";
 import { StudentCrmIdentityPanel } from "@/features/operations/components/StudentCrmIdentityPanel";
 import { StudentDetailActions } from "@/features/operations/components/StudentDetailActions";
 import { StudentGuardiansPanel } from "@/features/operations/components/StudentGuardiansPanel";
@@ -89,9 +90,9 @@ export default async function OpsStudentDetailPage({
           </p>
         </div>
         <div className="pgs-ops__header-actions">
-          <Link href="/ops/students">← Registry</Link>
+          <Link href={opsHref("/ops/students")}>← Registry</Link>
           {canEditDashboard ? (
-            <Link href={`/dash/${id}`}>Edit dashboard</Link>
+            <Link href={cmsStudentHref(id)}>Edit dashboard</Link>
           ) : null}
         </div>
       </div>

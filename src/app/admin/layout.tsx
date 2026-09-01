@@ -28,7 +28,13 @@ export default async function AdminLayout({
   }
 
   if (!staffHasPermission(actor.staff, "overview.read")) {
-    redirect("/");
+    const canUseCms =
+      staffHasPermission(actor.staff, "content.manage") ||
+      staffHasPermission(actor.staff, "catalog.manage") ||
+      staffHasPermission(actor.staff, "cms.publish");
+    if (!canUseCms) {
+      redirect("/login?error=forbidden");
+    }
   }
 
   return (

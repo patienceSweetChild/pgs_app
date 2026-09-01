@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
+import { opsHref } from "@pgs/shared";
 
 export default function OpsWorkspaceRedirect() {
-  redirect("/ops/students");
+  redirect(opsHref("/ops/students"));
 }

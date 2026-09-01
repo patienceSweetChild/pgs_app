@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { crossSurfaceLink } from "@pgs/shared";
 import { resolveActorContext } from "@/lib/auth/actor-context";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
@@ -22,7 +23,7 @@ export default async function PortalHomePage() {
     redirect("/login?surface=guardian&redirect=/portal");
   }
   if (actor.isStaff) {
-    redirect("/admin");
+    redirect(crossSurfaceLink("admin", "/"));
   }
 
   const supabase = await createSupabaseServerClient();

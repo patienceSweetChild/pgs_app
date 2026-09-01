@@ -1,3 +1,4 @@
+import { opsHref } from "@pgs/shared";
 import "server-only";
 
 import {
@@ -88,13 +89,13 @@ export async function loadOperationsScoreboard(options?: {
       title: "My caseload",
       description: "Metrics for students currently assigned to you.",
       metrics: [
-        { key: "assigned", label: "My students", value: count ?? 0, href: "/ops/students" },
-        { key: "targets", label: "Open targets", value: targetCount ?? 0, href: "/ops/work" },
+        { key: "assigned", label: "My students", value: count ?? 0, href: opsHref("/ops/students") },
+        { key: "targets", label: "Open targets", value: targetCount ?? 0, href: opsHref("/ops/work") },
       ],
       activity: [],
       operate: [
-        { href: "/ops/students", label: "Open my students" },
-        { href: "/ops/work", label: "Open my work" },
+        { href: opsHref("/ops/students"), label: "Open my students" },
+        { href: opsHref("/ops/work"), label: "Open my work" },
       ],
     };
   }
@@ -123,24 +124,24 @@ export async function loadOperationsScoreboard(options?: {
   ]);
 
   const metrics: ScoreboardMetric[] = [
-    { key: "total", label: "Total students", value: totalStudents ?? 0, href: "/ops/students" },
+    { key: "total", label: "Total students", value: totalStudents ?? 0, href: opsHref("/ops/students") },
     {
       key: "premium",
       label: "Premium active",
       value: premiumCount ?? 0,
-      href: "/ops/students?plan=premium",
+      href: `${opsHref("/ops/students")}?plan=premium`,
     },
     {
       key: "unassigned",
       label: "Premium unassigned",
       value: unassignedCount,
-      href: "/ops/students?plan=premium&mentor=unassigned",
+      href: `${opsHref("/ops/students")}?plan=premium&mentor=unassigned`,
       attention: unassignedCount > 0,
       description: "Premium students waiting for a mentor",
     },
   ];
   if (canReadStaff) {
-    metrics.push({ key: "staff", label: "Active staff", value: staffCount, href: "/ops/team" });
+    metrics.push({ key: "staff", label: "Active staff", value: staffCount, href: opsHref("/ops/team") });
   }
 
   return {
@@ -150,9 +151,12 @@ export async function loadOperationsScoreboard(options?: {
     metrics,
     activity,
     operate: [
-      { href: "/ops/students", label: "Student registry" },
-      { href: "/ops/students?plan=premium&mentor=unassigned", label: "Assign Premium students" },
-      { href: "/ops/work", label: "Staff targets" },
+      { href: opsHref("/ops/students"), label: "Student registry" },
+      {
+        href: `${opsHref("/ops/students")}?plan=premium&mentor=unassigned`,
+        label: "Assign Premium students",
+      },
+      { href: opsHref("/ops/work"), label: "Staff targets" },
     ],
   };
 }

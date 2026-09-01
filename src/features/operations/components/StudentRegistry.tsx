@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { opsStudentHref } from "@pgs/shared";
 import { useState, useTransition } from "react";
 import { assignMentorAction } from "@/features/operations/actions";
 import {
@@ -212,7 +213,7 @@ export function StudentRegistry({
                     <code className="pgs-ops__code">{row.pgsCode}</code>
                   </td>
                   <td>
-                    <Link href={`/ops/students/${row.id}`}>{row.fullName}</Link>
+                    <Link href={opsStudentHref(row.id)}>{row.fullName}</Link>
                   </td>
                   <td>{row.studyLevel || "—"}</td>
                   <td>{row.stream || "—"}</td>
@@ -227,7 +228,7 @@ export function StudentRegistry({
                   {showOpen ? <td>{row.canOpenWorkspace ? "Yes" : "No"}</td> : null}
                   <td>
                     <div className="pgs-ops__inline-actions">
-                      <Link href={`/ops/students/${row.id}`}>Open</Link>
+                      <Link href={opsStudentHref(row.id)}>Open</Link>
                       {canManageAssignments && mentors.length ? (
                         <select
                           defaultValue={row.mentorId ?? ""}

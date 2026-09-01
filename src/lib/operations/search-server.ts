@@ -1,3 +1,4 @@
+import { opsHref } from "@pgs/shared";
 import "server-only";
 
 import { staffHasPermission, type StaffContext } from "@/lib/auth/actor-context";
@@ -40,7 +41,7 @@ export async function searchOperations(
           id: row.id,
           label: row.full_name || "Student",
           description: convertStoredPgsCodeToDisplay(row.pgs_code) || "",
-          href: `/ops/students/${row.id}`,
+          href: opsHref(`/ops/students/${row.id}`),
         })),
       });
     }
@@ -60,7 +61,7 @@ export async function searchOperations(
           id: row.user_id,
           label: row.display_name || "Staff",
           description: row.role_key,
-          href: `/ops/team/${row.user_id}`,
+          href: opsHref(`/ops/team/${row.user_id}`),
         })),
       });
     }
@@ -80,7 +81,7 @@ export async function searchOperations(
           id: row.id,
           label: row.title,
           description: row.status,
-          href: `/ops/work?target=${row.id}`,
+          href: `${opsHref("/ops/work")}?target=${row.id}`,
         })),
       });
     }

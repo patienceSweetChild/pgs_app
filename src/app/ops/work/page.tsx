@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { opsHref } from "@pgs/shared";
 import { StaffTargetsPanel } from "@/features/operations/components/StaffTargetsPanel";
 import {
   loadStaffTargetOptions,
@@ -49,7 +50,7 @@ export default async function OpsWorkPage({
         </div>
         {scope === "organization" ? (
           <div className="pgs-ops__header-actions">
-            <Link href="/ops/team">Open Team</Link>
+            <Link href={opsHref("/ops/team")}>Open Team</Link>
           </div>
         ) : null}
       </div>

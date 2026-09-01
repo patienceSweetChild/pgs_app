@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { opsHref } from "@pgs/shared";
 import { StaffAddForm } from "@/features/operations/components/StaffAddForm";
 import { requireStaffPermission } from "@/lib/auth/student-access";
 import { redirectMentorPreviewAwayFromPrivilegedPages } from "@/lib/operations/staff-preview-server";
@@ -18,7 +19,7 @@ export default async function OpsTeamAddPage() {
           </p>
         </div>
         <div className="pgs-ops__header-actions">
-          <Link href="/ops/team">Back to Team</Link>
+          <Link href={opsHref("/ops/team")}>Back to Team</Link>
         </div>
       </div>
       <StaffAddForm />

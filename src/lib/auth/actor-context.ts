@@ -2,10 +2,13 @@ import { cache } from "react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import {
+  isProductRoleKey,
   isStaffRoleKey,
   normalizeRoleKey,
+  type StaffPermission,
   type StaffRoleKey,
 } from "@/lib/auth/permissions";
+import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/operations/role-matrix";
 
 export type StaffContext = {
   userId: string;
@@ -26,6 +29,55 @@ export type ActorContext = {
     fullName: string;
   } | null;
 };
+
+function permissionsFromRoleRows(
+  rows: Array<{
+    staff_permissions: { key: string } | { key: string }[] | null;
+  }> | null,
+): string[] {
+  return (rows ?? [])
+    .map((row) => {
+      const perm = row.staff_permissions;
+      if (Array.isArray(perm)) return perm[0]?.key;
+      return perm?.key;
+    })
+    .filter((k): k is string => Boolean(k));
+}
+
+function defaultPermissionsForRole(roleKey: string): string[] {
+  const canonical = normalizeRoleKey(roleKey) || roleKey;
+  if (!isProductRoleKey(canonical)) return [];
+  return [...DEFAULT_ROLE_PERMISSIONS[canonical]];
+}
+
+async function loadStaffPermissions(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  roleKey: string,
+  rawRoleKey: string,
+): Promise<string[]> {
+  async function queryForRole(key: string) {
+    const { data: role } = await supabase
+      .from("staff_roles")
+      .select("staff_role_permissions(staff_permissions(key))")
+      .eq("key", key)
+      .maybeSingle();
+
+    return permissionsFromRoleRows(
+      (role?.staff_role_permissions ?? null) as Array<{
+        staff_permissions: { key: string } | { key: string }[] | null;
+      }> | null,
+    );
+  }
+
+  let permissions = await queryForRole(roleKey);
+  if (!permissions.length && rawRoleKey !== roleKey) {
+    permissions = await queryForRole(rawRoleKey);
+  }
+  if (!permissions.length) {
+    permissions = defaultPermissionsForRole(roleKey);
+  }
+  return permissions;
+}
 
 export const resolveActorContext = cache(async (): Promise<ActorContext> => {
   const empty: ActorContext = {
@@ -56,7 +108,7 @@ export const resolveActorContext = cache(async (): Promise<ActorContext> => {
         .maybeSingle(),
       supabase
         .from("staff_profiles")
-        .select("user_id, role_key, display_name, status")
+        .select("*")
         .eq("user_id", user.id)
         .eq("status", "active")
         .maybeSingle(),
@@ -64,40 +116,20 @@ export const resolveActorContext = cache(async (): Promise<ActorContext> => {
     ]);
 
   let permissions: string[] = [];
-  if (staffRow) {
-    const roleKey = normalizeRoleKey(staffRow.role_key) || staffRow.role_key;
-    const { data: links } = await supabase
-      .from("staff_role_permissions")
-      .select("staff_permissions(key), staff_roles!inner(key)")
-      .eq("staff_roles.key", roleKey);
-
-    permissions = (links ?? [])
-      .map((row) => {
-        const perm = row.staff_permissions as
-          | { key: string }
-          | { key: string }[]
-          | null;
-        if (Array.isArray(perm)) return perm[0]?.key;
-        return perm?.key;
+  const staffProfile = staffRow as
+    | ({
+        user_id: string;
+        display_name: string;
+        status: string;
+        role_key?: string | null;
+        role?: string | null;
       })
-      .filter((k): k is string => Boolean(k));
+    | null;
 
-    if (!permissions.length && roleKey !== staffRow.role_key) {
-      const { data: legacyLinks } = await supabase
-        .from("staff_role_permissions")
-        .select("staff_permissions(key), staff_roles!inner(key)")
-        .eq("staff_roles.key", staffRow.role_key);
-      permissions = (legacyLinks ?? [])
-        .map((row) => {
-          const perm = row.staff_permissions as
-            | { key: string }
-            | { key: string }[]
-            | null;
-          if (Array.isArray(perm)) return perm[0]?.key;
-          return perm?.key;
-        })
-        .filter((k): k is string => Boolean(k));
-    }
+  if (staffProfile) {
+    const rawRole = staffProfile.role_key ?? staffProfile.role ?? "";
+    const roleKey = normalizeRoleKey(rawRole) || rawRole;
+    permissions = await loadStaffPermissions(supabase, roleKey, rawRole);
   }
 
   let isGuardian = false;
@@ -109,16 +141,18 @@ export const resolveActorContext = cache(async (): Promise<ActorContext> => {
   return {
     userId: user.id,
     email: user.email ?? null,
-    isStaff: Boolean(staffRow),
+    isStaff: Boolean(staffProfile),
     isPremium: Boolean(premium),
     isGuardian,
-    staff: staffRow
+    staff: staffProfile
       ? {
-          userId: staffRow.user_id,
-          roleKey: isStaffRoleKey(normalizeRoleKey(staffRow.role_key))
-            ? normalizeRoleKey(staffRow.role_key)
-            : staffRow.role_key,
-          displayName: staffRow.display_name,
+          userId: staffProfile.user_id,
+          roleKey: (() => {
+            const raw = staffProfile.role_key ?? staffProfile.role ?? "";
+            const normalized = normalizeRoleKey(raw) || raw;
+            return isStaffRoleKey(normalized) ? normalized : raw;
+          })(),
+          displayName: staffProfile.display_name,
           permissions,
         }
       : null,
@@ -132,5 +166,9 @@ export function staffHasPermission(
   staff: StaffContext | null,
   key: string,
 ): boolean {
-  return Boolean(staff?.permissions.includes(key));
+  if (!staff) return false;
+  if (staff.permissions.includes(key)) return true;
+  const role = normalizeRoleKey(staff.roleKey) || staff.roleKey;
+  if (!isProductRoleKey(role)) return false;
+  return DEFAULT_ROLE_PERMISSIONS[role].includes(key as StaffPermission);
 }

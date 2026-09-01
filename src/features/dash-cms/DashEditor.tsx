@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { cmsHref } from "@pgs/shared";
 import { EventEditShell } from "@/features/admin/EventEditShell";
 import { StandalonePreviewPane } from "@/features/admin/StandalonePreviewPane";
 import { UnsavedChangesModal } from "@/features/admin/UnsavedChangesModal";
@@ -69,7 +70,7 @@ export function DashEditor({ initial }: { initial: DashEditorPayload }) {
   const isDirty = unsavedCount > 0;
 
   const close = useCallback(() => {
-    router.push("/dash");
+    router.push(cmsHref("/dash"));
   }, [router]);
 
   function requestClose() {

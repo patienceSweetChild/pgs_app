@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { adminHref } from "@pgs/shared";
 import { resolveActorContext, staffHasPermission } from "@/lib/auth/actor-context";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CONTENT_ENTITIES, type ContentField } from "./content-registry";
@@ -159,7 +160,7 @@ export async function upsertContentRow(
     if (error) throw new Error(error.message);
   }
 
-  revalidatePath("/admin");
+  revalidatePath(adminHref("/admin"));
   revalidatePath("/", "layout");
   revalidatePath("/about");
   revalidatePath("/studentresources");
@@ -182,7 +183,7 @@ export async function deleteContentRow(entityKey: string, id: string | number) {
   const idKey = config.idKey ?? "id";
   const { error } = await supabase.from(config.table).delete().eq(idKey, id);
   if (error) throw new Error(error.message);
-  revalidatePath("/admin");
+  revalidatePath(adminHref("/admin"));
   revalidatePath("/", "layout");
   revalidatePath("/about");
   revalidatePath("/studentresources");
@@ -256,7 +257,7 @@ export async function saveLegalDocument(
     });
     if (error) throw new Error(error.message);
   }
-  revalidatePath("/admin");
+  revalidatePath(adminHref("/admin"));
   revalidatePath("/privacy");
   revalidatePath("/terms");
   revalidatePath("/refund");
@@ -295,7 +296,7 @@ export async function savePremiumContentSetting(
     updated_at: new Date().toISOString(),
   });
   if (error) throw new Error(error.message);
-  revalidatePath("/admin");
+  revalidatePath(adminHref("/admin"));
   revalidatePath("/purplepremiumhome");
   revalidatePath("/", "layout");
 }
@@ -369,5 +370,5 @@ export async function updateStaffProfile(displayName: string) {
     .update({ display_name: displayName })
     .eq("user_id", actor.userId);
   if (error) throw new Error(error.message);
-  revalidatePath("/admin/profile");
+  revalidatePath(adminHref("/admin/profile"));
 }

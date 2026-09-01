@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { cmsStudentHref, opsPortalLink } from "@pgs/shared";
 import {
   listDashboardStudents,
   type DashListFilter,
@@ -81,7 +82,7 @@ export function DashCmsTable() {
           aria-label="Search students"
           style={{ maxWidth: 320 }}
         />
-        <Link href="/ops" className="pgs-admin__portal-link">
+        <Link href={opsPortalLink("/ops")} className="pgs-admin__portal-link">
           Back to Operations
         </Link>
       </form>
@@ -139,7 +140,7 @@ export function DashCmsTable() {
                   </td>
                   <td>
                     <Link
-                      href={`/dash/${row.studentId}`}
+                      href={cmsStudentHref(row.studentId)}
                       className="pgs-admin__btn pgs-admin__btn--ghost"
                     >
                       Edit

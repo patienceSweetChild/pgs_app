@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { opsHref } from "@pgs/shared";
 import {
   STAFF_ASSIGNABLE_ROLES,
   existingStudentStaffGrantCopy,
@@ -54,7 +55,7 @@ export function StaffAddForm() {
     setPending(false);
     if (response.status === 409 && result.user_id) {
       setMessage("This person already has staff access.");
-      router.push(`/ops/team/${result.user_id}`);
+      router.push(opsHref(`/ops/team/${result.user_id}`));
       return;
     }
     if (!response.ok) {
@@ -64,7 +65,7 @@ export function StaffAddForm() {
     if (result.setup_link) {
       setMessage(`Staff created. Setup link: ${result.setup_link}`);
     }
-    if (result.user_id) router.push(`/ops/team/${result.user_id}`);
+    if (result.user_id) router.push(opsHref(`/ops/team/${result.user_id}`));
   }
 
   async function resolve() {

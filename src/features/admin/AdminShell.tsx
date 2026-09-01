@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
+import { adminHref, opsPortalLink } from "@pgs/shared";
 import { ADMIN_NAV, type AdminNavGroup, type AdminNavItem } from "./nav";
 import "./admin.css";
 import "./admin-field-overrides.css";
@@ -17,7 +18,7 @@ function isActive(pathname: string, href: string, exact?: boolean) {
 }
 
 function groupOpen(pathname: string, group: AdminNavGroup) {
-  return group.items.some((item) => isActive(pathname, item.href));
+  return group.items.some((item) => isActive(pathname, adminHref(item.href)));
 }
 
 export function AdminShell({
@@ -31,7 +32,7 @@ export function AdminShell({
   roleKey?: string;
   permissions?: string[];
 }) {
-  const pathname = usePathname() || "/admin";
+  const pathname = usePathname() || "/";
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -110,6 +111,14 @@ html.pgs-admin-html .pgs-admin .pgs-admin-rich__tool {
         return roleKey === "super_admin";
       }
       return true;
+    }).map((item) => {
+      if (isGroup(item)) {
+        return {
+          ...item,
+          items: item.items.map((sub) => ({ ...sub, href: adminHref(sub.href) })),
+        };
+      }
+      return { ...item, href: adminHref(item.href) };
     });
   }, [roleKey]);
 
@@ -176,7 +185,7 @@ html.pgs-admin-html .pgs-admin .pgs-admin-rich__tool {
           <strong>CMS Admin</strong>
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
             {permissions.includes("overview.read") ? (
-              <Link href="/ops" className="pgs-admin__portal-link">
+              <Link href={opsPortalLink("/ops")} className="pgs-admin__portal-link">
                 Operations
               </Link>
             ) : null}

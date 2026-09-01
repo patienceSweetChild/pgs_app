@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { adminHref } from "@pgs/shared";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export default async function AdminUsersPage() {
@@ -31,7 +32,7 @@ export default async function AdminUsersPage() {
                 <td>{u.preferred_study_country || "—"}</td>
                 <td>{new Date(u.created_at).toLocaleDateString()}</td>
                 <td>
-                  <Link href={`/admin/users/${u.id}`}>Open</Link>
+                  <Link href={adminHref(`/admin/users/${u.id}`)}>Open</Link>
                 </td>
               </tr>
             ))}

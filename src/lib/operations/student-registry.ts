@@ -1,3 +1,4 @@
+import { opsHref } from "@pgs/shared";
 import {
   isCrmStage,
   isCrmStream,
@@ -282,7 +283,7 @@ export function registryHref(
   if (options?.includePage && query.page > 1) params.set("page", String(query.page));
   if (options?.includeView && query.view) params.set("view", query.view);
   const search = params.toString();
-  return search ? `/ops/students?${search}` : "/ops/students";
+  return search ? `${opsHref("/ops/students")}?${search}` : opsHref("/ops/students");
 }
 
 export function omitRegistryFilter(

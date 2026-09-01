@@ -44,6 +44,7 @@ export function createSessionMiddleware(config: SessionMiddlewareConfig) {
 
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set(PGS_AUTH_SURFACE_HEADER, authSurface);
+    requestHeaders.set("x-pathname", pathname);
 
     let response = NextResponse.next({
       request: { headers: requestHeaders },
@@ -112,6 +113,7 @@ export function createSessionMiddleware(config: SessionMiddlewareConfig) {
           const url = request.nextUrl.clone();
           url.pathname = "/login";
           url.searchParams.set("surface", loginSurfaceParam(surface));
+          url.searchParams.set("error", "not_staff");
           return NextResponse.redirect(url);
         }
       } catch {

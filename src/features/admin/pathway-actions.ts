@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { adminHref } from "@pgs/shared";
 import { resolveActorContext, staffHasPermission } from "@/lib/auth/actor-context";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
@@ -214,11 +215,11 @@ export async function clearPathwayDraft(id: number) {
     .update({ cms_draft: null })
     .eq("id", id);
   if (error) throw new Error(error.message);
-  revalidatePath("/admin/pathways");
+  revalidatePath(adminHref("/admin/pathways"));
 }
 
 function revalidatePathwayPaths(slug: string) {
-  revalidatePath("/admin/pathways");
+  revalidatePath(adminHref("/admin/pathways"));
   if (slug) {
     revalidatePath(`/pathways/${slug}`);
   }

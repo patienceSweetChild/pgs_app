@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { adminHref } from "@pgs/shared";
 import { resolveActorContext, staffHasPermission } from "@/lib/auth/actor-context";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -634,7 +635,7 @@ export async function upsertCatalogRow(
       .eq("id", entityId);
     if (error) throw new Error(error.message);
 
-    revalidatePath(`/admin/${entity}`);
+    revalidatePath(adminHref(`/admin/${entity}`));
     return {
       id: entityId,
       slug: String(draftBody.slug ?? rest.slug ?? ""),
@@ -693,7 +694,7 @@ export async function upsertCatalogRow(
     await replaceCourseTestimonials(supabase, entityId, testimonials);
   }
 
-  revalidatePath(`/admin/${entity}`);
+  revalidatePath(adminHref(`/admin/${entity}`));
   revalidatePath("/purpleevents");
   revalidatePath("/programsfull");
   revalidatePath("/cvreadyprogram");
@@ -729,7 +730,7 @@ export async function clearCatalogDraft(
     .update({ cms_draft: null })
     .eq("id", id);
   if (error) throw new Error(error.message);
-  revalidatePath(`/admin/${entity}`);
+  revalidatePath(adminHref(`/admin/${entity}`));
 }
 
 export async function setCatalogPhase(
@@ -744,7 +745,7 @@ export async function setCatalogPhase(
     .update({ lifecycle_phase: phase })
     .eq("id", id);
   if (error) throw new Error(error.message);
-  revalidatePath(`/admin/${entity}`);
+  revalidatePath(adminHref(`/admin/${entity}`));
   if (entity === "events") {
     revalidatePath("/dashboard");
     revalidatePath("/purpleevents");

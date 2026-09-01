@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cmsHref, opsStudentHref } from "@pgs/shared";
 import { resolveActorContext, staffHasPermission } from "@/lib/auth/actor-context";
 import {
   canViewStudent,
@@ -449,10 +450,10 @@ export async function saveDashboardDoc(
     if (error) throw new Error(error.message);
   }
 
-  revalidatePath("/dash");
-  revalidatePath(`/dash/${studentId}`);
+  revalidatePath(cmsHref("/dash"));
+  revalidatePath(cmsHref(`/dash/${studentId}`));
   revalidatePath("/dashboard");
-  revalidatePath(`/ops/students/${studentId}`);
+  revalidatePath(opsStudentHref(studentId));
 
   return {
     published: mode === "publish" || currentlyPublished,
@@ -468,6 +469,6 @@ export async function discardDashboardDraft(studentId: string) {
     .update({ cms_draft: null })
     .eq("student_id", studentId);
   if (error) throw new Error(error.message);
-  revalidatePath("/dash");
-  revalidatePath(`/dash/${studentId}`);
+  revalidatePath(cmsHref("/dash"));
+  revalidatePath(cmsHref(`/dash/${studentId}`));
 }

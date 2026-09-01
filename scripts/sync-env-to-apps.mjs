@@ -23,6 +23,10 @@ for (const app of apps) {
     `# Auto-appended by sync-env for @pgs/app-${app}`,
     `NEXT_PUBLIC_PGS_SURFACE=${surface}`,
     `NEXT_PUBLIC_SITE_URL=http://localhost:${port}`,
+    `NEXT_PUBLIC_WEB_SITE_URL=http://localhost:3000`,
+    `NEXT_PUBLIC_OPS_SITE_URL=http://localhost:3001`,
+    `NEXT_PUBLIC_ADMIN_SITE_URL=http://localhost:3002`,
+    `NEXT_PUBLIC_CMS_SITE_URL=http://localhost:3003`,
   ].join("\n");
 
   const target = path.join(ROOT, "apps", app, ".env.local");

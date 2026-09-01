@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { adminHref, opsHref } from "@pgs/shared";
 import {
   requireStaffPermission,
 } from "@/lib/auth/student-access";
@@ -39,9 +40,9 @@ export async function assignMentorAction(
   });
   if (error) throw new Error(error.message);
 
-  revalidatePath("/ops/students");
-  revalidatePath("/ops/access");
-  revalidatePath("/admin/users");
+  revalidatePath(opsHref("/ops/students"));
+  revalidatePath(opsHref("/ops/access"));
+  revalidatePath(adminHref("/admin/users"));
   return data;
 }
 
@@ -60,8 +61,8 @@ export async function unassignMentorAction(
     event_reason: reason ?? "Unassigned from operations portal",
   });
   if (error) throw new Error(error.message);
-  revalidatePath("/ops/students");
-  revalidatePath("/ops/access");
+  revalidatePath(opsHref("/ops/students"));
+  revalidatePath(opsHref("/ops/access"));
 }
 
 export async function manageStaffAccessAction(input: {
@@ -94,8 +95,8 @@ export async function manageStaffAccessAction(input: {
     status: input.status ?? "active",
     reason: input.reason,
   });
-  revalidatePath("/ops/team");
-  revalidatePath(`/ops/team/${input.userId}`);
+  revalidatePath(opsHref("/ops/team"));
+  revalidatePath(opsHref(`/ops/team/${input.userId}`));
 }
 
 export async function inviteGuardianAction(
@@ -125,7 +126,7 @@ export async function inviteGuardianAction(
     // Relationship row still created
   }
 
-  revalidatePath(`/ops/students/${studentId}`);
+  revalidatePath(opsHref(`/ops/students/${studentId}`));
 }
 
 export async function revokeGuardianAction(relationshipId: string, studentId: string) {
@@ -138,7 +139,7 @@ export async function revokeGuardianAction(relationshipId: string, studentId: st
     .eq("id", relationshipId)
     .eq("student_id", studentId);
   if (error) throw new Error(error.message);
-  revalidatePath(`/ops/students/${studentId}`);
+  revalidatePath(opsHref(`/ops/students/${studentId}`));
 }
 
 export async function grantPremiumAction(studentId: string, planCode = "purple_premium_12") {
@@ -177,8 +178,8 @@ export async function grantPremiumAction(studentId: string, planCode = "purple_p
       p_metadata: { months: 12 },
     });
   }
-  revalidatePath("/ops/access");
-  revalidatePath("/ops/students");
+  revalidatePath(opsHref("/ops/access"));
+  revalidatePath(opsHref("/ops/students"));
 }
 
 export async function revokePremiumAction(studentId: string) {
@@ -204,8 +205,8 @@ export async function revokePremiumAction(studentId: string) {
       .eq("status", "active");
     if (error) throw new Error(error.message);
   }
-  revalidatePath("/ops/access");
-  revalidatePath("/ops/students");
+  revalidatePath(opsHref("/ops/access"));
+  revalidatePath(opsHref("/ops/students"));
 }
 
 export async function createStaffTargetAction(input: {
@@ -242,7 +243,7 @@ export async function createStaffTargetAction(input: {
     });
     if (error) throw new Error(error.message);
   }
-  revalidatePath("/ops/work");
+  revalidatePath(opsHref("/ops/work"));
 }
 
 export async function updateStaffTargetStatusAction(
@@ -257,5 +258,5 @@ export async function updateStaffTargetStatusAction(
     .update({ status, updated_at: new Date().toISOString() })
     .eq("id", targetId);
   if (error) throw new Error(error.message);
-  revalidatePath("/ops/work");
+  revalidatePath(opsHref("/ops/work"));
 }

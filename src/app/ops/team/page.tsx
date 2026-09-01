@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { opsHref } from "@pgs/shared";
 import { StaffDirectory } from "@/features/operations/components/StaffDirectory";
 import { loadStaffDirectory } from "@/lib/operations/staff-access-server";
 import { resolveActorContext, staffHasPermission } from "@/lib/auth/actor-context";
@@ -24,11 +25,11 @@ export default async function OpsTeamPage() {
         </div>
         <div className="pgs-ops__header-actions">
           {canManage ? (
-            <Link className="is-primary" href="/ops/team/add">
+            <Link className="is-primary" href={opsHref("/ops/team/add")}>
               Invite / add staff
             </Link>
           ) : null}
-          {isSuperAdmin ? <Link href="/ops/team/roles">Permission matrix</Link> : null}
+          {isSuperAdmin ? <Link href={opsHref("/ops/team/roles")}>Permission matrix</Link> : null}
         </div>
       </div>
       <StaffDirectory rows={rows} canManage={canManage} />

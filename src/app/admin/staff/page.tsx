@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
+import { opsPortalLink } from "@pgs/shared";
 
 export default function AdminStaffPage() {
-  redirect("/ops/team");
+  redirect(opsPortalLink("/ops/team"));
 }

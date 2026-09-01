@@ -33,7 +33,7 @@ export default async function DashLayout({
     !staffHasPermission(actor.staff, "student_workspace.read") &&
     !staffHasPermission(actor.staff, "student_workspace.read_all")
   ) {
-    redirect("/");
+    redirect("/login?error=forbidden");
   }
 
   return <DashShell>{children}</DashShell>;

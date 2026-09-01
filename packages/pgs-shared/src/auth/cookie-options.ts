@@ -1,5 +1,5 @@
 import type { CookieOptions } from "@supabase/ssr";
-import { normalizeSurface, type PgsSurface } from "../surfaces";
+import { normalizeSurface, type PgsEnv, type PgsSurface } from "../surfaces";
 
 export type SupabaseAuthCookieOptions = CookieOptions & { name: string };
 
@@ -11,7 +11,7 @@ export type SupabaseAuthCookieOptions = CookieOptions & { name: string };
  * if you explicitly want shared SSO across subdomains (not recommended for PGS).
  */
 export function resolveCookieDomain(
-  env: NodeJS.ProcessEnv = process.env,
+  env: PgsEnv = process.env,
 ): string | undefined {
   const explicit = env.PGS_COOKIE_DOMAIN?.trim();
   if (!explicit) {
@@ -41,7 +41,7 @@ export function resolveAuthCookieName(
 export function supabaseAuthCookieOptions(
   supabaseUrl: string,
   surface: PgsSurface,
-  env: NodeJS.ProcessEnv = process.env,
+  env: PgsEnv = process.env,
 ): SupabaseAuthCookieOptions {
   const domain = resolveCookieDomain(env);
   return {
@@ -56,7 +56,7 @@ export function supabaseAuthCookieOptions(
 
 export function mergeSupabaseCookieOptions(
   options: CookieOptions,
-  env: NodeJS.ProcessEnv = process.env,
+  env: PgsEnv = process.env,
 ): CookieOptions {
   const domain = resolveCookieDomain(env);
   if (!domain) {
@@ -73,7 +73,7 @@ export function mergeSupabaseCookieOptions(
 }
 
 /** True only when PGS_COOKIE_DOMAIN is explicitly set (shared SSO mode). */
-export function usesSharedParentDomain(env: NodeJS.ProcessEnv = process.env): boolean {
+export function usesSharedParentDomain(env: PgsEnv = process.env): boolean {
   return Boolean(resolveCookieDomain(env));
 }
 
@@ -81,7 +81,7 @@ export function usesSharedParentDomain(env: NodeJS.ProcessEnv = process.env): bo
 export function resolveAuthSurface(
   pathname: string,
   surfaceParam?: string | null,
-  env: NodeJS.ProcessEnv = process.env,
+  env: PgsEnv = process.env,
 ): PgsSurface {
   const deploySurface = env.NEXT_PUBLIC_PGS_SURFACE ?? env.PGS_SURFACE;
   if (deploySurface) {

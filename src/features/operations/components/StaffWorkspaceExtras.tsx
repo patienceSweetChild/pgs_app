@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { cmsStudentHref } from "@pgs/shared";
 import type {
   CounselorNote,
   PremiumWorkspaceProfile,
@@ -72,7 +73,7 @@ export function StaffWorkspaceExtras({
         </dl>
         {canManage ? (
           <p>
-            <Link className="pgs-ops__btn" href={`/dash/${studentId}`}>
+            <Link className="pgs-ops__btn" href={cmsStudentHref(studentId)}>
               Edit in Dashboard CMS
             </Link>
           </p>

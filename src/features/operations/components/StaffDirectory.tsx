@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { opsHref } from "@pgs/shared";
 import type { StaffDirectoryRow } from "@/lib/operations/staff-access";
 import { roleLabel, staffDirectoryActionLabel } from "@/lib/operations/staff-access";
 
@@ -27,7 +28,7 @@ export function StaffDirectory({
           {rows.map((row) => (
             <tr key={row.user_id}>
               <td>
-                <Link href={`/ops/team/${row.user_id}`}>
+                <Link href={opsHref(`/ops/team/${row.user_id}`)}>
                   {row.display_name || "—"}
                 </Link>
               </td>
@@ -35,7 +36,7 @@ export function StaffDirectory({
               <td>{row.status}</td>
               <td>{row.assigned_student_count}</td>
               <td>
-                <Link href={`/ops/team/${row.user_id}`}>
+                <Link href={opsHref(`/ops/team/${row.user_id}`)}>
                   {staffDirectoryActionLabel(canManage)}
                 </Link>
               </td>

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { adminHref } from "@pgs/shared";
 import { resolveActorContext, staffHasPermission } from "@/lib/auth/actor-context";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { publicObjectUrl, STORAGE_BUCKETS, type StorageBucket } from "@/lib/supabase/storage";
@@ -221,11 +222,11 @@ export async function clearCountryDraft(id: number) {
     .update({ cms_draft: null })
     .eq("id", id);
   if (error) throw new Error(error.message);
-  revalidatePath("/admin/countries");
+  revalidatePath(adminHref("/admin/countries"));
 }
 
 function revalidateCountryPaths(slug: string) {
-  revalidatePath("/admin/countries");
+  revalidatePath(adminHref("/admin/countries"));
   revalidatePath("/explorecountries");
   if (slug) {
     revalidatePath(`/countries/${slug}`);

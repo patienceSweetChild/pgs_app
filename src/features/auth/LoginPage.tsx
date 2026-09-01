@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { adminHref, crossSurfaceLink, opsHref, resolveCurrentSurface } from "@pgs/shared";
 import { useExperience } from "@/lib/auth/experience";
 import "./auth.css";
 import {
@@ -159,8 +160,16 @@ export function LoginPage() {
     const raw = (searchParams.get("redirect") || "").trim();
     if (!raw || raw.startsWith("//") || /^[a-z][a-z0-9+.-]*:/i.test(raw)) {
       const surface = (searchParams.get("surface") || "").toLowerCase();
-      if (surface === "admin") return "/admin";
-      if (surface === "operations") return "/ops";
+      if (surface === "admin") {
+        return resolveCurrentSurface() === "web"
+          ? crossSurfaceLink("admin", "/")
+          : adminHref("/admin");
+      }
+      if (surface === "operations") {
+        return resolveCurrentSurface() === "web"
+          ? crossSurfaceLink("ops", "/")
+          : opsHref("/ops");
+      }
       return "/";
     }
     return raw.startsWith("/") ? raw : `/${raw}`;

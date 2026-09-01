@@ -1,5 +1,4 @@
-import { crossSurfaceLink } from "./surfaces";
-import { resolveCurrentSurface, type PgsSurface } from "./surfaces";
+import { crossSurfaceLink, resolveCurrentSurface, type PgsEnv, type PgsSurface } from "./surfaces";
 
 /** Monolith URL prefix when all surfaces share one origin. */
 const MONOLITH_PREFIX: Record<Exclude<PgsSurface, "web">, string> = {
@@ -8,7 +7,7 @@ const MONOLITH_PREFIX: Record<Exclude<PgsSurface, "web">, string> = {
   cms: "/dash",
 };
 
-export function isSplitDeploy(env: NodeJS.ProcessEnv = process.env): boolean {
+export function isSplitDeploy(env: PgsEnv = process.env): boolean {
   return Boolean(env.NEXT_PUBLIC_PGS_SURFACE ?? env.PGS_SURFACE);
 }
 
@@ -16,7 +15,7 @@ export function isSplitDeploy(env: NodeJS.ProcessEnv = process.env): boolean {
 export function stripMonolithPrefix(
   surface: Exclude<PgsSurface, "web">,
   pathname: string,
-  env: NodeJS.ProcessEnv = process.env,
+  env: PgsEnv = process.env,
 ): string {
   const prefix = MONOLITH_PREFIX[surface];
   if (resolveCurrentSurface(env) !== surface) {
@@ -30,26 +29,59 @@ export function stripMonolithPrefix(
 }
 
 /** Resolve in-app href for ops (monolith `/ops/*` vs split `/`). */
-export function opsHref(pathname: string, env: NodeJS.ProcessEnv = process.env): string {
+export function opsHref(pathname: string, env: PgsEnv = process.env): string {
   if (!isSplitDeploy(env)) return pathname;
   return stripMonolithPrefix("ops", pathname, env);
 }
 
-export function adminHref(pathname: string, env: NodeJS.ProcessEnv = process.env): string {
+export function adminHref(pathname: string, env: PgsEnv = process.env): string {
   if (!isSplitDeploy(env)) return pathname;
   return stripMonolithPrefix("admin", pathname, env);
 }
 
-export function cmsHref(pathname: string, env: NodeJS.ProcessEnv = process.env): string {
+export function cmsHref(pathname: string, env: PgsEnv = process.env): string {
   if (!isSplitDeploy(env)) return pathname;
   return stripMonolithPrefix("cms", pathname, env);
+}
+
+function opsPathOnOpsSurface(pathname: string): string {
+  const monolith = pathname.startsWith("/ops")
+    ? pathname
+    : `/ops${pathname.startsWith("/") ? pathname : `/${pathname}`}`;
+  return stripMonolithPrefix("ops", monolith, { NEXT_PUBLIC_PGS_SURFACE: "ops" });
+}
+
+/** Ops link — relative in-app on ops, full URL when linking from admin/cms/web. */
+export function opsPortalLink(
+  pathname: string,
+  env: PgsEnv = process.env,
+): string {
+  const monolith = pathname.startsWith("/ops")
+    ? pathname
+    : `/ops${pathname.startsWith("/") ? pathname : `/${pathname}`}`;
+  if (!isSplitDeploy(env)) return monolith;
+  const onOps = opsPathOnOpsSurface(monolith);
+  if (resolveCurrentSurface(env) === "ops") return onOps;
+  return crossSurfaceLink("ops", onOps, env);
+}
+
+export function opsStudentHref(studentId: string, env: PgsEnv = process.env): string {
+  return opsHref(`/ops/students/${studentId}`, env);
+}
+
+/** Staff dashboard CMS editor for a student (split: cms host `/:id`). */
+export function cmsStudentHref(studentId: string, env: PgsEnv = process.env): string {
+  const monolith = `/dash/${studentId}`;
+  if (!isSplitDeploy(env)) return monolith;
+  if (resolveCurrentSurface(env) === "cms") return `/${studentId}`;
+  return crossSurfaceLink("cms", `/${studentId}`, env);
 }
 
 /** Cross-surface staff portal links (ops → admin/cms subdomains). */
 export function staffPortalLink(
   target: "admin" | "cms",
   path = "/",
-  env: NodeJS.ProcessEnv = process.env,
+  env: PgsEnv = process.env,
 ): string {
   if (!isSplitDeploy(env)) {
     return target === "admin" ? "/admin" : "/dash";
@@ -61,7 +93,7 @@ export function staffPortalLink(
 export function loginPathForSurface(
   surface: PgsSurface,
   redirectTo: string,
-  env: NodeJS.ProcessEnv = process.env,
+  env: PgsEnv = process.env,
 ): string {
   const surfaceParam =
     surface === "ops"

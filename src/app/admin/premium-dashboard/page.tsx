@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { cmsStudentHref, opsPortalLink } from "@pgs/shared";
 import { listPremiumWorkspaces } from "@/features/admin/content-actions";
 
 export default function PremiumDashboardListPage() {
@@ -23,7 +24,7 @@ export default function PremiumDashboardListPage() {
       <h1 style={{ marginTop: 0 }}>Premium Dashboard</h1>
       <p style={{ color: "#6b6280" }}>
         Students with premium workspace profiles.{" "}
-        <Link href="/ops/students?plan=premium">Manage in Operations</Link>
+        <Link href={`${opsPortalLink("/ops/students")}?plan=premium`}>Manage in Operations</Link>
       </p>
       {error ? (
         <p role="alert" style={{ color: "#b91c1c" }}>
@@ -70,7 +71,7 @@ export default function PremiumDashboardListPage() {
                         : "—"}
                     </td>
                     <td>
-                      <Link href={`/dash/${row.student_id}`}>Edit dashboard</Link>
+                      <Link href={cmsStudentHref(String(row.student_id))}>Edit dashboard</Link>
                     </td>
                   </tr>
                 );

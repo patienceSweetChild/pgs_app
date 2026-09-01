@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { opsHref } from "@pgs/shared";
 import { RoleMatrixEditor } from "@/features/operations/components/RoleMatrixEditor";
 import { loadRoleMatrix } from "@/lib/operations/role-matrix-server";
 import { resolveActorContext } from "@/lib/auth/actor-context";
@@ -8,7 +9,7 @@ import { redirectMentorPreviewAwayFromPrivilegedPages } from "@/lib/operations/s
 export default async function OpsRolesPage() {
   await redirectMentorPreviewAwayFromPrivilegedPages();
   const actor = await resolveActorContext();
-  if (actor.staff?.roleKey !== "super_admin") redirect("/ops/team");
+  if (actor.staff?.roleKey !== "super_admin") redirect(opsHref("/ops/team"));
   const roles = await loadRoleMatrix();
   return (
     <div className="pgs-ops__detail-page">
@@ -22,7 +23,7 @@ export default async function OpsRolesPage() {
           </p>
         </div>
         <div className="pgs-ops__header-actions">
-          <Link href="/ops/team">Back to Team</Link>
+          <Link href={opsHref("/ops/team")}>Back to Team</Link>
         </div>
       </div>
       <RoleMatrixEditor initialRoles={roles} />

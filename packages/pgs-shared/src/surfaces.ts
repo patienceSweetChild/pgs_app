@@ -6,6 +6,9 @@
  */
 export type PgsSurface = "web" | "ops" | "admin" | "cms";
 
+/** Env bag for surface helpers — avoids requiring full NodeJS.ProcessEnv in tests. */
+export type PgsEnv = Record<string, string | undefined>;
+
 /** @deprecated Use `cms`. Kept for env vars / routes still named dash during migration. */
 export type PgsSurfaceLegacy = PgsSurface | "dash";
 
@@ -57,7 +60,7 @@ export function normalizeSiteUrl(value: string): string {
 }
 
 export function resolveCurrentSurface(
-  env: NodeJS.ProcessEnv = process.env,
+  env: PgsEnv = process.env,
 ): PgsSurface {
   const raw = env.NEXT_PUBLIC_PGS_SURFACE ?? env.PGS_SURFACE ?? "web";
   return normalizeSurface(raw);
@@ -66,7 +69,7 @@ export function resolveCurrentSurface(
 /** Origin for a surface — env override wins, then production host, then localhost port. */
 export function surfaceSiteUrl(
   surface: PgsSurface,
-  env: NodeJS.ProcessEnv = process.env,
+  env: PgsEnv = process.env,
 ): string {
   const perSurfaceKey = `NEXT_PUBLIC_${surface.toUpperCase()}_SITE_URL`;
   const fromEnv = env[perSurfaceKey] ?? env.NEXT_PUBLIC_SITE_URL;
@@ -84,7 +87,7 @@ export function surfaceSiteUrl(
 
 export function surfaceConfig(
   surface: PgsSurface,
-  env: NodeJS.ProcessEnv = process.env,
+  env: PgsEnv = process.env,
 ): SurfaceConfig {
   const siteUrl = surfaceSiteUrl(surface, env);
   const loginPath = "/login";
@@ -97,7 +100,7 @@ export function surfaceConfig(
 export function loginUrlForIntent(
   intent: "operations" | "admin" | "guardian" | "student",
   redirectTo: string,
-  env: NodeJS.ProcessEnv = process.env,
+  env: PgsEnv = process.env,
 ): string {
   let surface: PgsSurface = "web";
   let surfaceParam = "";
@@ -123,7 +126,7 @@ export function loginUrlForIntent(
 export function crossSurfaceLink(
   target: PgsSurface,
   path: string,
-  env: NodeJS.ProcessEnv = process.env,
+  env: PgsEnv = process.env,
 ): string {
   const base = surfaceSiteUrl(target, env);
   const normalized = path.startsWith("/") ? path : `/${path}`;

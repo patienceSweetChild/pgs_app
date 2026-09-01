@@ -34,7 +34,7 @@ export default async function OpsLayout({
     !staffHasPermission(actor.staff, "student_workspace.read") &&
     !staffHasPermission(actor.staff, "student_workspace.read_all")
   ) {
-    redirect("/");
+    redirect("/login?error=forbidden");
   }
 
   const [preview, notificationUnreadCount] = await Promise.all([

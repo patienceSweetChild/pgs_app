@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { loginPathForSurface, opsHref } from "@pgs/shared";
 import { loadOperationsScoreboard } from "@/lib/operations/scoreboard-server";
 import { ScoreboardPanels } from "@/features/operations/components/ScoreboardPanels";
 import { getStaffPreviewContext } from "@/lib/operations/staff-preview-server";
@@ -7,9 +8,9 @@ import { resolveActorContext, staffHasPermission } from "@/lib/auth/actor-contex
 
 export default async function OpsScoreboardPage() {
   const actor = await resolveActorContext();
-  if (!actor.staff) redirect("/login?surface=operations&redirect=/ops");
+  if (!actor.staff) redirect(loginPathForSurface("ops", opsHref("/ops")));
   if (!staffHasPermission(actor.staff, "overview.read")) {
-    redirect("/ops/students");
+    redirect(opsHref("/ops/students"));
   }
   const preview = await getStaffPreviewContext(actor.staff);
   const model = await loadOperationsScoreboard({

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { opsPortalLink } from "@pgs/shared";
 import { assignMentor, inviteGuardian } from "./crm-actions";
 
 type Mentor = { user_id: string; display_name: string; role_key: string };
@@ -33,7 +34,7 @@ export function UserDetailClient({
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem" }}>
         <h1 style={{ marginTop: 0 }}>{String(user.full_name || "Student")}</h1>
-        <a href={`/ops/students/${String(user.id)}`}>Open in Operations</a>
+        <a href={opsPortalLink(`/ops/students/${String(user.id)}`)}>Open in Operations</a>
       </div>
       <div className="pgs-admin__grid">
         <div className="pgs-admin__card">

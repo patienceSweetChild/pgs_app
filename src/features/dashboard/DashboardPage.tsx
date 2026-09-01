@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { opsPortalLink } from "@pgs/shared";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import {
@@ -291,7 +292,7 @@ export function DashboardPage({
           }}
         >
           <span>Staff preview of student dashboard</span>
-          <Link href={`/ops/students/${staffStudentId}`} style={{ color: "#fff" }}>
+          <Link href={opsPortalLink(`/ops/students/${staffStudentId}`)} style={{ color: "#fff" }}>
             Back to Operations
           </Link>
         </div>

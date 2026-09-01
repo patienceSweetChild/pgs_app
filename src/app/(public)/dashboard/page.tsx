@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { opsPortalLink } from "@pgs/shared";
 import { DashboardPage } from "@/features/dashboard/DashboardPage";
 import { requireStudentViewer } from "@/lib/auth/student-access";
 import { listFeedUpcomingEvents } from "@/lib/catalog/public";
@@ -26,7 +27,7 @@ export default async function Page({
     try {
       await requireStudentViewer(studentId, "read");
     } catch {
-      redirect("/ops/students");
+      redirect(opsPortalLink("/ops/students"));
     }
   }
 

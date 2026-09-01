@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { opsHref } from "@pgs/shared";
 import { StaffAccessDetailPanel } from "@/features/operations/components/StaffAccessDetail";
 import { StaffTargetsPanel } from "@/features/operations/components/StaffTargetsPanel";
 import {
@@ -46,8 +47,8 @@ export default async function OpsTeamDetailPage({
           </p>
         </div>
         <div className="pgs-ops__header-actions">
-          <Link href="/ops/team">← Team directory</Link>
-          <Link href={`/ops/work?staff=${id}`}>Manage targets</Link>
+          <Link href={opsHref("/ops/team")}>← Team directory</Link>
+          <Link href={`${opsHref("/ops/work")}?staff=${id}`}>Manage targets</Link>
         </div>
       </div>
 

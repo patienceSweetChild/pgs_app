@@ -2,6 +2,7 @@ import "server-only";
 
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { opsHref } from "@pgs/shared";
 import type { StaffContext } from "@/lib/auth/actor-context";
 import { resolveActorContext, staffHasPermission } from "@/lib/auth/actor-context";
 
@@ -80,9 +81,15 @@ export async function redirectMentorPreviewAwayFromPrivilegedPages() {
   if (
     path.includes("/ops/team") ||
     path.includes("/ops/activity") ||
-    path.includes("/ops/access")
+    path.includes("/ops/access") ||
+    path === "/team" ||
+    path.startsWith("/team/") ||
+    path === "/activity" ||
+    path.startsWith("/activity/") ||
+    path === "/access" ||
+    path.startsWith("/access/")
   ) {
-    redirect("/ops/students");
+    redirect(opsHref("/ops/students"));
   }
 }
 

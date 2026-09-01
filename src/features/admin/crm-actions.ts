@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { adminHref, opsHref } from "@pgs/shared";
 import { resolveActorContext, staffHasPermission } from "@/lib/auth/actor-context";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -76,11 +77,11 @@ export async function reviewPremiumApplication(
     description: `${decision} PurplePremium application`,
   });
 
-  revalidatePath("/admin/premium");
-  revalidatePath("/admin");
-  revalidatePath("/admin/premium-dashboard");
-  revalidatePath("/ops/students");
-  revalidatePath("/ops/access");
+  revalidatePath(adminHref("/admin/premium"));
+  revalidatePath(adminHref("/admin"));
+  revalidatePath(adminHref("/admin/premium-dashboard"));
+  revalidatePath(opsHref("/ops/students"));
+  revalidatePath(opsHref("/ops/access"));
 }
 
 export async function assignMentor(studentId: string, mentorId: string) {
@@ -106,7 +107,7 @@ export async function assignMentor(studentId: string, mentorId: string) {
     changes: { mentor_id: mentorId },
   });
 
-  revalidatePath("/admin/users");
+  revalidatePath(adminHref("/admin/users"));
 }
 
 export async function replyEnquiry(id: number, replyMessage: string) {
@@ -117,7 +118,7 @@ export async function replyEnquiry(id: number, replyMessage: string) {
     .update({ reply: true, reply_message: replyMessage })
     .eq("id", id);
   if (error) throw new Error(error.message);
-  revalidatePath("/admin/enquiries");
+  revalidatePath(adminHref("/admin/enquiries"));
 }
 
 export async function inviteGuardian(
@@ -148,6 +149,6 @@ export async function inviteGuardian(
     // Relationship row still created; email invite may need dashboard fallback
   }
 
-  revalidatePath(`/admin/users/${studentId}`);
+  revalidatePath(adminHref(`/admin/users/${studentId}`));
   return data as string;
 }

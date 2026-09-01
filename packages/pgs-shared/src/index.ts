@@ -14,9 +14,12 @@ export { createSessionMiddleware, type SessionMiddlewareConfig } from "./auth/se
 export {
   adminHref,
   cmsHref,
+  cmsStudentHref,
   isSplitDeploy,
   loginPathForSurface,
   opsHref,
+  opsPortalLink,
+  opsStudentHref,
   staffPortalLink,
   stripMonolithPrefix,
 } from "./routes";
@@ -29,6 +32,7 @@ export {
   resolveCurrentSurface,
   surfaceConfig,
   surfaceSiteUrl,
+  type PgsEnv,
   type PgsSurface,
   type PgsSurfaceLegacy,
   type SurfaceConfig,

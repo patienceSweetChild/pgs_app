@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { opsHref } from "@pgs/shared";
 import { StudentRegistry } from "@/features/operations/components/StudentRegistry";
 import {
   canQueryStudentRegistry,
@@ -56,7 +57,7 @@ export default async function OpsStudentsPage({
         </div>
         {staffHasPermission(actor.staff, "premium.manage") && !preview ? (
           <div className="pgs-ops__header-actions">
-            <Link className="is-primary" href="/ops/access">
+            <Link className="is-primary" href={opsHref("/ops/access")}>
               Premium & mentor controls
             </Link>
           </div>
