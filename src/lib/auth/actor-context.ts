@@ -1,10 +1,15 @@
 import { cache } from "react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import {
+  isStaffRoleKey,
+  normalizeRoleKey,
+  type StaffRoleKey,
+} from "@/lib/auth/permissions";
 
 export type StaffContext = {
   userId: string;
-  roleKey: string;
+  roleKey: StaffRoleKey | string;
   displayName: string;
   permissions: string[];
 };
@@ -60,10 +65,11 @@ export const resolveActorContext = cache(async (): Promise<ActorContext> => {
 
   let permissions: string[] = [];
   if (staffRow) {
+    const roleKey = normalizeRoleKey(staffRow.role_key) || staffRow.role_key;
     const { data: links } = await supabase
       .from("staff_role_permissions")
       .select("staff_permissions(key), staff_roles!inner(key)")
-      .eq("staff_roles.key", staffRow.role_key);
+      .eq("staff_roles.key", roleKey);
 
     permissions = (links ?? [])
       .map((row) => {
@@ -75,6 +81,23 @@ export const resolveActorContext = cache(async (): Promise<ActorContext> => {
         return perm?.key;
       })
       .filter((k): k is string => Boolean(k));
+
+    if (!permissions.length && roleKey !== staffRow.role_key) {
+      const { data: legacyLinks } = await supabase
+        .from("staff_role_permissions")
+        .select("staff_permissions(key), staff_roles!inner(key)")
+        .eq("staff_roles.key", staffRow.role_key);
+      permissions = (legacyLinks ?? [])
+        .map((row) => {
+          const perm = row.staff_permissions as
+            | { key: string }
+            | { key: string }[]
+            | null;
+          if (Array.isArray(perm)) return perm[0]?.key;
+          return perm?.key;
+        })
+        .filter((k): k is string => Boolean(k));
+    }
   }
 
   let isGuardian = false;
@@ -92,7 +115,9 @@ export const resolveActorContext = cache(async (): Promise<ActorContext> => {
     staff: staffRow
       ? {
           userId: staffRow.user_id,
-          roleKey: staffRow.role_key,
+          roleKey: isStaffRoleKey(normalizeRoleKey(staffRow.role_key))
+            ? normalizeRoleKey(staffRow.role_key)
+            : staffRow.role_key,
           displayName: staffRow.display_name,
           permissions,
         }

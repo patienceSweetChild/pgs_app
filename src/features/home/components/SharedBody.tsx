@@ -1,9 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { VerticalStatCounter } from "@/features/auth/VerticalStatCounter";
+import "@/components/bump-premium-modal.css";
+import "@/features/scholarship/scholarship.css";
 import {
+  CHECKLIST_MODAL_COPY,
+  CHECKLIST_MODAL_GOALS,
+  CHECKLIST_STUDY_OPTIONS,
+  CHECKLIST_SUCCESS_MODAL,
   HOME_ABOUT_TEASER,
   HOME_APPLICATION_CHECKS,
   HOME_DASHBOARD,
@@ -553,15 +559,16 @@ function PathCard({
   );
 }
 
-function ChecklistCta() {
+function ChecklistCta({ onOpen }: { onOpen: () => void }) {
   return (
     <div className="border-radius-6px overflow-hidden">
       <div className="gradient-border">
         <div className="gradient-border-inner">
           <h5>Download our Application Planning Checklist (Free PDF)</h5>
-          <a
-            href="#"
+          <button
+            type="button"
             className="btn btn-small-large cm-buttom-1 border-radius-10px btn-base-color btn-rounded btn-switch-text d-inline-block me-20px sm-me-10px align-middle left-icon mt-5px"
+            onClick={onOpen}
           >
             <span>
               <span
@@ -571,7 +578,7 @@ function ChecklistCta() {
                 Request it here
               </span>
             </span>
-          </a>
+          </button>
         </div>
       </div>
     </div>
@@ -646,7 +653,44 @@ function StemCard() {
 
 function PremiumJumpSection() {
   const [usmle, amc, plab, rotation] = HOME_PREMIUM_PATHS;
+  const [modalOpen, setModalOpen] = useState(false);
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [studyPlan, setStudyPlan] = useState<string>(CHECKLIST_STUDY_OPTIONS[0].value);
+  const [goals, setGoals] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(CHECKLIST_MODAL_GOALS.map((g) => [g, true])),
+  );
+
+  useEffect(() => {
+    if (!modalOpen && !successOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [modalOpen, successOpen]);
+
+  function openChecklistModal() {
+    setSuccessOpen(false);
+    setModalOpen(true);
+  }
+
+  function closeChecklistModals() {
+    setModalOpen(false);
+    setSuccessOpen(false);
+  }
+
+  function onChecklistSubmit(e: FormEvent) {
+    e.preventDefault();
+    if (!name.trim() || !email.includes("@")) return;
+    setModalOpen(false);
+    setSuccessOpen(true);
+  }
+
   return (
+    <>
     <section className="half-section overlap-height position-relative overflow-hidden mobile-premium-section">
       <div className="w-873px m-auto overlap-gap-section p-0">
         <div className="col-lg-12 bg-very-light-green xl-p-4 md-p-50px sm-p-30px pb-sm-0">
@@ -675,7 +719,7 @@ function PremiumJumpSection() {
           </div>
           <div>
             <PathCard {...rotation} />
-            <ChecklistCta />
+            <ChecklistCta onOpen={openChecklistModal} />
             <div className="card-line-ht w-362px">
               <h5>#purplePremium</h5>
               <div className="black-header-1">
@@ -700,9 +744,10 @@ function PremiumJumpSection() {
             <div className="gradient-border">
               <div className="gradient-border-inner">
                 <h5>Download our Application Planning Checklist (Free PDF)</h5>
-                <a
-                  href="#"
+                <button
+                  type="button"
                   className="btn btn-small-large cm-buttom-1 border-radius-10px btn-base-color btn-rounded btn-switch-text d-inline-block me-20px sm-me-10px align-middle left-icon mt-5px"
+                  onClick={openChecklistModal}
                 >
                   <span>
                     <span
@@ -712,7 +757,7 @@ function PremiumJumpSection() {
                       Request it here
                     </span>
                   </span>
-                </a>
+                </button>
               </div>
             </div>
           </div>
@@ -731,6 +776,271 @@ function PremiumJumpSection() {
         </div>
       </div>
     </section>
+
+    {modalOpen ? (
+      <div
+        className="mobile-applicant pgs-modal pgs-modalSc pgs-modalSplit premium-modal-overlay"
+        style={{ display: "flex" }}
+      >
+        <div className="premium-modal-container purple-modal d-flex">
+          <div className="panel-left">
+            <button
+              className="close-btn desktop-none"
+              type="button"
+              aria-label="Close"
+              onClick={closeChecklistModals}
+            >
+              ✕
+            </button>
+            <div className="brand-row">
+              <div className="brand-title">#PGS</div>
+              <div className="heart-badge">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/assets/img/heart.gif" alt="" />
+              </div>
+            </div>
+            <div className="sub-label fnt-family">
+              {CHECKLIST_MODAL_COPY.subLabel}
+            </div>
+            <p className="tagline lh-18ppx">{CHECKLIST_MODAL_COPY.tagline}</p>
+            <div className="boost-wrap">
+              <div className="mobile-none" style={{ margin: "0 0 0 auto" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/assets/img/arrow-modal.png"
+                  style={{ width: 95, marginLeft: -10 }}
+                  alt=""
+                />
+                <span className="w-full d-block fs-16 text-white lh-18">
+                  {CHECKLIST_MODAL_COPY.boostDesktop.map((line, i) => (
+                    <span key={line}>
+                      {line}
+                      {i < CHECKLIST_MODAL_COPY.boostDesktop.length - 1 ? (
+                        <br />
+                      ) : null}
+                    </span>
+                  ))}
+                </span>
+              </div>
+              <div className="mb-4">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/assets/img/bump.png" alt="" />
+              </div>
+              <div className="desktop-none">
+                <p className="mb-0 fs-14 lh-20 fw-400 text-white">
+                  {CHECKLIST_MODAL_COPY.boostMobile}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="panel-right">
+            <button
+              className="close-btn mobile-none"
+              type="button"
+              aria-label="Close"
+              onClick={closeChecklistModals}
+            >
+              ✕
+            </button>
+
+            <form onSubmit={onChecklistSubmit}>
+              <div className="field-group">
+                <div className="field">
+                  <input
+                    type="text"
+                    placeholder="Enter Name *"
+                    autoComplete="name"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </div>
+                <div className="field">
+                  <input
+                    type="email"
+                    placeholder="Email *"
+                    autoComplete="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+                <div className="field">
+                  <input
+                    type="tel"
+                    placeholder={CHECKLIST_MODAL_COPY.phonePlaceholder}
+                    autoComplete="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <p className="section-label mb-0">
+                  {CHECKLIST_MODAL_COPY.aimLabel}
+                </p>
+                <div className="toggle-list" style={{ marginTop: 12 }}>
+                  {CHECKLIST_MODAL_GOALS.map((goal) => (
+                    <label className="toggle-row" key={goal}>
+                      <label className="toggle-switch">
+                        <input
+                          type="checkbox"
+                          checked={!!goals[goal]}
+                          onChange={() =>
+                            setGoals((prev) => ({
+                              ...prev,
+                              [goal]: !prev[goal],
+                            }))
+                          }
+                        />
+                        <span className="slider" />
+                      </label>
+                      <span>{goal}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="divider" />
+
+              <div>
+                <p className="section-label mb-2">
+                  {CHECKLIST_MODAL_COPY.studyLabel}
+                </p>
+                <div className="d-flex gap-3">
+                  <select
+                    className="modal-btn-pgs text-center"
+                    value={studyPlan}
+                    onChange={(e) => setStudyPlan(e.target.value)}
+                  >
+                    {CHECKLIST_STUDY_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/assets/img/arrow-btn.png"
+                    style={{ width: 26, height: 26 }}
+                    alt=""
+                  />
+                </div>
+              </div>
+
+              <div className="cta-row">
+                <button className="cta-btn" type="submit">
+                  {CHECKLIST_MODAL_COPY.cta}
+                  <span className="arrow">←</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    ) : null}
+
+    {successOpen ? (
+      <div
+        className="pgs-modal premium-modal-overlay modal-pgsamc-2 scholarship-success-overlay"
+        style={{ display: "flex" }}
+      >
+        <div className="premium-modal-container purple-modal d-flex bg-white pgs-modal-2 scholarship-success">
+          <button
+            className="close-btn"
+            type="button"
+            aria-label="Close"
+            onClick={closeChecklistModals}
+          >
+            ✕
+          </button>
+          <div className="scholarship-success__hero text-center">
+            <h5 className="fw-700 fs-48 text-black">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/assets/img/check-12.png"
+                style={{ width: 50 }}
+                alt=""
+              />
+              {CHECKLIST_SUCCESS_MODAL.title}
+            </h5>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/assets/img/okk.png"
+              className="scholarship-success__hand"
+              alt=""
+            />
+            <h5 className="fw-400 fs-24 fnt-family text-black mb-0">
+              {CHECKLIST_SUCCESS_MODAL.nextTitle}
+            </h5>
+          </div>
+
+          <div className="scholarship-success__side mobile-none">
+            <div className="scholarship-success__copy">
+              {CHECKLIST_SUCCESS_MODAL.paragraphs.map((p) => (
+                <p key={p} className="fs-13 fw-400 mb-3 text-black lh-15">
+                  {p}
+                </p>
+              ))}
+            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              className="scholarship-success__heart"
+              src="/assets/img/heart.gif"
+              alt=""
+            />
+            <div className="scholarship-success__cta">
+              <p className="fs-13 lh-15 text-white mb-2">
+                {CHECKLIST_SUCCESS_MODAL.stripLines[0]}
+              </p>
+              <p className="fs-13 lh-15 text-white mb-0">
+                <Link
+                  href="/contact"
+                  className="text-white text-decoration-underline"
+                >
+                  {CHECKLIST_SUCCESS_MODAL.stripLines[1]}
+                </Link>
+              </p>
+            </div>
+          </div>
+
+          <div className="scholarship-success__mobile desktop-none">
+            {CHECKLIST_SUCCESS_MODAL.paragraphs.map((p) => (
+              <p key={p} className="fs-13 fw-400 mb-3 text-black lh-15">
+                {p}
+              </p>
+            ))}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/assets/img/heart.gif"
+              style={{
+                width: 50,
+                borderRadius: 10,
+                margin: "8px auto 12px",
+                display: "block",
+              }}
+              alt=""
+            />
+            <div className="scholarship-success__cta">
+              <p className="fs-13 lh-15 text-white mb-2">
+                {CHECKLIST_SUCCESS_MODAL.stripLines[0]}
+              </p>
+              <p className="fs-13 lh-15 text-white mb-0">
+                <Link
+                  href="/contact"
+                  className="text-white text-decoration-underline"
+                >
+                  {CHECKLIST_SUCCESS_MODAL.stripLines[1]}
+                </Link>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    ) : null}
+    </>
   );
 }
 

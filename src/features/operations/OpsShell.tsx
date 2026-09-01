@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo } from "react";
-import { usePathname } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { OPS_NAV } from "./nav";
+import { AskPgsPanel } from "./components/AskPgsPanel";
 import "./operations.css";
 import "./ops-field-overrides.css";
 
@@ -19,6 +20,9 @@ export function OpsShell({
   permissions,
   preview,
   showCmsLink,
+  showDashLink,
+  notificationUnreadCount = 0,
+  aiEnabled = false,
 }: {
   children: React.ReactNode;
   staffName: string;
@@ -29,9 +33,21 @@ export function OpsShell({
     targetName: string;
   } | null;
   showCmsLink?: boolean;
+  showDashLink?: boolean;
+  notificationUnreadCount?: number;
+  aiEnabled?: boolean;
 }) {
   const pathname = usePathname() || "/ops";
+  const router = useRouter();
   const permSet = useMemo(() => new Set(permissions), [permissions]);
+  const [query, setQuery] = useState("");
+  const [groups, setGroups] = useState<
+    Array<{
+      domain: string;
+      label: string;
+      results: Array<{ id: string; label: string; description: string; href: string }>;
+    }>
+  >([]);
 
   useEffect(() => {
     document.documentElement.classList.add("pgs-ops-html");
@@ -43,51 +59,23 @@ export function OpsShell({
   }, []);
 
   useEffect(() => {
-    const id = "pgs-ops-field-fix";
-    let el = document.getElementById(id) as HTMLStyleElement | null;
-    if (!el) {
-      el = document.createElement("style");
-      el.id = id;
-      document.head.appendChild(el);
+    if (query.trim().length < 2) {
+      setGroups([]);
+      return;
     }
-    el.textContent = `
-html.pgs-ops-html .pgs-ops input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
-html.pgs-ops-html .pgs-ops select,
-html.pgs-ops-html .pgs-ops textarea,
-html.pgs-ops-html .pgs-ops button {
-  font-family: inherit !important;
-}
-html.pgs-ops-html .pgs-ops input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
-html.pgs-ops-html .pgs-ops select,
-html.pgs-ops-html .pgs-ops textarea {
-  box-sizing: border-box !important;
-  min-height: 38px !important;
-  padding: 0.45rem 0.65rem !important;
-  text-indent: 0 !important;
-}
-html.pgs-ops-html .pgs-ops h2 {
-  font-size: 1.05rem !important;
-}
-html.pgs-ops-html .pgs-ops button.pgs-ops__btn {
-  width: auto !important;
-  display: inline-flex !important;
-}
-html.pgs-ops-html .pgs-ops .pgs-ops__action-bar .pgs-ops__btn {
-  width: 100% !important;
-}
-html.pgs-ops-html .pgs-ops .pgs-ops__form-toolbar,
-html.pgs-ops-html .pgs-ops .pgs-ops__form-inline {
-  display: flex !important;
-}
-`;
-    return () => {
-      el?.remove();
-    };
-  }, []);
+    const handle = window.setTimeout(() => {
+      void fetch(`/api/staff/search?q=${encodeURIComponent(query)}`)
+        .then((response) => response.json())
+        .then((payload) => setGroups(payload.groups ?? []))
+        .catch(() => setGroups([]));
+    }, 220);
+    return () => window.clearTimeout(handle);
+  }, [query]);
 
   const nav = OPS_NAV.filter((item) => {
-    if (!permSet.has(item.permission)) return false;
-    if (item.mentorHidden && roleKey === "mentor") return false;
+    const keys = item.anyOf ?? (item.permission ? [item.permission] : []);
+    if (keys.length && !keys.some((key) => permSet.has(key))) return false;
+    if (item.mentorHidden && (roleKey === "mentor" || preview?.mode === "mentor")) return false;
     return true;
   });
 
@@ -103,11 +91,12 @@ html.pgs-ops-html .pgs-ops .pgs-ops__form-inline {
               key={item.href}
               href={item.href}
               prefetch={false}
-              className={
-                isActive(pathname, item.href, item.exact) ? "is-active" : undefined
-              }
+              className={isActive(pathname, item.href, item.exact) ? "is-active" : undefined}
             >
               {item.label}
+              {item.href === "/ops/notifications" && notificationUnreadCount > 0 ? (
+                <span className="pgs-ops__nav-badge">{notificationUnreadCount}</span>
+              ) : null}
             </Link>
           ))}
         </nav>
@@ -127,14 +116,50 @@ html.pgs-ops-html .pgs-ops .pgs-ops__form-inline {
           </div>
         ) : null}
         <header className="pgs-ops__top">
-          <strong>Operations Portal</strong>
+          <div className="pgs-ops__search">
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search students, staff, work"
+              aria-label="Search operations"
+            />
+            {groups.length ? (
+              <div className="pgs-ops__search-results">
+                {groups.map((group) => (
+                  <section key={group.domain}>
+                    <p>{group.label}</p>
+                    {group.results.map((item) => (
+                      <Link
+                        key={item.id}
+                        href={item.href}
+                        onClick={() => {
+                          setQuery("");
+                          setGroups([]);
+                          router.refresh();
+                        }}
+                      >
+                        <strong>{item.label}</strong>
+                        <span>{item.description}</span>
+                      </Link>
+                    ))}
+                  </section>
+                ))}
+              </div>
+            ) : null}
+          </div>
           <div className="pgs-ops__top-actions">
+            {aiEnabled ? <AskPgsPanel /> : null}
+            {showDashLink ? (
+              <Link href="/dash" className="pgs-ops__portal-link">
+                Dashboard CMS
+              </Link>
+            ) : null}
             {showCmsLink ? (
               <Link href="/admin" className="pgs-ops__portal-link">
                 CMS Admin
               </Link>
             ) : null}
-            <span className="pgs-ops__role-badge">{roleKey.replace("_", " ")}</span>
+            <span className="pgs-ops__role-badge">{roleKey.replaceAll("_", " ")}</span>
             <span>{staffName}</span>
           </div>
         </header>

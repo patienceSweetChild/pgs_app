@@ -1,17 +1,26 @@
 export type OpsNavItem = {
   href: string;
   label: string;
-  permission: string;
+  permission?: string;
+  anyOf?: string[];
   exact?: boolean;
   mentorHidden?: boolean;
 };
 
 export const OPS_NAV: OpsNavItem[] = [
   { href: "/ops", label: "Scoreboard", permission: "overview.read", exact: true },
-  { href: "/ops/students", label: "Students", permission: "overview.read" },
-  { href: "/ops/work", label: "Work", permission: "staff_targets.read" },
+  {
+    href: "/ops/students",
+    label: "Students",
+    anyOf: ["students.read", "student_workspace.read", "student_workspace.read_all"],
+  },
+  { href: "/ops/work", label: "Targets", permission: "staff_targets.read" },
   { href: "/ops/team", label: "Team", permission: "staff.read", mentorHidden: true },
-  { href: "/ops/access", label: "Access", permission: "mentor_assignments.manage" },
+  {
+    href: "/ops/notifications",
+    label: "Notifications",
+    anyOf: ["overview.read", "notifications.manage"],
+  },
   {
     href: "/ops/activity",
     label: "Activity",

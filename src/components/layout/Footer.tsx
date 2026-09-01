@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import {
   BumpPremiumModal,
+  INVESTOR_BUMP_CONFIG,
   REFERRAL_BUMP_CONFIG,
 } from "@/components/BumpPremiumModal";
 import {
@@ -20,7 +21,8 @@ const DEFAULT_SOCIALS: CmsSocial[] = [
 ];
 
 export function Footer({ socialLinks }: { socialLinks?: CmsSocial[] }) {
-  const [joinOpen, setJoinOpen] = useState(false);
+  const [investorOpen, setInvestorOpen] = useState(false);
+  const [referralOpen, setReferralOpen] = useState(false);
   const socials =
     socialLinks && socialLinks.length > 0 ? socialLinks : DEFAULT_SOCIALS;
 
@@ -41,7 +43,7 @@ export function Footer({ socialLinks }: { socialLinks?: CmsSocial[] }) {
                 <button
                   type="button"
                   className="btn btn-join"
-                  onClick={() => setJoinOpen(true)}
+                  onClick={() => setInvestorOpen(true)}
                 >
                   Join The Team!
                 </button>
@@ -145,7 +147,7 @@ export function Footer({ socialLinks }: { socialLinks?: CmsSocial[] }) {
                   <button
                     type="button"
                     className="text-white fs-24 fw-700 lh-28 cursor-pointer bg-transparent border-0 text-start p-0"
-                    onClick={() => setJoinOpen(true)}
+                    onClick={() => setReferralOpen(true)}
                   >
                     (For Mentors) Help Students Choose <br />
                     Smarter – Earn with Our Referral Program
@@ -165,8 +167,13 @@ export function Footer({ socialLinks }: { socialLinks?: CmsSocial[] }) {
       </section>
 
       <BumpPremiumModal
-        open={joinOpen}
-        onClose={() => setJoinOpen(false)}
+        open={investorOpen}
+        onClose={() => setInvestorOpen(false)}
+        config={INVESTOR_BUMP_CONFIG}
+      />
+      <BumpPremiumModal
+        open={referralOpen}
+        onClose={() => setReferralOpen(false)}
         config={REFERRAL_BUMP_CONFIG}
       />
     </div>

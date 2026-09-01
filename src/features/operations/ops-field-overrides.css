@@ -111,3 +111,28 @@ html.pgs-ops-html .pgs-ops .pgs-ops__form-grid .pgs-ops__btn {
   flex: 0 0 auto !important;
   align-self: flex-end !important;
 }
+
+html.pgs-ops-html .pgs-ops .pgs-ops__matrix th,
+html.pgs-ops-html .pgs-ops .pgs-ops__matrix td {
+  padding: 1rem 1.15rem !important;
+  vertical-align: middle !important;
+}
+
+html.pgs-ops-html .pgs-ops .pgs-ops__matrix th:not(:first-child),
+html.pgs-ops-html .pgs-ops .pgs-ops__matrix td:not(:first-child) {
+  text-align: center !important;
+}
+
+html.pgs-ops-html .pgs-ops .pgs-ops__matrix-role {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  max-width: none !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  font-family: inherit !important;
+  font-weight: 500 !important;
+  padding: 0.8rem 0.95rem !important;
+  line-height: 1.3 !important;
+}

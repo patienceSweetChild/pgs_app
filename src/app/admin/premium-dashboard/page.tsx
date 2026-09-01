@@ -70,7 +70,7 @@ export default function PremiumDashboardListPage() {
                         : "—"}
                     </td>
                     <td>
-                      <Link href={`/admin/users/${row.student_id}`}>Open</Link>
+                      <Link href={`/dash/${row.student_id}`}>Edit dashboard</Link>
                     </td>
                   </tr>
                 );

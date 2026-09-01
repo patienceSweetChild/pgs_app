@@ -220,3 +220,15 @@
   background: #111;
   pointer-events: none;
 }
+
+/* Onboarding / feedback checklist labels next to toggles */
+.checkbox-card .d-flex > span,
+.checkbox-card span.w-80 {
+  color: #111 !important;
+  font-size: 13px;
+  line-height: 1.35;
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto !important;
+  text-align: left;
+}

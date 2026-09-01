@@ -340,3 +340,43 @@ export const MASTERCLASS_BY_TAB: Record<MasterclassTabId, MasterclassCard> = {
     ],
   },
 };
+
+export const CHECKLIST_MODAL_GOALS = [
+  "What documents I need before applying",
+  "SOP / LOR preparation",
+  "Test requirements (IELTS, GRE, etc.)",
+  "Application timeline",
+] as const;
+
+export const CHECKLIST_STUDY_OPTIONS = [
+  { value: "1", label: "MS / Masters Abroad" },
+  { value: "2", label: "MBA" },
+  { value: "3", label: "Medical Pathway" },
+  { value: "4", label: "Other" },
+] as const;
+
+export const CHECKLIST_MODAL_COPY = {
+  subLabel: "APPLICATION PREP",
+  tagline:
+    "Know what to keep ready before you start your applications, from documents and SOPs to tests, timelines, and shortlisting.",
+  boostDesktop: ["get the", "boost", "your", "PREP", "deserves"],
+  boostMobile: "get the boost your PREP deserves",
+  aimLabel: "What are you aiming to sort out?",
+  studyLabel: "What are you planning to study?",
+  cta: "GET MY CHECKLIST",
+  phonePlaceholder: "Phone (Whatsapp number preferred) (optional)",
+} as const;
+
+export const CHECKLIST_SUCCESS_MODAL = {
+  title: "you're in",
+  nextTitle: "LETS GET THINGS MOVING.",
+  paragraphs: [
+    "We've sent the #PGS Study Toolkit to your email.",
+    "It covers documents, SOPs, tests, and timelines — everything you need before you apply.",
+    "We'll send your study toolkit and important updates on WhatsApp (If you shared your WhatsApp number). No spam. Unsubscribe anytime.",
+  ],
+  stripLines: [
+    "Need to sort out the study journey?",
+    "Book a free 15min clarity call",
+  ],
+} as const;

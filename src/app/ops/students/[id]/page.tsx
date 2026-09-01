@@ -3,18 +3,26 @@ import { notFound } from "next/navigation";
 import { StudentCrmIdentityPanel } from "@/features/operations/components/StudentCrmIdentityPanel";
 import { StudentDetailActions } from "@/features/operations/components/StudentDetailActions";
 import { StudentGuardiansPanel } from "@/features/operations/components/StudentGuardiansPanel";
+import { StaffAlertsPanel } from "@/features/operations/components/StaffAlertsPanel";
+import { StaffDocumentsPanel } from "@/features/operations/components/StaffDocumentsPanel";
+import { StaffKanbanBoard } from "@/features/operations/components/StaffKanbanBoard";
+import { StaffWorkspaceExtras } from "@/features/operations/components/StaffWorkspaceExtras";
 import {
   loadStaffStudentCrmProfile,
   loadStudentCrmTags,
 } from "@/lib/operations/student-crm-server";
 import {
+  canQueryStudentRegistry,
   loadMentorOptions,
-  registryShowsOpenColumn,
 } from "@/lib/operations/student-registry-server";
-import { requireStaffPermission } from "@/lib/auth/student-access";
-import { staffHasPermission } from "@/lib/auth/actor-context";
+import { staffHasPermission, resolveActorContext } from "@/lib/auth/actor-context";
+import { canViewStudent } from "@/lib/auth/student-access";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CRM_STAGE_LABELS } from "@/lib/operations/student-crm";
+import {
+  loadPremiumWorkspace,
+  WorkspaceAccessError,
+} from "@/lib/premium-workspace";
 
 export default async function OpsStudentDetailPage({
   params,
@@ -22,59 +30,68 @@ export default async function OpsStudentDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const actor = await requireStaffPermission("overview.read");
-  if (!actor.staff || !registryShowsOpenColumn(actor.staff)) notFound();
+  const actor = await resolveActorContext();
+  if (!actor.staff || !canQueryStudentRegistry(actor.staff)) notFound();
 
-  const [crm, availableTags, mentors, guardiansResult, workspaceResult] =
-    await Promise.all([
-      loadStaffStudentCrmProfile(id),
-      loadStudentCrmTags(),
-      loadMentorOptions().catch(() => []),
-      createSupabaseServerClient()
-        .then((supabase) =>
-          supabase
-            .from("student_guardian_relationships")
-            .select("id, student_id, guardian_email, relationship_label, status, created_at")
-            .eq("student_id", id)
-            .order("created_at", { ascending: false }),
-        )
-        .then(({ data }) => data ?? []),
-      createSupabaseServerClient()
-        .then((supabase) =>
-          supabase
-            .from("premium_workspace_profiles")
-            .select("*")
-            .eq("student_id", id)
-            .maybeSingle(),
-        )
-        .then(({ data }) => data),
-    ]);
+  const [crm, availableTags, mentors, guardiansResult] = await Promise.all([
+    loadStaffStudentCrmProfile(id),
+    loadStudentCrmTags(),
+    loadMentorOptions().catch(() => []),
+    createSupabaseServerClient()
+      .then((supabase) =>
+        supabase
+          .from("student_guardian_relationships")
+          .select("id, student_id, guardian_email, relationship_label, status, created_at")
+          .eq("student_id", id)
+          .order("created_at", { ascending: false }),
+      )
+      .then(({ data }) => data ?? []),
+  ]);
 
   if (!crm) notFound();
 
-  const canManageGuardians = staffHasPermission(
-    actor.staff,
-    "student_workspace.manage_all",
-  );
+  let workspace = null;
+  let canManage = false;
+  if (crm.canOpenWorkspace) {
+    try {
+      workspace = await loadPremiumWorkspace(id);
+      const manageDecision = await canViewStudent(id, "manage");
+      canManage = manageDecision.allowed && manageDecision.actor.kind !== "student";
+    } catch (error) {
+      if (!(error instanceof WorkspaceAccessError)) throw error;
+    }
+  }
+
+  const canEditDashboard =
+    crm.plan === "Premium" &&
+    (canManage ||
+      staffHasPermission(actor.staff, "student_workspace.manage_all") ||
+      staffHasPermission(actor.staff, "students.manage"));
+  const canManageGuardians = staffHasPermission(actor.staff, "student_workspace.manage_all");
+  const universityOptions = workspace
+    ? (
+        await createSupabaseServerClient().then((supabase) =>
+          supabase.from("universities").select("id,name").order("name").limit(300),
+        )
+      ).data ?? []
+    : [];
 
   return (
     <div className="pgs-ops__detail-page">
       <div className="pgs-ops__page-header">
         <div>
-          <p className="pgs-ops__eyebrow">Student profile</p>
+          <p className="pgs-ops__eyebrow">{workspace ? "Student workspace" : "Student profile"}</p>
           <h1>{crm.fullName}</h1>
           <p className="pgs-ops__page-meta">
-            Registry record for this student. Use access controls to grant premium,
-            assign a handler, or open the workspace when authorized.
+            {workspace
+              ? "CRM identity and the shared premium workspace."
+              : "Registry record for this student. Workspace opens when entitlement and permission both allow it."}
           </p>
         </div>
         <div className="pgs-ops__header-actions">
           <Link href="/ops/students">← Registry</Link>
-          <Link href={`/admin/users/${id}`}>CMS record</Link>
-          {crm.canOpenWorkspace ? (
-            <Link className="is-primary" href={`/ops/students/${id}/workspace`}>
-              Open workspace
-            </Link>
+          {canEditDashboard ? (
+            <Link href={`/dash/${id}`}>Edit dashboard</Link>
           ) : null}
         </div>
       </div>
@@ -102,10 +119,7 @@ export default async function OpsStudentDetailPage({
         <div className="pgs-ops__profile-main">
           <StudentCrmIdentityPanel
             availableTags={availableTags}
-            canCreateTags={staffHasPermission(
-              actor.staff,
-              "student_workspace.manage_all",
-            )}
+            canCreateTags={staffHasPermission(actor.staff, "student_workspace.manage_all")}
             profile={crm}
           />
           <StudentGuardiansPanel
@@ -113,36 +127,42 @@ export default async function OpsStudentDetailPage({
             initialGuardians={guardiansResult}
             studentId={id}
           />
-          {workspaceResult ? (
-            <section className="pgs-ops__detail-panel">
-              <h2>Workspace snapshot</h2>
-              <dl className="pgs-ops__facts">
-                <div>
-                  <dt>Pathway</dt>
-                  <dd>{workspaceResult.pathway_label || "Not set"}</dd>
-                </div>
-                <div>
-                  <dt>Applied</dt>
-                  <dd>{workspaceResult.universities_applied ?? 0}</dd>
-                </div>
-                <div>
-                  <dt>Offers</dt>
-                  <dd>{workspaceResult.offers_received ?? 0}</dd>
-                </div>
-                <div>
-                  <dt>Onboarding</dt>
-                  <dd>{workspaceResult.onboarding_percentage ?? "—"}%</dd>
-                </div>
-              </dl>
-            </section>
+          {workspace ? (
+            <>
+              <StaffWorkspaceExtras
+                studentId={id}
+                canManage={canManage}
+                premiumProfile={workspace.premiumProfile}
+                comments={workspace.comments}
+                notes={workspace.notes}
+                reviews={workspace.reviews}
+                universities={workspace.universities}
+                universityOptions={universityOptions}
+              />
+              <StaffKanbanBoard
+                canManage={canManage}
+                columns={workspace.columns}
+                studentId={id}
+                tasks={workspace.tasks}
+              />
+              <StaffAlertsPanel alerts={workspace.alerts} canManage={canManage} studentId={id} />
+              <StaffDocumentsPanel
+                canManage={canManage}
+                requirements={workspace.requirements}
+                studentId={id}
+              />
+            </>
           ) : null}
         </div>
-
         <aside className="pgs-ops__profile-aside">
           <StudentDetailActions
             canOpenWorkspace={crm.canOpenWorkspace}
             isPremium={crm.plan === "Premium"}
-            mentors={mentors}
+            mentors={mentors.map((mentor) => ({
+              user_id: mentor.id,
+              display_name: mentor.displayName,
+              role_key: mentor.roleKey ?? "mentor",
+            }))}
             studentId={id}
             studentName={crm.fullName}
           />

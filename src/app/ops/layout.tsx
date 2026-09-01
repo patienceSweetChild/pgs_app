@@ -6,6 +6,7 @@ import {
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getStaffPreviewContext } from "@/lib/operations/staff-preview-server";
 import { OpsShell } from "@/features/operations/OpsShell";
+import { loadOperationsNotificationUnreadCount } from "@/lib/operations/notifications-server";
 
 export default async function OpsLayout({
   children,
@@ -26,15 +27,27 @@ export default async function OpsLayout({
     redirect("/login?surface=operations&redirect=/ops");
   }
 
-  if (!staffHasPermission(actor.staff, "overview.read")) {
+  if (
+    !staffHasPermission(actor.staff, "overview.read") &&
+    !staffHasPermission(actor.staff, "students.read") &&
+    !staffHasPermission(actor.staff, "student_workspace.read") &&
+    !staffHasPermission(actor.staff, "student_workspace.read_all")
+  ) {
     redirect("/");
   }
 
-  const preview = await getStaffPreviewContext(actor.staff);
+  const [preview, notificationUnreadCount] = await Promise.all([
+    getStaffPreviewContext(actor.staff),
+    loadOperationsNotificationUnreadCount().catch(() => 0),
+  ]);
   const showCmsLink =
     staffHasPermission(actor.staff, "catalog.manage") ||
     staffHasPermission(actor.staff, "cms.publish") ||
     staffHasPermission(actor.staff, "content.manage");
+  const showDashLink =
+    staffHasPermission(actor.staff, "students.read") ||
+    staffHasPermission(actor.staff, "student_workspace.read") ||
+    staffHasPermission(actor.staff, "student_workspace.read_all");
 
   return (
     <OpsShell
@@ -42,6 +55,9 @@ export default async function OpsLayout({
       roleKey={actor.staff.roleKey}
       permissions={actor.staff.permissions}
       showCmsLink={showCmsLink}
+      showDashLink={showDashLink}
+      notificationUnreadCount={notificationUnreadCount}
+      aiEnabled={staffHasPermission(actor.staff, "ai.analyze")}
       preview={
         preview
           ? { mode: preview.mode, targetName: preview.targetName }

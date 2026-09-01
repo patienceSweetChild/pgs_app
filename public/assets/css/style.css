@@ -26886,7 +26886,7 @@ border: 1px solid #ddd;
     /*font-size: 12px;*/
     /*line-height: 22px;*/
     margin-bottom: 10px;
-    color: #00000099;
+    color: var(--medium-gray);
     font-weight: 400;
         font-size: 16px;
     line-height: 1.0;
@@ -35920,7 +35920,7 @@ position: absolute !important;
    }
    .comment-content {
     margin-bottom: 10px;
-    color: #00000099;
+    color: var(--medium-gray);
     font-weight: 400;
     font-size: 14px;
     line-height: 15px !important;

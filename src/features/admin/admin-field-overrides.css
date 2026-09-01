@@ -12,6 +12,48 @@ html.pgs-admin-html .pgs-admin textarea {
   max-width: 100% !important;
 }
 
+html.pgs-admin-html .pgs-admin input[type="checkbox"],
+html.pgs-admin-html .pgs-admin input[type="radio"] {
+  box-sizing: border-box !important;
+  appearance: auto !important;
+  width: 1.1rem !important;
+  min-width: 1.1rem !important;
+  max-width: 1.25rem !important;
+  height: 1.1rem !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+html.pgs-admin-html .pgs-admin input[type="checkbox"] {
+  -webkit-appearance: checkbox !important;
+}
+
+html.pgs-admin-html .pgs-admin input[type="radio"] {
+  -webkit-appearance: radio !important;
+}
+
+html.pgs-admin-html .pgs-admin .toggle-switch input[type="checkbox"] {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+html.pgs-admin-html .pgs-admin .pgs-admin-line-items__row-head .pgs-admin__btn,
+html.pgs-admin-html .pgs-admin .pgs-admin-line-items > .pgs-admin__btn {
+  width: auto !important;
+  min-width: 5.5rem !important;
+  padding: 0.45rem 0.9rem !important;
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+}
+
 html.pgs-admin-html .pgs-admin .pgs-admin-tags {
   box-sizing: border-box !important;
   padding: 14px 16px !important;

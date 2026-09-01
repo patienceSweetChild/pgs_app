@@ -24,19 +24,56 @@ export const STAFF_PERMISSIONS = [
   "staff_targets.read",
   "staff_targets.manage",
   "staff_targets.manage_all",
+  "ai.analyze",
 ] as const;
 
 export type StaffPermission = (typeof STAFF_PERMISSIONS)[number];
 
-export type StaffRoleKey =
+export type ProductRoleKey =
   | "super_admin"
   | "admin"
   | "mentor"
-  | "read_only_staff";
+  | "viewer"
+  | "guardian"
+  | "student";
+
+export type StaffRoleKey = Exclude<ProductRoleKey, "guardian" | "student">;
+
+export const PRODUCT_ROLE_KEYS: ProductRoleKey[] = [
+  "super_admin",
+  "admin",
+  "mentor",
+  "viewer",
+  "guardian",
+  "student",
+];
 
 export const STAFF_ROLE_KEYS: StaffRoleKey[] = [
-  "read_only_staff",
+  "viewer",
   "mentor",
   "admin",
   "super_admin",
 ];
+
+export const STAFF_ASSIGNABLE_ROLES: StaffRoleKey[] = [
+  "admin",
+  "mentor",
+  "viewer",
+];
+
+export function normalizeRoleKey(value: string | null | undefined): string {
+  if (value === "read_only_staff" || value === "viewer") return "viewer";
+  return value ?? "";
+}
+
+export function isProductRoleKey(value: string): value is ProductRoleKey {
+  return (PRODUCT_ROLE_KEYS as readonly string[]).includes(normalizeRoleKey(value));
+}
+
+export function isStaffRoleKey(value: string): value is StaffRoleKey {
+  return (STAFF_ROLE_KEYS as readonly string[]).includes(normalizeRoleKey(value));
+}
+
+export function isStaffAssignableRole(value: string): value is StaffRoleKey {
+  return (STAFF_ASSIGNABLE_ROLES as readonly string[]).includes(normalizeRoleKey(value));
+}

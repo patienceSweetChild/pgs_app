@@ -132,8 +132,13 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const lastUserIdRef = useRef<string | null>(null);
+  const authEpochRef = useRef(0);
+  const [profileTick, setProfileTick] = useState<string | null>(null);
+
   const applySession = useCallback((session: Session | null) => {
     if (!session?.user) {
+      lastUserIdRef.current = null;
       clearIdentity(
         setUserId,
         setFullName,
@@ -142,13 +147,22 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
         setPgsCode,
       );
       setExperienceState("anonymous");
+      setProfileTick(null);
       setReady(true);
       return;
     }
 
+    const sameUser = lastUserIdRef.current === session.user.id;
+    lastUserIdRef.current = session.user.id;
     setUserId(session.user.id);
     setEmail(session.user.email ?? null);
-    setExperienceState("authenticated_standard");
+    // Token refresh / INITIAL_SESSION must not flash premium students back
+    // to standard. Only a user change resets the experience.
+    if (!sameUser) {
+      setExperienceState("authenticated_standard");
+    }
+    authEpochRef.current += 1;
+    setProfileTick(`${session.user.id}:${authEpochRef.current}`);
     setReady(true);
   }, []);
 
@@ -192,9 +206,10 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
   const profileUserIdRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!configured || !userId) return;
+    if (!configured || !profileTick) return;
 
-    profileUserIdRef.current = userId;
+    const tickUserId = profileTick.slice(0, profileTick.lastIndexOf(":"));
+    profileUserIdRef.current = tickUserId;
     let cancelled = false;
 
     const timer = setTimeout(() => {
@@ -215,7 +230,9 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
             applyProfile(user, profile, premium);
           }
         } catch {
-          // Keep authenticated_standard when profile/RPC is slow or unavailable.
+          // Keep the current experience when profile/RPC is slow or unavailable.
+          // Downgrading to standard here is what made premium students flicker
+          // back to the locked/non-premium chrome after a few seconds.
         }
       })();
     }, PROFILE_FETCH_DEBOUNCE_MS);
@@ -224,7 +241,7 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [applyProfile, configured, userId]);
+  }, [applyProfile, configured, userId, profileTick]);
 
   const setExperience = useCallback(
     (next: Experience) => {

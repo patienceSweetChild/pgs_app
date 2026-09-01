@@ -29,7 +29,7 @@ export default async function OpsTeamDetailPage({
     loadStaffAccessHistory(actor, id),
     loadStaffMemberTargetSummary(id),
     loadStaffTargets(actor).then((rows) =>
-      rows.filter((row) => row.staff_user_id === id).slice(0, 25),
+      rows.filter((row) => row.assignedStaffId === id).slice(0, 25),
     ),
   ]);
 
@@ -76,7 +76,7 @@ export default async function OpsTeamDetailPage({
         </dl>
         {targets.length ? (
           <div style={{ marginTop: "1rem" }}>
-            <StaffTargetsPanel targets={targets} />
+            <StaffTargetsPanel targets={targets} canCreate={false} />
           </div>
         ) : null}
       </section>

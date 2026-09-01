@@ -1,3 +1,211 @@
+/* Success modal: card chrome + centered layout */
+.scholarship-success-overlay.premium-modal-overlay {
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.pgs-modal .premium-modal-container.scholarship-success.pgs-modal-2 {
+  display: flex !important;
+  flex-direction: row;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 32px;
+  height: auto !important;
+  min-height: 460px;
+  max-width: 860px;
+  width: 100%;
+  margin: auto;
+  padding: 48px 44px 44px !important;
+  background: #ffffff !important;
+  border: 4px solid #000 !important;
+  border-radius: 24px !important;
+  box-shadow: none !important;
+  box-sizing: border-box;
+  overflow: visible;
+  position: relative;
+}
+
+.scholarship-success .close-btn {
+  color: #000 !important;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+}
+
+.scholarship-success__hero {
+  flex: 0 0 auto;
+  max-width: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.scholarship-success__hero h5 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.scholarship-success__hand {
+  width: 55% !important;
+  max-width: 160px;
+  height: auto;
+  margin: 0 auto 8px;
+  display: block;
+}
+
+.scholarship-success__side {
+  display: grid;
+  grid-template-columns: minmax(150px, 190px) minmax(170px, 210px);
+  grid-template-rows: auto auto;
+  column-gap: 28px;
+  row-gap: 12px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 1 auto;
+}
+
+.scholarship-success__copy {
+  grid-column: 1;
+  grid-row: 2;
+  align-self: center;
+  text-align: left;
+  margin: 0;
+}
+
+.scholarship-success__copy p:last-child {
+  margin-bottom: 0 !important;
+}
+
+.scholarship-success__heart {
+  grid-column: 2;
+  grid-row: 1;
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 10px;
+  justify-self: end;
+  display: block;
+}
+
+.scholarship-success__cta {
+  grid-column: 2;
+  grid-row: 2;
+  background: #150035;
+  padding: 14px 16px;
+  border-radius: 4px;
+  align-self: center;
+  text-align: left;
+}
+
+.scholarship-success__mobile {
+  width: min(280px, 100%);
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.scholarship-success__mobile .scholarship-success__cta {
+  width: 100%;
+  text-align: left;
+  border-radius: 4px;
+}
+
+@media (max-width: 756px) {
+  .pgs-modal .premium-modal-container.scholarship-success.pgs-modal-2 {
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: auto !important;
+    min-height: 0;
+    padding: 36px 22px 28px !important;
+    gap: 16px;
+    border-radius: 20px !important;
+    max-width: 420px;
+  }
+
+  .scholarship-success__hero {
+    max-width: 100%;
+  }
+
+  .scholarship-success__mobile {
+    width: 100%;
+  }
+}
+
+/* Split-panel layout: see bump-premium-modal.css (.pgs-modalSplit) */
+
+/* Find modal: arrow + copy on the right, fist bump centered below */
+.pgs-modalFind .boost-wrap--find {
+  margin-top: auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.pgs-modalFind .boost-wrap__callout {
+  align-self: flex-end;
+  text-align: right;
+}
+
+.pgs-modalFind .boost-wrap__callout img {
+  width: 95px;
+  display: block;
+  margin: 0 0 2px auto;
+}
+
+.pgs-modalFind .boost-wrap__callout span {
+  display: block;
+  line-height: 18px !important;
+  text-align: right;
+}
+
+.pgs-modalFind .boost-wrap__fist {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  line-height: 0;
+}
+
+.pgs-modalFind .boost-wrap__fist img {
+  width: 190px !important;
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.pgs-modalFind .panel-left .tagline {
+  margin-bottom: 16px;
+}
+
+@media (max-width: 756px) {
+  .pgs-modalFind .boost-wrap--find {
+    align-items: center;
+  }
+
+  .pgs-modalFind .boost-wrap__callout,
+  .pgs-modalFind .boost-wrap__callout span {
+    align-self: center;
+    text-align: center;
+  }
+
+  .pgs-modalFind .boost-wrap__callout img {
+    margin: 0 auto 2px;
+  }
+
+  .pgs-modalFind .boost-wrap__fist img {
+    width: 170px !important;
+  }
+}
+
 .scholarship-tip-carousel {
   max-width: 900px;
   margin: 0 auto;

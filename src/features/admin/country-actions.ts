@@ -3,10 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { resolveActorContext, staffHasPermission } from "@/lib/auth/actor-context";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { publicObjectUrl, STORAGE_BUCKETS, type StorageBucket } from "@/lib/supabase/storage";
 import {
   COUNTRY_SLUGS,
   getCountryContent,
+  mapCatalogRowToShortTermCourse,
   type CountryPageContent,
+  type ShortTermCourse,
 } from "@/features/countries/content";
 
 const WRITABLE_KEYS = [
@@ -228,6 +231,39 @@ function revalidateCountryPaths(slug: string) {
     revalidatePath(`/countries/${slug}`);
   }
   revalidatePath("/countries", "layout");
+}
+
+export async function listCountryCoursePickerOptions(): Promise<
+  ShortTermCourse[]
+> {
+  await requireCountryStaff();
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("courses")
+    .select(
+      "id, title, short_description, duration, mode, badge, tags_text, image_asset:media_assets!image_asset_id(bucket, path)",
+    )
+    .order("title", { ascending: true })
+    .limit(500);
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((row) => {
+    const media = Array.isArray(row.image_asset)
+      ? row.image_asset[0]
+      : row.image_asset;
+    const image =
+      media && typeof media === "object" && "path" in media && media.path
+        ? publicObjectUrl(
+            supabase,
+            ((media as { bucket?: string }).bucket ||
+              STORAGE_BUCKETS.media) as StorageBucket,
+            String((media as { path: string }).path),
+          )
+        : "";
+    return mapCatalogRowToShortTermCourse({
+      ...row,
+      image: image || undefined,
+    });
+  });
 }
 
 export type CountryRow = {

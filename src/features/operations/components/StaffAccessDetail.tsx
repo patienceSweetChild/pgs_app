@@ -179,10 +179,9 @@ export function StaffAccessDetailPanel({
               }}
               value={role}
             >
-              <option value="read_only_staff">Read-only Staff</option>
+              <option value="viewer">Viewer</option>
               <option value="mentor">Mentor</option>
               <option value="admin">Admin</option>
-              <option value="super_admin">Super Admin</option>
             </select>
           </label>
           <div className="pgs-ops__inline-actions" style={{ marginTop: "0.75rem" }}>

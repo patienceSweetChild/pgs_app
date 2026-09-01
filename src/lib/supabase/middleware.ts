@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { getSupabasePublicConfig } from "@/lib/supabase/config";
+import { isDashCmsPath } from "@/lib/dash-cms-path";
 
 function safeRedirectPath(value: string | null): string {
   if (!value || !value.startsWith("/") || value.startsWith("//")) return "/";
@@ -67,7 +68,7 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  if (pathname.startsWith("/ops")) {
+  if (pathname.startsWith("/ops") || isDashCmsPath(pathname)) {
     if (!user) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";

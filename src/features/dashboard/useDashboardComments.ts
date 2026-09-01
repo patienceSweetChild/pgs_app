@@ -52,15 +52,24 @@ export function formatCommentTime(iso: string): string {
 export function useDashboardComments(author: {
   name: string;
   avatar: string;
+  initial?: DashboardComment[];
 }) {
   const [comments, setComments] = useState<DashboardComment[]>(() =>
-    COMMENTS_SEED.map((c) => ({ ...c })),
+    (author.initial ?? COMMENTS_SEED).map((c) => ({ ...c })),
   );
   const [draft, setDraft] = useState("");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [submitting, setSubmitting] = useState(false);
 
+  const initialKey = JSON.stringify(
+    (author.initial ?? []).map((item) => [item.id, item.body, item.authorName]),
+  );
+
   useEffect(() => {
+    if (author.initial) {
+      setComments(author.initial.map((c) => ({ ...c })));
+      return;
+    }
     let cancelled = false;
     (async () => {
       const rows = await listComments();
@@ -69,7 +78,9 @@ export function useDashboardComments(author: {
     return () => {
       cancelled = true;
     };
-  }, []);
+    // initialKey captures the CMS document so preview updates without
+    // resetting student-typed comments on unrelated parent renders.
+  }, [initialKey]);
 
   const visibleComments = useMemo(
     () => comments.slice(0, visibleCount),

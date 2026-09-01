@@ -1,13 +1,17 @@
 "use client";
 
 import { DEFAULT_AVATAR, useExperience } from "@/lib/auth/experience";
-import { GUEST_PROFILE } from "./content";
+import { GUEST_PROFILE, type DashboardComment } from "./content";
 import {
   formatCommentTime,
   useDashboardComments,
 } from "./useDashboardComments";
 
-export function CommentsSection() {
+export function CommentsSection({
+  items,
+}: {
+  items?: DashboardComment[];
+} = {}) {
   const { isLoggedIn, fullName, avatarUrl } = useExperience();
   const name = isLoggedIn
     ? fullName?.trim() || "Student"
@@ -25,6 +29,7 @@ export function CommentsSection() {
   } = useDashboardComments({
     name,
     avatar,
+    initial: items,
   });
 
   return (

@@ -24,3 +24,280 @@
   max-height: calc(100vh - 40px);
   overflow: auto;
 }
+
+/* Equal-height panels (investor / checklist modals) */
+.pgs-modalSc.premium-modal-overlay .premium-modal-container.purple-modal {
+  align-items: stretch !important;
+  overflow: hidden;
+  border-radius: 20px !important;
+  background: #150035;
+  max-width: 800px;
+}
+
+.pgs-modalSc .panel-left {
+  border-radius: 20px 0 0 20px !important;
+  align-self: stretch;
+  flex: 1 1 48%;
+  min-height: 100%;
+}
+
+.pgs-modalSc .panel-right {
+  height: auto !important;
+  min-height: 100%;
+  align-self: stretch;
+  flex: 1 1 52%;
+  width: auto !important;
+  padding: 36px 30px 32px !important;
+  border-radius: 0 20px 20px 0 !important;
+  border: 2px solid #000;
+  border-left: none;
+  box-sizing: border-box;
+}
+
+.pgs-modalSc .panel-right form {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 100%;
+  gap: 0;
+}
+
+.pgs-modalSc .boost-wrap {
+  margin-top: auto;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+}
+
+.pgs-modalSc .boost-wrap .mb-4 {
+  margin-bottom: 0 !important;
+}
+
+/* Split-panel modals — shorter white card, purple overlap (investor, checklist, docs) */
+.pgs-modalSplit.pgs-modalSc.premium-modal-overlay .premium-modal-container.purple-modal {
+  align-items: stretch !important;
+  background: transparent !important;
+  overflow: visible !important;
+  border-radius: 0 !important;
+}
+
+.pgs-modalSplit.pgs-modalSc .panel-left {
+  align-self: stretch;
+  min-height: auto;
+  position: relative;
+  z-index: 2;
+  background: #150035;
+  border: 2px solid #000 !important;
+  border-radius: 20px !important;
+  margin-right: -14px;
+  box-sizing: border-box;
+}
+
+.pgs-modalSplit.pgs-modalSc .panel-right {
+  align-self: stretch !important;
+  position: relative;
+  z-index: 1;
+  height: auto !important;
+  min-height: unset !important;
+  margin-block: 2% !important;
+  background: #fff !important;
+  border: 2px solid #000 !important;
+  border-radius: 0 20px 20px 4px !important;
+  padding: 20px 30px 20px !important;
+}
+
+.pgs-modalSplit.pgs-modalSc .panel-right form {
+  min-height: unset !important;
+  flex: 0 1 auto;
+}
+
+.pgs-modalSplit.pgs-modalSc .cta-row {
+  margin-top: 1.5rem !important;
+}
+
+/* Investor success modal */
+.bump-investor-success-overlay.premium-modal-overlay {
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.pgs-modal .premium-modal-container.bump-investor-success.pgs-modal-2 {
+  display: flex !important;
+  flex-direction: row;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 32px;
+  height: auto !important;
+  min-height: 460px;
+  max-width: 860px;
+  width: 100%;
+  margin: auto;
+  padding: 48px 44px 44px !important;
+  background: #ffffff !important;
+  border: 4px solid #000 !important;
+  border-radius: 24px !important;
+  box-shadow: none !important;
+  box-sizing: border-box;
+  overflow: visible;
+  position: relative;
+}
+
+.bump-investor-success .close-btn {
+  color: #000 !important;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+}
+
+.bump-investor-success__hero {
+  flex: 0 0 auto;
+  max-width: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.bump-investor-success__hero h5 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.bump-investor-success__hand {
+  width: 55% !important;
+  max-width: 160px;
+  height: auto;
+  margin: 0 auto 8px;
+  display: block;
+}
+
+.bump-investor-success__side {
+  display: grid;
+  grid-template-columns: minmax(150px, 190px) minmax(170px, 210px);
+  grid-template-rows: auto auto;
+  column-gap: 28px;
+  row-gap: 12px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 1 auto;
+}
+
+.bump-investor-success__copy {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: center;
+  text-align: left;
+  margin: 0;
+}
+
+.bump-investor-success__copy p:last-child {
+  margin-bottom: 0 !important;
+}
+
+.bump-investor-success__heart {
+  grid-column: 2;
+  grid-row: 1;
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 10px;
+  justify-self: end;
+  display: block;
+}
+
+.bump-investor-success__cta {
+  grid-column: 2;
+  grid-row: 2;
+  background: #150035;
+  padding: 14px 16px;
+  border-radius: 4px;
+  align-self: center;
+  text-align: left;
+}
+
+.bump-investor-success__mobile {
+  width: min(280px, 100%);
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.bump-investor-success__mobile .bump-investor-success__cta {
+  width: 100%;
+  text-align: left;
+  border-radius: 4px;
+}
+
+@media (max-width: 756px) {
+  .pgs-modal .premium-modal-container.bump-investor-success.pgs-modal-2 {
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: auto !important;
+    min-height: 0;
+    padding: 36px 22px 28px !important;
+    gap: 16px;
+    border-radius: 20px !important;
+    max-width: 420px;
+  }
+
+  .bump-investor-success__hero {
+    max-width: 100%;
+  }
+
+  .bump-investor-success__mobile {
+    width: 100%;
+  }
+
+  .pgs-modalSc.premium-modal-overlay .premium-modal-container.purple-modal {
+    flex-direction: column !important;
+    max-width: 420px;
+  }
+
+  .pgs-modalSc .panel-left {
+    border-radius: 20px 20px 0 0 !important;
+    flex: 0 0 auto;
+  }
+
+  .pgs-modalSc .panel-right {
+    border-radius: 0 0 20px 20px !important;
+    border-left: 2px solid #000;
+    border-top: none;
+    flex: 1 1 auto;
+  }
+
+  .pgs-modalSplit.pgs-modalSc.premium-modal-overlay .premium-modal-container.purple-modal {
+    background: transparent !important;
+    border-radius: 0 !important;
+    overflow: visible;
+  }
+
+  .pgs-modalSplit.pgs-modalSc .panel-left {
+    margin-right: 0;
+    margin-bottom: -8px;
+    border-radius: 20px 20px 0 0 !important;
+    flex: none;
+    width: 100% !important;
+    z-index: 2;
+  }
+
+  .pgs-modalSplit.pgs-modalSc .panel-right {
+    height: auto !important;
+    align-self: stretch !important;
+    margin-block: 0 !important;
+    margin: -5px auto 0 !important;
+    border-radius: 0 0 20px 20px !important;
+    border: 4px solid #000 !important;
+    width: 94% !important;
+    padding: 24px 22px 22px !important;
+    z-index: 1;
+    flex: none;
+  }
+}

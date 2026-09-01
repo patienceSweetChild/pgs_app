@@ -1,11 +1,13 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { AdminRichTextField } from "./AdminRichTextField";
 import { LineItemsField } from "./LineItemsField";
 import { MediaAssetField } from "./MediaAssetField";
 import { StatBlockField } from "./StatBlockField";
 import { KeyValueTableField } from "./KeyValueTableField";
 import { getMediaAssetPreview } from "./media-actions";
+import { listCountryCoursePickerOptions } from "./country-actions";
 import {
   getTabFromDraft,
   parsePageContentFromRow,
@@ -16,6 +18,7 @@ import {
 import type {
   DocGroup,
   ShortTermCourse,
+  SidebarLink,
   VisaStep,
   VisaType,
 } from "@/features/countries/content";
@@ -155,77 +158,143 @@ function VisaStepsEditor({
   );
 }
 
-function ShortTermCoursesEditor({
+function SidebarLinksField({
   value,
   onChange,
 }: {
-  value: ShortTermCourse[];
-  onChange: (next: ShortTermCourse[]) => void;
+  value: SidebarLink[] | undefined;
+  onChange: (next: SidebarLink[]) => void;
 }) {
-  const rows =
-    value.length > 0
-      ? value
-      : [{ tag: "", title: "", blurb: "", metric: "" }];
+  return (
+    <KeyValueTableField
+      label="Sidebar links (left card + section headings)"
+      columns={[
+        { key: "id", label: "Anchor id" },
+        { key: "label", label: "Label", multiline: true },
+      ]}
+      value={value ?? []}
+      onChange={onChange}
+      emptyRow={() => ({ id: "", label: "" })}
+      itemLabel="Link"
+    />
+  );
+}
+
+function selectedCourseIds(tab: {
+  courseIds?: string[];
+  courses: ShortTermCourse[];
+}): string[] {
+  if (tab.courseIds?.length) return tab.courseIds;
+  return tab.courses.map((c) => c.id).filter((id): id is string => Boolean(id));
+}
+
+function ShortTermCoursesEditor({
+  value,
+  selectedIds,
+  onChange,
+}: {
+  value: ShortTermCourse[];
+  selectedIds: string[];
+  onChange: (next: { courseIds: string[]; courses: ShortTermCourse[] }) => void;
+}) {
+  const [options, setOptions] = useState<ShortTermCourse[]>([]);
+  const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    void listCountryCoursePickerOptions()
+      .then((rows) => {
+        if (!cancelled) {
+          setOptions(rows);
+          setError(null);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Failed to load courses");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return options;
+    return options.filter(
+      (course) =>
+        course.title.toLowerCase().includes(q) ||
+        (course.tag ?? "").toLowerCase().includes(q),
+    );
+  }, [options, query]);
+
+  const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+
+  function toggle(course: ShortTermCourse) {
+    const id = course.id;
+    if (!id) return;
+    const nextIds = selectedSet.has(id)
+      ? selectedIds.filter((item) => item !== id)
+      : [...selectedIds, id];
+    const byId = new Map(options.map((item) => [item.id, item]));
+    for (const existing of value) {
+      if (existing.id && !byId.has(existing.id)) byId.set(existing.id, existing);
+    }
+    onChange({
+      courseIds: nextIds,
+      courses: nextIds
+        .map((item) => byId.get(item))
+        .filter((item): item is ShortTermCourse => Boolean(item)),
+    });
+  }
 
   return (
     <div className="pgs-admin-line-items">
       <div className="pgs-admin-line-items__head">
-        <strong>Short-term courses</strong>
+        <strong>Select courses</strong>
+        <span>{selectedIds.length} selected</span>
       </div>
-      {rows.map((course, i) => (
-        <div key={`course-${i}`} className="pgs-admin-line-items__row">
-          <div className="pgs-admin-line-items__row-head">
-            <span>Course {i + 1}</span>
-            <button
-              type="button"
-              className="pgs-admin__btn pgs-admin__btn--ghost"
-              onClick={() => onChange(rows.filter((_, idx) => idx !== i))}
-            >
-              Remove
-            </button>
-          </div>
-          {(["tag", "title", "metric"] as const).map((key) => (
-            <label key={key}>
-              {key}
+      <input
+        className="pgs-admin-control"
+        placeholder="Search courses"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+      />
+      {loading ? <p className="pgs-admin-help">Loading courses…</p> : null}
+      {error ? <p className="pgs-admin-help">{error}</p> : null}
+      {!loading && !error && options.length === 0 ? (
+        <p className="pgs-admin-help">No courses in the catalog yet.</p>
+      ) : null}
+      <div className="pgs-country-course-picker">
+        {filtered.map((course) => {
+          const id = course.id ?? "";
+          return (
+            <label key={id} className="pgs-admin-checkbox">
               <input
-                className="pgs-admin-control"
-                value={course[key] ?? ""}
-                onChange={(e) =>
-                  onChange(
-                    rows.map((r, idx) =>
-                      idx === i ? { ...r, [key]: e.target.value } : r,
-                    ),
-                  )
-                }
+                type="checkbox"
+                checked={selectedSet.has(id)}
+                onChange={() => toggle(course)}
               />
+              <span>
+                {course.title}
+                {course.tag ? (
+                  <small className="pgs-country-course-picker__tag">
+                    {" "}
+                    {course.tag}
+                  </small>
+                ) : null}
+              </span>
             </label>
-          ))}
-          <label>
-            Blurb
-            <textarea
-              className="pgs-admin-control"
-              rows={3}
-              value={course.blurb}
-              onChange={(e) =>
-                onChange(
-                  rows.map((r, idx) =>
-                    idx === i ? { ...r, blurb: e.target.value } : r,
-                  ),
-                )
-              }
-            />
-          </label>
-        </div>
-      ))}
-      <button
-        type="button"
-        className="pgs-admin__btn pgs-admin__btn--ghost"
-        onClick={() =>
-          onChange([...rows, { tag: "", title: "", blurb: "", metric: "" }])
-        }
-      >
-        Add course
-      </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -306,16 +375,32 @@ export function CountryEditForm({ draft, onChange, onSectionRef }: Props) {
     <div className="pgs-event-cms__form-inner">
       <section id="hero" className="pgs-event-cms__section" ref={bindSection("hero")}>
         <h2 className="pgs-event-cms__section-title">Hero</h2>
-        <MediaAssetField
-          label="Flag image"
-          value={
-            (draft.hero_flag_asset_id as string | null) ??
-            content.hero.flagImageAssetId ??
-            null
-          }
-          onChange={(id) => void setHeroMedia("flag", id)}
-          folder="countries"
-        />
+        <div className="pgs-country-hero-uploads">
+          <MediaAssetField
+            label="Flag strip (flag + small image)"
+            value={
+              (draft.hero_flag_asset_id as string | null) ??
+              content.hero.flagImageAssetId ??
+              null
+            }
+            onChange={(id) => void setHeroMedia("flag", id)}
+            folder="countries"
+          />
+          <MediaAssetField
+            label="Mobile hero image"
+            value={
+              (draft.hero_mobile_asset_id as string | null) ??
+              content.hero.mobileImageAssetId ??
+              null
+            }
+            onChange={(id) => void setHeroMedia("mobile", id)}
+            folder="countries"
+          />
+        </div>
+        <p className="pgs-country-hero-uploads__hint">
+          Upload one strip for the top-right (flag + thumbnail together). Mobile
+          hero is only used as the phone banner.
+        </p>
         <MediaAssetField
           label="Desktop hero image"
           value={
@@ -324,16 +409,6 @@ export function CountryEditForm({ draft, onChange, onSectionRef }: Props) {
             null
           }
           onChange={(id) => void setHeroMedia("desktop", id)}
-          folder="countries"
-        />
-        <MediaAssetField
-          label="Mobile hero image"
-          value={
-            (draft.hero_mobile_asset_id as string | null) ??
-            content.hero.mobileImageAssetId ??
-            null
-          }
-          onChange={(id) => void setHeroMedia("mobile", id)}
           folder="countries"
         />
       </section>
@@ -520,6 +595,20 @@ export function CountryEditForm({ draft, onChange, onSectionRef }: Props) {
       </section>
 
       <section
+        id="study101-sidebar"
+        className="pgs-event-cms__section"
+        ref={bindSection("study101-sidebar")}
+      >
+        <h2 className="pgs-event-cms__section-title">Study 101 — Sidebar links</h2>
+        <SidebarLinksField
+          value={study101.sidebarLinks}
+          onChange={(sidebarLinks) =>
+            onChange(patchTab(draft, "study101", { sidebarLinks }))
+          }
+        />
+      </section>
+
+      <section
         id="study101-why"
         className="pgs-event-cms__section"
         ref={bindSection("study101-why")}
@@ -638,11 +727,36 @@ export function CountryEditForm({ draft, onChange, onSectionRef }: Props) {
       </section>
 
       <section
+        id="cost-sidebar"
+        className="pgs-event-cms__section"
+        ref={bindSection("cost-sidebar")}
+      >
+        <h2 className="pgs-event-cms__section-title">Study Cost — Sidebar links</h2>
+        <SidebarLinksField
+          value={cost.sidebarLinks}
+          onChange={(sidebarLinks) =>
+            onChange(patchTab(draft, "cost", { sidebarLinks }))
+          }
+        />
+      </section>
+
+      <section
         id="cost-budgeting"
         className="pgs-event-cms__section"
         ref={bindSection("cost-budgeting")}
       >
         <h2 className="pgs-event-cms__section-title">Study Cost — Budgeting</h2>
+        <LineItemsField
+          label="Budget intro paragraphs"
+          value={itemsToLines(cost.budgetIntro ?? [])}
+          onChange={(next) =>
+            onChange(
+              patchTab(draft, "cost", { budgetIntro: linesToItems(next) }),
+            )
+          }
+          itemLabel="Paragraph"
+          rich
+        />
         <LineItemsField
           label="Budget questions"
           value={itemsToLines(cost.budgetQs)}
@@ -660,12 +774,101 @@ export function CountryEditForm({ draft, onChange, onSectionRef }: Props) {
       >
         <h2 className="pgs-event-cms__section-title">Study Cost — Spending</h2>
         <LineItemsField
-          label="Spend items"
+          label="Spend items (legacy list)"
           value={itemsToLines(cost.spendItems)}
           onChange={(next) =>
             onChange(patchTab(draft, "cost", { spendItems: linesToItems(next) }))
           }
           itemLabel="Item"
+        />
+        {(
+          [
+            ["research", "Tuition / primary cost card"],
+            ["universities", "Universities card"],
+            ["alumni", "Alumni card"],
+            ["famousUnis", "Famous universities card"],
+            ["startup", "Startup culture card"],
+            ["tagline", "Tagline"],
+            ["quote", "Quote"],
+          ] as const
+        ).map(([key, label]) => (
+          <label key={key}>
+            {label}
+            <textarea
+              className="pgs-admin-control"
+              rows={key === "quote" ? 4 : 2}
+              value={cost.reasons?.[key] ?? ""}
+              onChange={(e) =>
+                onChange(
+                  patchTab(draft, "cost", {
+                    reasons: {
+                      ...(cost.reasons ?? {
+                        research: "",
+                        universities: "",
+                        alumni: "",
+                        famousUnis: "",
+                        startup: "",
+                        tagline: "",
+                        quote: "",
+                      }),
+                      [key]: e.target.value,
+                    },
+                  }),
+                )
+              }
+            />
+          </label>
+        ))}
+      </section>
+
+      <section
+        id="cost-pgs-banner"
+        className="pgs-event-cms__section"
+        ref={bindSection("cost-pgs-banner")}
+      >
+        <h2 className="pgs-event-cms__section-title">Study Cost — #PGS banner</h2>
+        <label>
+          Headline
+          <input
+            className="pgs-admin-control"
+            value={
+              typeof cost.pgsBanner === "string"
+                ? cost.pgsBanner
+                : (cost.pgsBanner?.headline ?? "")
+            }
+            onChange={(e) =>
+              onChange(
+                patchTab(draft, "cost", {
+                  pgsBanner: {
+                    headline: e.target.value,
+                    body:
+                      typeof cost.pgsBanner === "string"
+                        ? ""
+                        : (cost.pgsBanner?.body ?? ""),
+                  },
+                }),
+              )
+            }
+          />
+        </label>
+        <AdminRichTextField
+          label="Body"
+          value={
+            typeof cost.pgsBanner === "string" ? "" : (cost.pgsBanner?.body ?? "")
+          }
+          onChange={(body) =>
+            onChange(
+              patchTab(draft, "cost", {
+                pgsBanner: {
+                  headline:
+                    typeof cost.pgsBanner === "string"
+                      ? cost.pgsBanner
+                      : (cost.pgsBanner?.headline ?? ""),
+                  body,
+                },
+              }),
+            )
+          }
         />
       </section>
 
@@ -700,6 +903,20 @@ export function CountryEditForm({ draft, onChange, onSectionRef }: Props) {
             )
           }
         />
+        <label>
+          Image URL
+          <input
+            className="pgs-admin-control"
+            value={cost.premiumCta.image ?? ""}
+            onChange={(e) =>
+              onChange(
+                patchTab(draft, "cost", {
+                  premiumCta: { ...cost.premiumCta, image: e.target.value },
+                }),
+              )
+            }
+          />
+        </label>
       </section>
 
       <section
@@ -726,11 +943,30 @@ export function CountryEditForm({ draft, onChange, onSectionRef }: Props) {
       </section>
 
       <section
+        id="visa-sidebar"
+        className="pgs-event-cms__section"
+        ref={bindSection("visa-sidebar")}
+      >
+        <h2 className="pgs-event-cms__section-title">Visa 101 — Sidebar links</h2>
+        <SidebarLinksField
+          value={visa.sidebarLinks}
+          onChange={(sidebarLinks) =>
+            onChange(patchTab(draft, "visa", { sidebarLinks }))
+          }
+        />
+      </section>
+
+      <section
         id="visa-types"
         className="pgs-event-cms__section"
         ref={bindSection("visa-types")}
       >
-        <h2 className="pgs-event-cms__section-title">Visa 101 — Visa types</h2>
+        <h2 className="pgs-event-cms__section-title">Visa 101 — Intro &amp; visa types</h2>
+        <AdminRichTextField
+          label="Intro paragraph"
+          value={visa.intro ?? ""}
+          onChange={(intro) => onChange(patchTab(draft, "visa", { intro }))}
+        />
         <VisaTypesEditor
           value={visa.visaTypes}
           onChange={(visaTypes) => onChange(patchTab(draft, "visa", { visaTypes }))}
@@ -747,6 +983,38 @@ export function CountryEditForm({ draft, onChange, onSectionRef }: Props) {
           label="Document groups"
           value={visa.docGroups}
           onChange={(docGroups) => onChange(patchTab(draft, "visa", { docGroups }))}
+        />
+        <label>
+          Plan. Review. Submit. — title
+          <input
+            className="pgs-admin-control"
+            value={visa.planReview?.title ?? "Plan. Review. Submit."}
+            onChange={(e) =>
+              onChange(
+                patchTab(draft, "visa", {
+                  planReview: {
+                    title: e.target.value,
+                    items: visa.planReview?.items ?? [],
+                  },
+                }),
+              )
+            }
+          />
+        </label>
+        <LineItemsField
+          label="Plan. Review. Submit. — checklist items"
+          value={itemsToLines(visa.planReview?.items ?? [])}
+          onChange={(next) =>
+            onChange(
+              patchTab(draft, "visa", {
+                planReview: {
+                  title: visa.planReview?.title ?? "Plan. Review. Submit.",
+                  items: linesToItems(next),
+                },
+              }),
+            )
+          }
+          itemLabel="Checklist item"
         />
       </section>
 
@@ -851,6 +1119,20 @@ export function CountryEditForm({ draft, onChange, onSectionRef }: Props) {
       </section>
 
       <section
+        id="shortTerm-sidebar"
+        className="pgs-event-cms__section"
+        ref={bindSection("shortTerm-sidebar")}
+      >
+        <h2 className="pgs-event-cms__section-title">Short-Term — Sidebar links</h2>
+        <SidebarLinksField
+          value={shortTerm.sidebarLinks}
+          onChange={(sidebarLinks) =>
+            onChange(patchTab(draft, "shortTerm", { sidebarLinks }))
+          }
+        />
+      </section>
+
+      <section
         id="shortTerm-intro"
         className="pgs-event-cms__section"
         ref={bindSection("shortTerm-intro")}
@@ -877,8 +1159,14 @@ export function CountryEditForm({ draft, onChange, onSectionRef }: Props) {
         <h2 className="pgs-event-cms__section-title">Short-Term — Courses</h2>
         <ShortTermCoursesEditor
           value={shortTerm.courses}
-          onChange={(courses) =>
-            onChange(patchTab(draft, "shortTerm", { courses }))
+          selectedIds={selectedCourseIds(shortTerm)}
+          onChange={(next) =>
+            onChange(
+              patchTab(draft, "shortTerm", {
+                courseIds: next.courseIds,
+                courses: next.courses,
+              }),
+            )
           }
         />
       </section>
@@ -889,6 +1177,35 @@ export function CountryEditForm({ draft, onChange, onSectionRef }: Props) {
         ref={bindSection("shortTerm-contact")}
       >
         <h2 className="pgs-event-cms__section-title">Short-Term — Contact CTA</h2>
+        <label>
+          CTA button label
+          <input
+            className="pgs-admin-control"
+            value={shortTerm.ctaLabel ?? ""}
+            onChange={(e) =>
+              onChange(patchTab(draft, "shortTerm", { ctaLabel: e.target.value }))
+            }
+          />
+        </label>
+        <AdminRichTextField
+          label="CTA helper text"
+          value={shortTerm.ctaHelper ?? ""}
+          onChange={(ctaHelper) =>
+            onChange(patchTab(draft, "shortTerm", { ctaHelper }))
+          }
+        />
+        <label>
+          Mentor section title
+          <input
+            className="pgs-admin-control"
+            value={shortTerm.mentorTitle ?? ""}
+            onChange={(e) =>
+              onChange(
+                patchTab(draft, "shortTerm", { mentorTitle: e.target.value }),
+              )
+            }
+          />
+        </label>
         <AdminRichTextField
           label="Mentor blurb"
           value={shortTerm.mentorBlurb}
@@ -918,6 +1235,20 @@ export function CountryEditForm({ draft, onChange, onSectionRef }: Props) {
           value={scholarships.stats}
           onChange={(stats) =>
             onChange(patchTab(draft, "scholarships", { stats }))
+          }
+        />
+      </section>
+
+      <section
+        id="scholarships-sidebar"
+        className="pgs-event-cms__section"
+        ref={bindSection("scholarships-sidebar")}
+      >
+        <h2 className="pgs-event-cms__section-title">Scholarships — Sidebar links</h2>
+        <SidebarLinksField
+          value={scholarships.sidebarLinks}
+          onChange={(sidebarLinks) =>
+            onChange(patchTab(draft, "scholarships", { sidebarLinks }))
           }
         />
       </section>
@@ -980,13 +1311,61 @@ export function CountryEditForm({ draft, onChange, onSectionRef }: Props) {
             }
           />
         </label>
-        <AdminRichTextField
-          label="Body"
-          value={scholarships.guide.body}
-          onChange={(body) =>
+        <LineItemsField
+          label="Guide paragraphs"
+          value={itemsToLines(
+            scholarships.guide.paragraphs ??
+              (scholarships.guide.body ? [scholarships.guide.body] : []),
+          )}
+          onChange={(next) =>
             onChange(
               patchTab(draft, "scholarships", {
-                guide: { ...scholarships.guide, body },
+                guide: {
+                  ...scholarships.guide,
+                  paragraphs: linesToItems(next),
+                },
+              }),
+            )
+          }
+          itemLabel="Paragraph"
+          rich
+        />
+        <label>
+          Help intro
+          <input
+            className="pgs-admin-control"
+            value={scholarships.guide.helpIntro ?? "We help you:"}
+            onChange={(e) =>
+              onChange(
+                patchTab(draft, "scholarships", {
+                  guide: { ...scholarships.guide, helpIntro: e.target.value },
+                }),
+              )
+            }
+          />
+        </label>
+        <LineItemsField
+          label="Help bullets"
+          value={itemsToLines(scholarships.guide.helpItems ?? [])}
+          onChange={(next) =>
+            onChange(
+              patchTab(draft, "scholarships", {
+                guide: {
+                  ...scholarships.guide,
+                  helpItems: linesToItems(next),
+                },
+              }),
+            )
+          }
+          itemLabel="Bullet"
+        />
+        <AdminRichTextField
+          label="Closing line"
+          value={scholarships.guide.closing ?? ""}
+          onChange={(closing) =>
+            onChange(
+              patchTab(draft, "scholarships", {
+                guide: { ...scholarships.guide, closing },
               }),
             )
           }
@@ -1012,6 +1391,20 @@ export function CountryEditForm({ draft, onChange, onSectionRef }: Props) {
         <StatBlockField
           value={tracks.stats}
           onChange={(stats) => onChange(patchTab(draft, "tracks", { stats }))}
+        />
+      </section>
+
+      <section
+        id="tracks-sidebar"
+        className="pgs-event-cms__section"
+        ref={bindSection("tracks-sidebar")}
+      >
+        <h2 className="pgs-event-cms__section-title">Tracks — Sidebar links</h2>
+        <SidebarLinksField
+          value={tracks.sidebarLinks}
+          onChange={(sidebarLinks) =>
+            onChange(patchTab(draft, "tracks", { sidebarLinks }))
+          }
         />
       </section>
 
@@ -1101,6 +1494,16 @@ export function CountryEditForm({ draft, onChange, onSectionRef }: Props) {
         ref={bindSection("tracks-punchline")}
       >
         <h2 className="pgs-event-cms__section-title">Tracks — Punchline</h2>
+        <label>
+          Heads-up title
+          <input
+            className="pgs-admin-control"
+            value={tracks.headsUpTitle ?? "A Heads Up"}
+            onChange={(e) =>
+              onChange(patchTab(draft, "tracks", { headsUpTitle: e.target.value }))
+            }
+          />
+        </label>
         <LineItemsField
           label="Heads-up paragraphs"
           value={itemsToLines(tracks.headsUp)}

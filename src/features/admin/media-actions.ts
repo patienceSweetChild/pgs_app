@@ -14,7 +14,10 @@ async function requireMediaStaff() {
     actor.staff &&
     (staffHasPermission(actor.staff, "catalog.manage") ||
       staffHasPermission(actor.staff, "content.manage") ||
-      staffHasPermission(actor.staff, "cms.publish"));
+      staffHasPermission(actor.staff, "cms.publish") ||
+      staffHasPermission(actor.staff, "student_workspace.manage") ||
+      staffHasPermission(actor.staff, "student_workspace.manage_all") ||
+      staffHasPermission(actor.staff, "students.manage"));
   if (!ok) throw new Error("Forbidden");
   return actor;
 }

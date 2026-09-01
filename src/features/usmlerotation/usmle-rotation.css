@@ -81,11 +81,23 @@
   font-size: 28px;
 }
 
+.USML-Erotatio-Css-Update .purple-premium-section .purple-premium-box,
+.USML-Erotatio-Css-Update .usml-pricing-section .usml-pricing-gray {
+  width: 100% !important;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  transform: scale(0.96);
+  transform-origin: center top;
+  box-sizing: border-box;
+}
+
 .USML-Erotatio-Css-Update .usml-fee {
   font-family: "Bebas Neue", sans-serif;
   font-size: 64px;
   color: #000;
-  margin: 0;
+  margin: 0 0 20px;
+  line-height: 1;
 }
 
 .USML-Erotatio-Css-Update .usml-badge {
@@ -116,6 +128,82 @@
 .USML-Erotatio-Css-Update .hero-usml-box .USML-custom-btn {
   width: auto;
   min-width: 174px;
+}
+
+/* Why Pick Us — 3×2 grid matching reference design */
+.USML-Erotatio-Css-Update .usml-why-pick-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: 10px;
+  row-gap: 14px;
+  width: 643px;
+  max-width: 100%;
+  margin: 0 auto 1rem;
+}
+
+.USML-Erotatio-Css-Update .usml-why-pick-heading {
+  margin: 0;
+  padding: 0 4px;
+  font-size: 25px;
+  font-weight: 500;
+  line-height: 30px;
+  color: #000;
+  text-align: left;
+  align-self: center;
+}
+
+.USML-Erotatio-Css-Update .usml-why-pick-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.USML-Erotatio-Css-Update .usml-why-pick-card__header {
+  flex-shrink: 0;
+  padding: 4px 8px;
+  background-color: #a6ffaf;
+  color: #000;
+  font-size: 25px;
+  font-weight: 500;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.USML-Erotatio-Css-Update .usml-why-pick-card__body {
+  flex: 1 1 auto;
+  padding: 22px;
+  background-color: #e1f9d9;
+  color: #000;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 19px;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.USML-Erotatio-Css-Update .usml-why-pick-card__body p {
+  margin: 0;
+}
+
+@media (max-width: 767px) {
+  .USML-Erotatio-Css-Update .usml-why-pick-grid {
+    grid-template-columns: repeat(2, 1fr);
+    width: 100%;
+    column-gap: 8px;
+    row-gap: 12px;
+  }
+
+  .USML-Erotatio-Css-Update .usml-why-pick-heading {
+    grid-column: 1 / -1;
+    font-size: 18px;
+    line-height: 20px;
+    text-align: center;
+  }
+
+  .USML-Erotatio-Css-Update .usml-why-pick-card__header {
+    font-size: 15px;
+  }
 }
 
 /* Step 4: keep desc as one column under the table; disclaimer bottom-right */
@@ -153,5 +241,160 @@
 @media (max-width: 767px) {
   .USML-Erotatio-Css-Update .pgs-pricing .pricing-item.sticky-stp-4 {
     flex-wrap: wrap !important;
+  }
+}
+
+/* USMLE documents request modal — docs-specific boost callout */
+.pgs-modalDocs .boost-wrap__callout {
+  position: relative;
+  align-self: flex-end;
+  margin: 0 0 0 auto;
+  transform: translateY(-48px);
+  text-align: right;
+}
+
+.pgs-modalDocs .boost-wrap__callout img {
+  width: 95px;
+  display: block;
+  margin: 0 0 2px auto;
+  margin-left: -10px;
+}
+
+.pgs-modalDocs .boost-wrap__callout span {
+  display: block;
+  line-height: 18px !important;
+}
+
+.usmle-docs-success-overlay.premium-modal-overlay {
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.pgs-modal .premium-modal-container.usmle-docs-success.pgs-modal-2 {
+  display: flex !important;
+  flex-direction: row;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 32px;
+  height: auto !important;
+  min-height: 460px;
+  max-width: 860px;
+  width: 100%;
+  margin: auto;
+  padding: 48px 44px 44px !important;
+  background: #ffffff !important;
+  border: 4px solid #000 !important;
+  border-radius: 24px !important;
+  box-shadow: none !important;
+  box-sizing: border-box;
+  overflow: visible;
+  position: relative;
+}
+
+.usmle-docs-success .close-btn {
+  color: #000 !important;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+}
+
+.usmle-docs-success__hero {
+  flex: 0 0 auto;
+  max-width: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.usmle-docs-success__hero h5 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.usmle-docs-success__hand {
+  width: 55% !important;
+  max-width: 160px;
+  height: auto;
+  margin: 0 auto 8px;
+  display: block;
+}
+
+.usmle-docs-success__side {
+  display: grid;
+  grid-template-columns: minmax(150px, 190px) minmax(170px, 210px);
+  grid-template-rows: auto auto;
+  column-gap: 28px;
+  row-gap: 12px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 1 auto;
+}
+
+.usmle-docs-success__copy {
+  grid-column: 1;
+  grid-row: 2;
+  align-self: center;
+  text-align: left;
+  margin: 0;
+}
+
+.usmle-docs-success__heart {
+  grid-column: 2;
+  grid-row: 1;
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 10px;
+  justify-self: end;
+  display: block;
+}
+
+.usmle-docs-success__cta {
+  grid-column: 2;
+  grid-row: 2;
+  background: #150035;
+  padding: 14px 16px;
+  border-radius: 4px;
+  align-self: center;
+  text-align: left;
+}
+
+.usmle-docs-success__mobile {
+  width: min(280px, 100%);
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.usmle-docs-success__mobile .usmle-docs-success__cta {
+  width: 100%;
+  text-align: left;
+  border-radius: 4px;
+}
+
+@media (max-width: 756px) {
+  .pgs-modal .premium-modal-container.usmle-docs-success.pgs-modal-2 {
+    flex-direction: column !important;
+    height: auto !important;
+    min-height: 0;
+    padding: 36px 22px 28px !important;
+    gap: 16px;
+    border-radius: 20px !important;
+    max-width: 420px;
+  }
+
+  .usmle-docs-success__hero {
+    max-width: 100%;
+  }
+
+  .usmle-docs-success__mobile {
+    width: 100%;
   }
 }

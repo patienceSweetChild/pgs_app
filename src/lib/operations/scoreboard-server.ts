@@ -9,6 +9,8 @@ import {
   resolveOperationsScoreboardScope,
 } from "@/lib/operations/authorization";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { loadOperationsActivity } from "@/lib/operations/activity-server";
+import type { OperationsActivityItem } from "@/lib/operations/activity";
 
 export type ScoreboardMetric = {
   key: string;
@@ -16,6 +18,16 @@ export type ScoreboardMetric = {
   value: number;
   href?: string;
   description?: string;
+  attention?: boolean;
+};
+
+export type OperationsScoreboardModel = {
+  scope: "organization" | "assigned_students" | "restricted";
+  title: string;
+  description: string;
+  metrics: ScoreboardMetric[];
+  activity: OperationsActivityItem[];
+  operate: Array<{ href: string; label: string }>;
 };
 
 async function countPremiumUnassigned(
@@ -33,61 +45,72 @@ async function countPremiumUnassigned(
   return (premiumRows ?? []).filter((row) => !assigned.has(row.student_id)).length;
 }
 
-export async function loadOperationsScoreboard(): Promise<ScoreboardMetric[]> {
+export async function loadOperationsScoreboard(options?: {
+  mentorPreviewTargetId?: string;
+}): Promise<OperationsScoreboardModel> {
   const actor = await resolveActorContext();
   if (!actor.staff || !canViewOperationsScoreboard(actor.staff)) {
     throw new Error("Forbidden");
   }
 
-  const scope = resolveOperationsScoreboardScope(actor.staff);
+  const mentorId = options?.mentorPreviewTargetId ?? actor.userId!;
+  const scope = options?.mentorPreviewTargetId
+    ? "assigned_students"
+    : resolveOperationsScoreboardScope(actor.staff);
   const supabase = await createSupabaseServerClient();
 
   if (scope === "restricted") {
-    return [{ key: "restricted", label: "Access", value: 0 }];
+    return {
+      scope,
+      title: "Restricted view",
+      description: "Your current role does not include operational metrics.",
+      metrics: [{ key: "restricted", label: "Access", value: 0 }],
+      activity: [],
+      operate: [],
+    };
   }
 
   if (scope === "assigned_students") {
     const { count } = await supabase
       .from("mentor_assignments")
       .select("*", { count: "exact", head: true })
-      .eq("mentor_id", actor.userId!)
+      .eq("mentor_id", mentorId)
       .eq("status", "active");
 
     const { count: targetCount } = await supabase
       .from("staff_targets")
       .select("*", { count: "exact", head: true })
-      .eq("staff_user_id", actor.userId!)
-      .in("status", ["open", "in_progress"]);
+      .eq("staff_user_id", mentorId)
+      .in("status", ["open", "in_progress", "pending"]);
 
-    return [
-      {
-        key: "assigned",
-        label: "My students",
-        value: count ?? 0,
-        href: "/ops/students",
-      },
-      {
-        key: "targets",
-        label: "Open targets",
-        value: targetCount ?? 0,
-        href: "/ops/work",
-      },
-    ];
+    return {
+      scope,
+      title: "My caseload",
+      description: "Metrics for students currently assigned to you.",
+      metrics: [
+        { key: "assigned", label: "My students", value: count ?? 0, href: "/ops/students" },
+        { key: "targets", label: "Open targets", value: targetCount ?? 0, href: "/ops/work" },
+      ],
+      activity: [],
+      operate: [
+        { href: "/ops/students", label: "Open my students" },
+        { href: "/ops/work", label: "Open my work" },
+      ],
+    };
   }
 
   const canReadStaff = staffHasPermission(actor.staff, "staff.read");
+  const canReadAudit = staffHasPermission(actor.staff, "audit.read");
 
   const [
     { count: totalStudents },
     { count: premiumCount },
     unassignedCount,
     staffCount,
+    activity,
   ] = await Promise.all([
     supabase.from("profiles").select("*", { count: "exact", head: true }),
-    supabase
-      .from("premium_entitlements")
-      .select("*", { count: "exact", head: true })
-      .eq("status", "active"),
+    supabase.from("premium_entitlements").select("*", { count: "exact", head: true }).eq("status", "active"),
     countPremiumUnassigned(supabase),
     canReadStaff
       ? supabase
@@ -96,15 +119,11 @@ export async function loadOperationsScoreboard(): Promise<ScoreboardMetric[]> {
           .eq("status", "active")
           .then(({ count }) => count ?? 0)
       : Promise.resolve(0),
+    canReadAudit ? loadOperationsActivity(null, 8).catch(() => []) : Promise.resolve([]),
   ]);
 
   const metrics: ScoreboardMetric[] = [
-    {
-      key: "total",
-      label: "Total students",
-      value: totalStudents ?? 0,
-      href: "/ops/students",
-    },
+    { key: "total", label: "Total students", value: totalStudents ?? 0, href: "/ops/students" },
     {
       key: "premium",
       label: "Premium active",
@@ -116,17 +135,24 @@ export async function loadOperationsScoreboard(): Promise<ScoreboardMetric[]> {
       label: "Premium unassigned",
       value: unassignedCount,
       href: "/ops/students?plan=premium&mentor=unassigned",
+      attention: unassignedCount > 0,
+      description: "Premium students waiting for a mentor",
     },
   ];
-
   if (canReadStaff) {
-    metrics.push({
-      key: "staff",
-      label: "Active staff",
-      value: staffCount,
-      href: "/ops/team",
-    });
+    metrics.push({ key: "staff", label: "Active staff", value: staffCount, href: "/ops/team" });
   }
 
-  return metrics;
+  return {
+    scope,
+    title: "Organization scoreboard",
+    description: "Role-scoped operational metrics for the authorized student registry.",
+    metrics,
+    activity,
+    operate: [
+      { href: "/ops/students", label: "Student registry" },
+      { href: "/ops/students?plan=premium&mentor=unassigned", label: "Assign Premium students" },
+      { href: "/ops/work", label: "Staff targets" },
+    ],
+  };
 }

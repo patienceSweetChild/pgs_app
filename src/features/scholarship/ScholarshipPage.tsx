@@ -9,14 +9,22 @@ import {
   FAQ_ITEMS,
   FAQ_TAB_PLACEHOLDERS,
   FAQ_TABS,
+  FIND_MODAL_COPY,
+  FIND_SUCCESS_MODAL,
+  MODAL_COPY,
   MODAL_COUNTRIES,
   MODAL_LEVELS,
+  MODAL_STUDY_OPTIONS,
   PROCESS_CHECKLIST,
   SCENARIO_CARDS,
+  SUCCESS_MODAL,
   TESTIMONIALS,
   TIP_SLIDES,
 } from "./content";
 import "./scholarship.css";
+import "@/components/bump-premium-modal.css";
+
+type ModalKind = "apply" | "find";
 
 function KnowSection() {
   const [tab, setTab] = useState<(typeof FAQ_TABS)[number]["id"]>("tab_1");
@@ -255,29 +263,33 @@ function TestimonialsBlock() {
  * Scholarship guide page — from standalone-html/scholarship.html
  */
 export function ScholarshipPage() {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [successOpen, setSuccessOpen] = useState(false);
+  const [modalKind, setModalKind] = useState<ModalKind | null>(null);
+  const [successKind, setSuccessKind] = useState<ModalKind | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [studyPlan, setStudyPlan] = useState<string>(
+    MODAL_STUDY_OPTIONS[0].value,
+  );
   const [country, setCountry] = useState<string>(MODAL_COUNTRIES[0].value);
   const [level, setLevel] = useState<string>(MODAL_LEVELS[0].value);
 
-  function openModal() {
-    setSuccessOpen(false);
-    setModalOpen(true);
+  function openModal(kind: ModalKind) {
+    setSuccessKind(null);
+    setModalKind(kind);
   }
 
   function closeModals() {
-    setModalOpen(false);
-    setSuccessOpen(false);
+    setModalKind(null);
+    setSuccessKind(null);
   }
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (!name.trim() || !email.includes("@")) return;
-    setModalOpen(false);
-    setSuccessOpen(true);
+    const kind = modalKind;
+    setModalKind(null);
+    if (kind) setSuccessKind(kind);
   }
 
   return (
@@ -305,7 +317,7 @@ export function ScholarshipPage() {
                   <button
                     type="button"
                     className="btn btn-purple mt-1 bg-black-btn fs-11 mt-1 mb-0 px-1 mobile-fs-15 mobile-text-start"
-                    onClick={openModal}
+                    onClick={() => openModal("apply")}
                   >
                     Book Your Free Scholarship Call
                   </button>
@@ -491,9 +503,9 @@ export function ScholarshipPage() {
                   <br />
                   <h5
                     className="cursor-pointer bg-yellow-white mb-0 fnt-family fs-38 lh-28 w-70 py-1"
-                    onClick={openModal}
+                    onClick={() => openModal("apply")}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") openModal();
+                      if (e.key === "Enter" || e.key === " ") openModal("apply");
                     }}
                     role="button"
                     tabIndex={0}
@@ -621,9 +633,9 @@ export function ScholarshipPage() {
                 </h5>
                 <h4
                   className="bg-black text-white px-2 fs-25 d-inline-block graidant-border cursor-pointer"
-                  onClick={openModal}
+                  onClick={() => openModal("find")}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") openModal();
+                    if (e.key === "Enter" || e.key === " ") openModal("find");
                   }}
                   role="button"
                   tabIndex={0}
@@ -654,9 +666,9 @@ export function ScholarshipPage() {
         <TipsCarousel />
       </div>
 
-      {modalOpen ? (
+      {modalKind === "apply" ? (
         <div
-          className="mobile-applicant pgs-modal pgs-modalSc premium-modal-overlay"
+          className="mobile-applicant pgs-modal pgs-modalSc pgs-modalSplit premium-modal-overlay"
           style={{ display: "flex" }}
         >
           <div className="premium-modal-container purple-modal d-flex">
@@ -676,11 +688,8 @@ export function ScholarshipPage() {
                   <img src="/assets/img/heart.gif" alt="" />
                 </div>
               </div>
-              <div className="sub-label fnt-family">scholarships Await</div>
-              <p className="tagline lh-18ppx">
-                Different scholarships have different criteria, figure out which
-                alls you can stand in.
-              </p>
+              <div className="sub-label fnt-family">{MODAL_COPY.subLabel}</div>
+              <p className="tagline lh-18ppx">{MODAL_COPY.tagline}</p>
               <div className="boost-wrap">
                 <div className="mobile-none" style={{ margin: "0 0 0 auto" }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -690,8 +699,10 @@ export function ScholarshipPage() {
                     alt=""
                   />
                   <span className="w-full d-block fs-16 text-white lh-18">
-                    lets get your <br />
-                    options <br /> ready
+                    {MODAL_COPY.boostDesktop[0]} <br />
+                    {MODAL_COPY.boostDesktop[1]} <br />
+                    {MODAL_COPY.boostDesktop[2]} <br />
+                    {MODAL_COPY.boostDesktop[3]}
                   </span>
                 </div>
                 <div className="mb-4">
@@ -700,7 +711,7 @@ export function ScholarshipPage() {
                 </div>
                 <div className="desktop-none">
                   <p className="mb-0 fs-14 lh-20 fw-400 text-white">
-                    get the boost your <br /> PREP deserves
+                    {MODAL_COPY.boostMobile}
                   </p>
                 </div>
               </div>
@@ -739,7 +750,7 @@ export function ScholarshipPage() {
                   <div className="field">
                     <input
                       type="tel"
-                      placeholder="Phone (Whatsapp number preffered)"
+                      placeholder={MODAL_COPY.phonePlaceholder}
                       autoComplete="tel"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
@@ -747,7 +758,133 @@ export function ScholarshipPage() {
                   </div>
                 </div>
                 <div>
-                  <p className="section-label mb-2">Country aiming for</p>
+                  <p className="section-label mb-2">{MODAL_COPY.studyLabel}</p>
+                  <div className="d-flex gap-3">
+                    <select
+                      className="modal-btn-pgs text-center"
+                      value={studyPlan}
+                      onChange={(e) => setStudyPlan(e.target.value)}
+                    >
+                      {MODAL_STUDY_OPTIONS.map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/assets/img/arrow-btn.png"
+                      style={{ width: 26, height: 26 }}
+                      alt=""
+                    />
+                  </div>
+                </div>
+                <br />
+                <div className="divider" />
+                <div className="cta-row">
+                  <button className="cta-btn" type="submit">
+                    {MODAL_COPY.cta}
+                    <span className="arrow">←</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {modalKind === "find" ? (
+        <div
+          className="mobile-applicant pgs-modal pgs-modalSc pgs-modalSplit pgs-modalFind premium-modal-overlay"
+          style={{ display: "flex" }}
+        >
+          <div className="premium-modal-container purple-modal d-flex">
+            <div className="panel-left">
+              <button
+                className="close-btn desktop-none"
+                type="button"
+                aria-label="Close"
+                onClick={closeModals}
+              >
+                ✕
+              </button>
+              <div className="brand-row">
+                <div className="brand-title">#PGS</div>
+                <div className="heart-badge">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/assets/img/heart.gif" alt="" />
+                </div>
+              </div>
+              <div className="sub-label fnt-family">
+                {FIND_MODAL_COPY.subLabel}
+              </div>
+              <p className="tagline lh-18ppx">{FIND_MODAL_COPY.tagline}</p>
+              <div className="boost-wrap boost-wrap--find">
+                <div className="boost-wrap__callout mobile-none">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/assets/img/arrow-modal.png" alt="" />
+                  <span className="d-block fs-16 text-white lh-18">
+                    {FIND_MODAL_COPY.boostDesktop[0]} <br />
+                    {FIND_MODAL_COPY.boostDesktop[1]} <br />
+                    {FIND_MODAL_COPY.boostDesktop[2]}
+                  </span>
+                </div>
+                <div className="boost-wrap__fist">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/assets/img/bump.png" alt="" />
+                </div>
+                <div className="desktop-none">
+                  <p className="mb-0 fs-14 lh-20 fw-400 text-white">
+                    {FIND_MODAL_COPY.boostMobile}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="panel-right">
+              <button
+                className="close-btn mobile-none"
+                type="button"
+                aria-label="Close"
+                onClick={closeModals}
+              >
+                ✕
+              </button>
+              <form onSubmit={onSubmit}>
+                <div className="field-group">
+                  <div className="field">
+                    <input
+                      type="text"
+                      placeholder="Enter Name *"
+                      autoComplete="name"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
+                  <div className="field">
+                    <input
+                      type="email"
+                      placeholder="Email *"
+                      autoComplete="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </div>
+                  <div className="field">
+                    <input
+                      type="tel"
+                      placeholder={FIND_MODAL_COPY.phonePlaceholder}
+                      autoComplete="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <p className="section-label mb-2">
+                    {FIND_MODAL_COPY.countryLabel}
+                  </p>
                   <div className="d-flex gap-3">
                     <select
                       className="modal-btn-pgs text-center"
@@ -771,7 +908,9 @@ export function ScholarshipPage() {
                 <br />
                 <div className="divider" />
                 <div>
-                  <p className="section-label mb-2">Course Level </p>
+                  <p className="section-label mb-2">
+                    {FIND_MODAL_COPY.levelLabel}
+                  </p>
                   <div className="d-flex gap-3">
                     <select
                       className="modal-btn-pgs text-center"
@@ -795,8 +934,18 @@ export function ScholarshipPage() {
                 <br />
                 <div className="divider" />
                 <div className="cta-row">
-                  <button className="cta-btn" type="submit">
-                    share update
+                  <button
+                    className="cta-btn mobile-none"
+                    type="submit"
+                  >
+                    {FIND_MODAL_COPY.ctaDesktop}
+                    <span className="arrow">←</span>
+                  </button>
+                  <button
+                    className="cta-btn desktop-none"
+                    type="submit"
+                  >
+                    {FIND_MODAL_COPY.ctaMobile}
                     <span className="arrow">←</span>
                   </button>
                 </div>
@@ -806,15 +955,12 @@ export function ScholarshipPage() {
         </div>
       ) : null}
 
-      {successOpen ? (
+      {successKind === "apply" ? (
         <div
-          className="pgs-modal premium-modal-overlay modal-pgsamc-2"
+          className="pgs-modal premium-modal-overlay modal-pgsamc-2 scholarship-success-overlay"
           style={{ display: "flex" }}
         >
-          <div
-            className="premium-modal-container purple-modal d-flex bg-white pgs-modal-2"
-            style={{ borderRadius: "20px" }}
-          >
+          <div className="premium-modal-container purple-modal d-flex bg-white pgs-modal-2 scholarship-success">
             <button
               className="close-btn"
               type="button"
@@ -823,7 +969,7 @@ export function ScholarshipPage() {
             >
               ✕
             </button>
-            <div className="text-center">
+            <div className="scholarship-success__hero text-center">
               <h5 className="fw-700 fs-48 text-black">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -831,82 +977,182 @@ export function ScholarshipPage() {
                   style={{ width: 50 }}
                   alt=""
                 />
-                you’re in
+                {SUCCESS_MODAL.title}
               </h5>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/assets/img/okk.png" className="w-50%" alt="" />
-              <h5 className="fw-400 fs-24 fnt-family text-black">
-                lets get things moving.
-              </h5>
-              <div className="w-180px desktop-none">
-                <p className="fs-13 fw-400 mb-5 text-black lh-15">
-                  We’ve sent the #PGS Scholarship Guide to your email.
-                </p>
-                <p className="fs-13 fw-400 mb-5 text-black lh-15">
-                  This covers the basics you actually need.
-                </p>
-                <p className="fs-13 fw-400 mb-5 text-black lh-15">
-                  We’ll send your study toolkit and important updates on
-                  WhatsApp (If you shared your WhatsApp number). No spam.
-                  Unsubscribe anytime.
-                </p>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  className="mobile-none"
-                  src="/assets/img/heart.gif"
-                  style={{
-                    width: 50,
-                    borderRadius: 10,
-                    margin: "0 0 0 auto",
-                    display: "block",
-                  }}
-                  alt=""
-                />
-                <div style={{ background: "#150035" }} className="p-3 mt-4">
-                  <p className="fs-13 lh-15 text-white mb-4">
-                    Need to sort out the study journey?
-                  </p>
-                  <p className="fs-13 lh-15 text-white mb-4">
-                    <Link href="/contact" className="text-white">
-                      Book a free 15min clarity call
-                    </Link>
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="w-180px mobile-none">
-              <p className="fs-13 fw-400 mb-5 text-black lh-15">
-                We’ve sent the #PGS Scholarship Guide to your email.
-              </p>
-              <p className="fs-13 fw-400 mb-5 text-black lh-15">
-                This covers the basics you actually need.
-              </p>
-              <p className="fs-13 fw-400 mb-5 text-black lh-15">
-                We’ll send your study toolkit and important updates on WhatsApp
-                (If you shared your WhatsApp number). No spam. Unsubscribe
-                anytime.
-              </p>
-            </div>
-            <div className="mobile-none">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                className="mobile-none"
+                src="/assets/img/okk.png"
+                className="scholarship-success__hand"
+                alt=""
+              />
+              <h5 className="fw-400 fs-24 fnt-family text-black mb-0">
+                {SUCCESS_MODAL.nextTitle}
+              </h5>
+            </div>
+
+            <div className="scholarship-success__side mobile-none">
+              <p className="scholarship-success__copy fs-13 fw-400 mb-0 text-black lh-15">
+                {SUCCESS_MODAL.body}{" "}
+                <a href={`tel:${SUCCESS_MODAL.phone}`} className="text-black">
+                  {SUCCESS_MODAL.phone}
+                </a>{" "}
+                {SUCCESS_MODAL.bodySuffix}
+              </p>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                className="scholarship-success__heart"
+                src="/assets/img/heart.gif"
+                alt=""
+              />
+              <div className="scholarship-success__cta">
+                <p className="fs-13 lh-15 text-white mb-2">
+                  {SUCCESS_MODAL.stripLines[0]}
+                </p>
+                <p className="fs-13 lh-15 text-white mb-0">
+                  <Link
+                    href="/contact"
+                    className="text-white text-decoration-underline"
+                  >
+                    {SUCCESS_MODAL.stripLines[1]}
+                  </Link>
+                </p>
+              </div>
+            </div>
+
+            <div className="scholarship-success__mobile desktop-none">
+              <p className="fs-13 fw-400 mb-4 text-black lh-15">
+                {SUCCESS_MODAL.body}{" "}
+                <a href={`tel:${SUCCESS_MODAL.phone}`} className="text-black">
+                  {SUCCESS_MODAL.phone}
+                </a>{" "}
+                {SUCCESS_MODAL.bodySuffix}
+              </p>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src="/assets/img/heart.gif"
                 style={{
                   width: 50,
                   borderRadius: 10,
-                  margin: "0 0 0 auto",
+                  margin: "0 auto 12px",
                   display: "block",
                 }}
                 alt=""
               />
-              <div style={{ background: "#150035" }} className="p-3 mt-4">
-                <p className="fs-13 lh-15 text-white mb-4">
-                  Need to sort out the study journey?
+              <div className="scholarship-success__cta">
+                <p className="fs-13 lh-15 text-white mb-2">
+                  {SUCCESS_MODAL.stripLines[0]}
                 </p>
-                <p className="fs-13 lh-15 text-white mb-4">
-                  <Link href="/contact" className="text-white">
-                    Book a free 15min clarity call
+                <p className="fs-13 lh-15 text-white mb-0">
+                  <Link
+                    href="/contact"
+                    className="text-white text-decoration-underline"
+                  >
+                    {SUCCESS_MODAL.stripLines[1]}
+                  </Link>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {successKind === "find" ? (
+        <div
+          className="pgs-modal premium-modal-overlay modal-pgsamc-2 scholarship-success-overlay"
+          style={{ display: "flex" }}
+        >
+          <div className="premium-modal-container purple-modal d-flex bg-white pgs-modal-2 scholarship-success">
+            <button
+              className="close-btn"
+              type="button"
+              aria-label="Close"
+              onClick={closeModals}
+            >
+              ✕
+            </button>
+            <div className="scholarship-success__hero text-center">
+              <h5 className="fw-700 fs-48 text-black">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/assets/img/check-12.png"
+                  style={{ width: 50 }}
+                  alt=""
+                />
+                {FIND_SUCCESS_MODAL.title}
+              </h5>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/assets/img/okk.png"
+                className="scholarship-success__hand"
+                alt=""
+              />
+              <h5 className="fw-400 fs-24 fnt-family text-black mb-0">
+                {FIND_SUCCESS_MODAL.nextTitle}
+              </h5>
+            </div>
+
+            <div className="scholarship-success__side mobile-none">
+              <div className="scholarship-success__copy">
+                {FIND_SUCCESS_MODAL.paragraphs.map((p) => (
+                  <p
+                    key={p}
+                    className="fs-13 fw-400 mb-3 text-black lh-15"
+                  >
+                    {p}
+                  </p>
+                ))}
+              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                className="scholarship-success__heart"
+                src="/assets/img/heart.gif"
+                alt=""
+              />
+              <div className="scholarship-success__cta">
+                <p className="fs-13 lh-15 text-white mb-2">
+                  {FIND_SUCCESS_MODAL.stripLines[0]}
+                </p>
+                <p className="fs-13 lh-15 text-white mb-0">
+                  <Link
+                    href="/contact"
+                    className="text-white text-decoration-underline"
+                  >
+                    {FIND_SUCCESS_MODAL.stripLines[1]}
+                  </Link>
+                </p>
+              </div>
+            </div>
+
+            <div className="scholarship-success__mobile desktop-none">
+              {FIND_SUCCESS_MODAL.paragraphs.map((p) => (
+                <p
+                  key={p}
+                  className="fs-13 fw-400 mb-3 text-black lh-15"
+                >
+                  {p}
+                </p>
+              ))}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/assets/img/heart.gif"
+                style={{
+                  width: 50,
+                  borderRadius: 10,
+                  margin: "8px auto 12px",
+                  display: "block",
+                }}
+                alt=""
+              />
+              <div className="scholarship-success__cta">
+                <p className="fs-13 lh-15 text-white mb-2">
+                  {FIND_SUCCESS_MODAL.stripLines[0]}
+                </p>
+                <p className="fs-13 lh-15 text-white mb-0">
+                  <Link
+                    href="/contact"
+                    className="text-white text-decoration-underline"
+                  >
+                    {FIND_SUCCESS_MODAL.stripLines[1]}
                   </Link>
                 </p>
               </div>

@@ -9,17 +9,31 @@ export type BumpModalSelect = {
   options: { value: string; label: string }[];
 };
 
+export type BumpModalSuccessConfig = {
+  title: string;
+  nextTitle: string;
+  paragraphs: string[];
+  email?: string;
+  emailLabel?: string;
+  emailNote?: string;
+};
+
 export type BumpModalConfig = {
   subLabel: string;
   tagline: string;
   /** Desktop boost lines next to arrow (default: get the boost…) */
   boostLines?: string[];
+  boostMobile?: string;
   cta: string;
+  ctaMobile?: string;
+  phonePlaceholder?: string;
   overlayClassName?: string;
   toggles?: string[];
   selects?: BumpModalSelect[];
   successTitle?: string;
   successBody?: string;
+  success?: BumpModalSuccessConfig;
+  modalType?: string;
 };
 
 const DEFAULT_BOOST = ["get the", "boost", "your", "deserves"];
@@ -99,7 +113,7 @@ export function BumpPremiumModal({
           .filter(([, on]) => on)
           .map(([label]) => label);
         await supabase.from("lead_submissions").insert({
-          modal_type: "applicant",
+          modal_type: config.modalType ?? "applicant",
           name,
           email,
           phone,
@@ -113,6 +127,130 @@ export function BumpPremiumModal({
       /* keep existing success UX */
     }
     setDone(true);
+  }
+
+  if (done && config.success) {
+  const successModal = (
+    <div
+      className="pgs-modal premium-modal-overlay bump-investor-success-overlay"
+      style={{
+        display: "flex",
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0,0,0,0.8)",
+        zIndex: 10000,
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 20,
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) close();
+      }}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div className="premium-modal-container purple-modal d-flex bg-white pgs-modal-2 bump-investor-success">
+        <button
+          className="close-btn"
+          type="button"
+          aria-label="Close"
+          onClick={close}
+        >
+          ✕
+        </button>
+        <div className="bump-investor-success__hero text-center">
+          <h5 className="fw-700 fs-48 text-black">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/assets/img/check-12.png"
+              style={{ width: 50 }}
+              alt=""
+            />
+            {config.success.title}
+          </h5>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/assets/img/okk.png"
+            className="bump-investor-success__hand"
+            alt=""
+          />
+          <h5 className="fw-400 fs-24 fnt-family text-black mb-0">
+            {config.success.nextTitle}
+          </h5>
+        </div>
+
+        <div className="bump-investor-success__side mobile-none">
+          <div className="bump-investor-success__copy">
+            {config.success.paragraphs.map((p) => (
+              <p key={p} className="fs-13 fw-400 mb-3 text-black lh-15">
+                {p}
+              </p>
+            ))}
+          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            className="bump-investor-success__heart"
+            src="/assets/img/heart.gif"
+            alt=""
+          />
+          {config.success.email ? (
+            <div className="bump-investor-success__cta">
+              <p className="fs-13 lh-15 text-white mb-1">
+                <a
+                  href={`mailto:${config.success.email}`}
+                  className="text-white text-decoration-underline"
+                >
+                  {config.success.emailLabel ?? config.success.email}
+                </a>
+              </p>
+              {config.success.emailNote ? (
+                <p className="fs-13 lh-15 text-white mb-0">
+                  {config.success.emailNote}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+
+        <div className="bump-investor-success__mobile desktop-none">
+          {config.success.paragraphs.map((p) => (
+            <p key={p} className="fs-13 fw-400 mb-3 text-black lh-15">
+              {p}
+            </p>
+          ))}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/assets/img/heart.gif"
+            style={{
+              width: 50,
+              borderRadius: 10,
+              margin: "8px auto 12px",
+              display: "block",
+            }}
+            alt=""
+          />
+          {config.success.email ? (
+            <div className="bump-investor-success__cta">
+              <p className="fs-13 lh-15 text-white mb-1">
+                <a
+                  href={`mailto:${config.success.email}`}
+                  className="text-white text-decoration-underline"
+                >
+                  {config.success.emailLabel ?? config.success.email}
+                </a>
+              </p>
+              {config.success.emailNote ? (
+                <p className="fs-13 lh-15 text-white mb-0">
+                  {config.success.emailNote}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+  return createPortal(successModal, document.body);
   }
 
   const modal = (
@@ -177,7 +315,11 @@ export function BumpPremiumModal({
             </div>
             <div className="desktop-none">
               <p className="mb-0 fs-14 lh-20 fw-400 text-white">
-                get the boost your <br /> PREP deserves
+                {config.boostMobile ?? (
+                  <>
+                    get the boost your <br /> PREP deserves
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -233,7 +375,10 @@ export function BumpPremiumModal({
                 <div className="field">
                   <input
                     type="tel"
-                    placeholder="Phone (Whatsapp number preffered)"
+                    placeholder={
+                      config.phonePlaceholder ??
+                      "Phone (Whatsapp number preffered)"
+                    }
                     autoComplete="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
@@ -305,7 +450,10 @@ export function BumpPremiumModal({
 
               <div className="cta-row mt-5">
                 <button className="cta-btn" type="submit">
-                  {config.cta}
+                  <span className="mobile-none">{config.cta}</span>
+                  <span className="desktop-none">
+                    {config.ctaMobile ?? config.cta}
+                  </span>
                   <span className="arrow">←</span>
                 </button>
               </div>
@@ -340,14 +488,20 @@ export const UNLOCK_BUMP_CONFIG: BumpModalConfig = {
   successBody: "We'll reach out about #PurplePremium seats shortly.",
 };
 
-/** Footer “Join The Team!” / investor access */
+/** Footer “Join The Team!” — investor access */
 export const INVESTOR_BUMP_CONFIG: BumpModalConfig = {
   subLabel: "INVESTOR ACCESS",
   tagline: "Interested in investing or partnering with #PGS?",
-  cta: "lets connect",
+  boostLines: ["lets", "scale"],
+  boostMobile: "lets scale",
+  cta: "LETS CONNECT",
+  ctaMobile: "RETAIL INVESTOR",
+  phonePlaceholder: "Phone (Whatsapp number preferred) (optional)",
+  overlayClassName: "pgs-modalSc pgs-modalSplit",
+  modalType: "investor",
   selects: [
     {
-      label: "What are you planning to study?",
+      label: "What kind of investor are you?",
       options: [
         { value: "1", label: "Retail investor" },
         { value: "2", label: "Institutional" },
@@ -361,6 +515,17 @@ export const INVESTOR_BUMP_CONFIG: BumpModalConfig = {
       ],
     },
   ],
+  success: {
+    title: "you're in",
+    nextTitle: "WE'RE EXCITED TO CONNECT.",
+    paragraphs: [
+      "If you're exploring a business or institutional partnership, our team will reach out to set up a proper conversation.",
+      "If you're a retail investor interested in our pre-seed round, we'll keep you on our investor update list.",
+    ],
+    email: "anjay@purpleguide.study",
+    emailLabel: "direct email?",
+    emailNote: "(Anjay gets this email directly)",
+  },
 };
 
 /** Referral access (footer / team) */

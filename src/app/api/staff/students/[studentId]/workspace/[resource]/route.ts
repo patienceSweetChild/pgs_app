@@ -20,6 +20,11 @@ const tables: Record<string, string> = {
   alerts: "student_alerts",
   requirements: "student_document_requirements",
   documents: "student_documents",
+  comments: "workspace_comments",
+  reviews: "review_queue_items",
+  notes: "counselor_notes",
+  universities: "student_university_selections",
+  profile: "premium_workspace_profiles",
 };
 
 function recordId(value: unknown): string {
@@ -116,6 +121,50 @@ export async function POST(request: Request, route: Context) {
         sort_order: order(input.sort_order),
         requested_by: actor.userId,
       };
+    } else if (resource === "comments") {
+      values = {
+        ...common,
+        author_id: actor.userId,
+        body: cleanWorkspaceText(input.body, 4000),
+        visibility: input.visibility === "staff_only" ? "staff_only" : "student_visible",
+        parent_id: input.parent_id ? recordId(input.parent_id) : null,
+      };
+    } else if (resource === "reviews") {
+      values = {
+        ...common,
+        title: cleanWorkspaceText(input.title, 255),
+        details: typeof input.details === "string" ? input.details.trim().slice(0, 4000) : "",
+        status: "queued",
+        sort_order: order(input.sort_order),
+        created_by: actor.userId,
+        updated_by: actor.userId,
+      };
+    } else if (resource === "notes") {
+      values = {
+        ...common,
+        author_id: actor.userId,
+        body: cleanWorkspaceText(input.body, 6000),
+        visibility: input.visibility === "student_visible" ? "student_visible" : "staff_only",
+      };
+    } else if (resource === "universities") {
+      const universityId = Number(input.university_id);
+      if (!Number.isSafeInteger(universityId) || universityId <= 0) {
+        throw new Error("Invalid university.");
+      }
+      values = {
+        ...common,
+        university_id: universityId,
+        stage: ["selected", "shortlisted", "applied", "offer_received", "finalized", "declined"].includes(
+          String(input.stage),
+        )
+          ? input.stage
+          : "selected",
+        sort_order: order(input.sort_order),
+        created_by: actor.userId,
+        updated_by: actor.userId,
+      };
+    } else if (resource === "profile") {
+      return NextResponse.json({ message: "Use update for dashboard details." }, { status: 405 });
     } else {
       return NextResponse.json({ message: "Unsupported create operation." }, { status: 405 });
     }
@@ -141,6 +190,31 @@ export async function PATCH(request: Request, route: Context) {
   try {
     const { actor, resource, table } = await context(route.params);
     const input = await readJsonObject(request);
+    if (resource === "profile") {
+      const values = {
+        pathway_label:
+          typeof input.pathway_label === "string" ? input.pathway_label.trim().slice(0, 120) : "",
+        intake_label:
+          typeof input.intake_label === "string" ? input.intake_label.trim().slice(0, 120) : "",
+        universities_applied: Number(input.universities_applied ?? 0),
+        offers_received: Number(input.offers_received ?? 0),
+        visa_status: String(input.visa_status ?? "not_applied"),
+        onboarding_percentage:
+          input.onboarding_percentage === "" || input.onboarding_percentage == null
+            ? null
+            : Number(input.onboarding_percentage),
+        currently_working_on: Array.isArray(input.currently_working_on)
+          ? input.currently_working_on
+          : [],
+        future_tasks: Array.isArray(input.future_tasks) ? input.future_tasks : [],
+      };
+      const supabase = await createSupabaseServerClient();
+      const { error } = await supabase
+        .from(table)
+        .upsert({ student_id: actor.studentId, ...values }, { onConflict: "student_id" });
+      if (error) return writeError(error, "Unable to update dashboard details.");
+      return NextResponse.json({ ok: true });
+    }
     const idValue = recordId(input.id);
     const values: Record<string, unknown> = {};
 

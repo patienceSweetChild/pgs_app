@@ -22,7 +22,11 @@ import type {
   CmsUniversity,
   CmsWeeklyWall,
 } from "./cms-types";
-import type { CountryPageContent } from "@/features/countries/content";
+import {
+  mapCatalogRowToShortTermCourse,
+  type CountryPageContent,
+  type ShortTermCourse,
+} from "@/features/countries/content";
 import type { PathwayPageContent, PathwayTemplate } from "@/features/pathway/page-content";
 
 export type {
@@ -438,10 +442,52 @@ export async function getPublishedCountryBySlug(
     .maybeSingle();
   if (error || !data?.page_content) return null;
   const content = data.page_content as CountryPageContent;
-  return {
+  return hydrateCountryShortTermCourses(client, {
     ...content,
     slug: (data.slug || content.slug) as CountryPageContent["slug"],
     name: data.name || content.name,
+  });
+}
+
+async function hydrateCountryShortTermCourses(
+  client: NonNullable<Awaited<ReturnType<typeof sb>>>,
+  content: CountryPageContent,
+): Promise<CountryPageContent> {
+  const tab = content.tabs.find((item) => item.id === "shortTerm");
+  if (!tab || tab.id !== "shortTerm") return content;
+
+  const ids = (tab.courseIds ?? []).map((id) => String(id).trim()).filter(Boolean);
+  if (ids.length === 0) return content;
+
+  const { data, error } = await client
+    .from("courses")
+    .select(
+      "id, title, short_description, duration, mode, badge, tags_text, image_asset:media_assets!image_asset_id(bucket, path)",
+    )
+    .in("id", ids);
+  if (error || !data?.length) return content;
+
+  const mapped = new Map<string, ShortTermCourse>();
+  for (const row of data) {
+    const course = mapCatalogRowToShortTermCourse(row);
+    course.image = mediaUrl(
+      client,
+      normalizeMediaJoin(row.image_asset),
+      course.image ?? "/assets/img/half-cut-girl.png",
+    );
+    mapped.set(String(row.id), course);
+  }
+
+  const courses = ids
+    .map((id) => mapped.get(id))
+    .filter((item): item is ShortTermCourse => Boolean(item));
+  if (courses.length === 0) return content;
+
+  return {
+    ...content,
+    tabs: content.tabs.map((item) =>
+      item.id === "shortTerm" ? { ...item, courses } : item,
+    ),
   };
 }
 

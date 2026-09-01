@@ -150,12 +150,76 @@ export const TIP_SLIDES = [
   },
 ] as const;
 
+export const MODAL_STUDY_OPTIONS = [
+  { value: "1", label: "MS/Masters Abroad" },
+  { value: "2", label: "MBA" },
+  { value: "3", label: "Medical Pathway" },
+  { value: "4", label: "Other" },
+] as const;
+
 export const MODAL_COUNTRIES = [
   { value: "1", label: "USA" },
-  { value: "2", label: "India" },
+  { value: "2", label: "UK" },
+  { value: "3", label: "Canada" },
+  { value: "4", label: "Germany" },
+  { value: "5", label: "Other" },
 ] as const;
 
 export const MODAL_LEVELS = [
-  { value: "1", label: "Master’s" },
-  { value: "2", label: "Master’s - 1" },
+  { value: "1", label: "Master's" },
+  { value: "2", label: "Bachelor's" },
+  { value: "3", label: "PhD" },
+  { value: "4", label: "Other" },
 ] as const;
+
+/** apply with #PGS */
+export const MODAL_COPY = {
+  subLabel: "LETS CONNECT",
+  tagline:
+    "Lost Between Courses, Deadlines, and Decisions? Kickstart your study journey with us.",
+  boostDesktop: ["get the boost", "your", "PREP", "deserves."],
+  boostMobile: "get the boost your PREP deserves",
+  studyLabel: "What are you planning to study?",
+  cta: "GET CALL FROM #PGS",
+  phonePlaceholder: "Phone (Whatsapp number preffered) (optional)",
+} as const;
+
+export const SUCCESS_MODAL = {
+  title: "you're in",
+  nextTitle: "LETS GET THINGS MOVING.",
+  body: "We got your details, will connect soon. If you are in a hurry give us a call on",
+  phone: "9566566298",
+  bodySuffix: "or book an appointment below.",
+  stripLines: [
+    "Need to sort out the study journey?",
+    "Book a free 15min clarity call",
+  ],
+} as const;
+
+/** Let’s Find Your Scholarships */
+export const FIND_MODAL_COPY = {
+  subLabel: "SCHOLARSHIPS AWAIT",
+  tagline:
+    "Different scholarships have different criteria, figure out which alls you can stand in.",
+  boostDesktop: ["lets get your", "options", "ready"],
+  boostMobile: "lets get your options ready",
+  countryLabel: "Country aiming for",
+  levelLabel: "Course Level",
+  ctaDesktop: "SHARE UPDATE",
+  ctaMobile: "I NEED THE KIT",
+  phonePlaceholder: "Phone (Whatsapp number preffered) (optional)",
+} as const;
+
+export const FIND_SUCCESS_MODAL = {
+  title: "you're in",
+  nextTitle: "LETS GET THINGS MOVING.",
+  paragraphs: [
+    "We've sent the #PGS Scholarship Guide to your email.",
+    "This covers the basics you actually need.",
+    "We'll send your study toolkit and important updates on WhatsApp (If you shared your WhatsApp number). No spam. Unsubscribe anytime.",
+  ],
+  stripLines: [
+    "Need to sort out the study journey?",
+    "Book a free 15min clarity call",
+  ],
+} as const;

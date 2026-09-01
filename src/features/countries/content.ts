@@ -63,6 +63,11 @@ export type VisaStep = {
   detail: string;
 };
 
+export type VisaPlanReview = {
+  title: string;
+  items: string[];
+};
+
 export type DosDontsRow = {
   criteria: string;
   dos: string;
@@ -70,11 +75,45 @@ export type DosDontsRow = {
 };
 
 export type ShortTermCourse = {
+  id?: string;
   tag: string;
   title: string;
   blurb: string;
   metric?: string;
+  image?: string;
+  categoryTag?: string;
 };
+
+export function mapCatalogRowToShortTermCourse(row: {
+  id: unknown;
+  title?: string | null;
+  short_description?: string | null;
+  badge?: string | null;
+  mode?: string | null;
+  duration?: string | null;
+  tags_text?: string | null;
+  image?: string | null;
+}): ShortTermCourse {
+  const tags = String(row.tags_text ?? "")
+    .split(/[,|]/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+  const firstTag = tags[0];
+  const mode = String(row.mode ?? "").trim();
+  return {
+    id: String(row.id),
+    title: String(row.title ?? "").trim(),
+    blurb: String(row.short_description ?? "").trim(),
+    tag: String(row.badge ?? "").trim() || (mode ? `#${mode}` : "#inCampus"),
+    categoryTag: firstTag
+      ? firstTag.startsWith("#")
+        ? firstTag
+        : `#${firstTag}`
+      : "#all",
+    metric: String(row.duration ?? "").trim() || undefined,
+    image: String(row.image ?? "").trim() || undefined,
+  };
+}
 
 export type ScholarshipRow = {
   name: string;
@@ -116,17 +155,50 @@ export type Study101Tab = {
   nonStemBlurb: string;
 };
 
+export type PgsBanner = {
+  headline: string;
+  body: string;
+};
+
+export const DEFAULT_COST_PGS_BANNER: PgsBanner = {
+  headline:
+    'Yes, the competition is global, but so are the rewards —stay sharp and go claim yours.',
+  body: "We've worked closely with students who've taken this path—and yeah, it definitely takes commitment. But with the right mentor and a clear plan, it makes all the difference. That's why we've built a solid approach for each study pathway, helping our students stay on track and move forward with confidence.",
+};
+
+export function resolveCostPgsBanner(
+  banner?: PgsBanner | string,
+): PgsBanner {
+  if (!banner) return DEFAULT_COST_PGS_BANNER;
+  if (typeof banner === 'string') {
+    return {
+      headline: banner.trim() || DEFAULT_COST_PGS_BANNER.headline,
+      body: DEFAULT_COST_PGS_BANNER.body,
+    };
+  }
+  return {
+    headline: banner.headline.trim() || DEFAULT_COST_PGS_BANNER.headline,
+    body: banner.body.trim() || DEFAULT_COST_PGS_BANNER.body,
+  };
+}
+
+export type PremiumCta = {
+  title: string;
+  body: string;
+  image?: string;
+};
+
 export type CostTab = {
   id: 'cost';
   label: string;
   sidebarLinks: SidebarLink[];
   stats: StatBlock;
+  budgetIntro?: string[];
   budgetQs: string[];
   spendItems: string[];
-  premiumCta: {
-    title: string;
-    body: string;
-  };
+  reasons?: Study101Reasons;
+  pgsBanner?: PgsBanner | string;
+  premiumCta: PremiumCta;
 };
 
 export type VisaTab = {
@@ -134,8 +206,10 @@ export type VisaTab = {
   label: string;
   sidebarLinks: SidebarLink[];
   fundingStats: StatBlock;
+  intro?: string;
   visaTypes: VisaType[];
   docGroups: DocGroup[];
+  planReview?: VisaPlanReview;
   steps: VisaStep[];
   dosDonts: DosDontsRow[];
   helpCta: {
@@ -145,36 +219,224 @@ export type VisaTab = {
   };
 };
 
+export const DEFAULT_VISA_INTRO =
+  "USA offers different visa options depending on whether it's for a full degree, an exchange program, or a vocational course. These visas each cater to different student categories. Understanding the visa types and requirements is crucial for a smooth application.";
+
+export const DEFAULT_VISA_PLAN_REVIEW: VisaPlanReview = {
+  title: 'Plan. Review. Submit.',
+  items: [
+    'For all our students, #PGS will make sure you don’t miss anything on your visa checklist',
+  ],
+};
+
 export type ShortTermTab = {
   id: 'shortTerm';
   label: string;
+  sidebarLinks?: SidebarLink[];
   stats: StatBlock;
   intro: string[];
+  ctaLabel?: string;
+  ctaHelper?: string;
+  mentorTitle?: string;
   mentorBlurb: string;
+  /** Catalog course ids selected in CMS. */
+  courseIds?: string[];
   courses: ShortTermCourse[];
+};
+
+export type ScholarshipGuide = {
+  title: string;
+  body?: string;
+  paragraphs?: string[];
+  helpIntro?: string;
+  helpItems?: string[];
+  closing?: string;
 };
 
 export type ScholarshipsTab = {
   id: 'scholarships';
   label: string;
+  sidebarLinks?: SidebarLink[];
   stats: StatBlock;
   intro: string[];
   rows: ScholarshipRow[];
-  guide: {
-    title: string;
-    body: string;
-  };
+  guide: ScholarshipGuide;
 };
+
+export const DEFAULT_SCHOLARSHIP_SIDEBAR_LINKS: SidebarLink[] = [
+  {
+    id: 'scholarship_major',
+    label:
+      'Major Scholarships & Positions in the USA Students Should Know About',
+  },
+  {
+    id: 'scholarship_guide',
+    label: '#PGS | Scholarship Apply Guide',
+  },
+];
+
+export const DEFAULT_SCHOLARSHIP_GUIDE: ScholarshipGuide = {
+  title: '#PGS | Scholarship Apply Guide',
+  paragraphs: [
+    "Most students miss scholarships, not because they're not eligible, but because no one tells them how to actually apply the right way.",
+    'For international students, the scholarship journey is often confusing.',
+    "Every university or scholarship body has its own rules. Some want essays. Some ask for income proof. Deadlines are to be followed. And most of the time, you're just applying randomly hoping it works. By the time you figure it all out—you’ve either missed the deadline or applied with zero strategy. That’s where most students lose out.",
+    'At #PGS, we don’t let that happen.',
+  ],
+  helpIntro: 'We help you:',
+  helpItems: [
+    'Find scholarships that actually match your course and profile.',
+    'Break down what each one really needs—essays, docs, formats, all of it.',
+    'Apply with a clear plan, without last-minute chaos.',
+  ],
+  closing:
+    'And if you’re part of #PurplePremium? This whole process is already included.',
+};
+
+function stripHtml(text: string): string {
+  return text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function splitScholarshipGuideParagraphs(text: string): string[] {
+  const cleaned = stripHtml(text);
+  if (!cleaned) return [];
+
+  if (cleaned.includes('\n\n')) {
+    return cleaned
+      .split(/\n\n+/)
+      .map((part) => part.trim())
+      .filter(Boolean);
+  }
+
+  const markers = [
+    'For international students, the scholarship journey is often confusing.',
+    'Every university or scholarship body has its own rules.',
+    'At #PGS, we don',
+  ];
+
+  let remaining = cleaned;
+  const paragraphs: string[] = [];
+
+  for (const marker of markers) {
+    const idx = remaining.indexOf(marker);
+    if (idx > 0) {
+      paragraphs.push(remaining.slice(0, idx).trim());
+      remaining = remaining.slice(idx);
+    }
+  }
+
+  const helpIdx = remaining.search(/We help you/i);
+  if (helpIdx > 0) {
+    paragraphs.push(remaining.slice(0, helpIdx).trim());
+  } else if (remaining && !/^We help you/i.test(remaining)) {
+    paragraphs.push(remaining.trim());
+  }
+
+  return paragraphs.filter(Boolean);
+}
+
+function isMonolithicScholarshipGuide(text: string): boolean {
+  const cleaned = stripHtml(text);
+  return (
+    cleaned.length > 180 ||
+    /We help you/i.test(cleaned) ||
+    /And if you(?:'|’)re part of #PurplePremium/i.test(cleaned)
+  );
+}
+
+export function resolveScholarshipGuide(
+  guide: ScholarshipGuide | undefined,
+): Required<
+  Pick<
+    ScholarshipGuide,
+    'title' | 'paragraphs' | 'helpIntro' | 'helpItems' | 'closing'
+  >
+> {
+  const base = guide ?? DEFAULT_SCHOLARSHIP_GUIDE;
+  const hasStructuredParagraphs = (base.paragraphs?.length ?? 0) > 1;
+  const monolithicParagraph =
+    base.paragraphs?.length === 1 ? base.paragraphs[0] : '';
+  const monolithicBody = base.body?.trim() ?? '';
+  const monolithicSource = monolithicParagraph || monolithicBody;
+
+  if (
+    hasStructuredParagraphs &&
+    !isMonolithicScholarshipGuide(base.paragraphs!.join('\n\n'))
+  ) {
+    return {
+      title: base.title || DEFAULT_SCHOLARSHIP_GUIDE.title,
+      paragraphs: base.paragraphs!.map(stripHtml),
+      helpIntro: base.helpIntro ?? DEFAULT_SCHOLARSHIP_GUIDE.helpIntro!,
+      helpItems: base.helpItems?.length
+        ? base.helpItems
+        : DEFAULT_SCHOLARSHIP_GUIDE.helpItems!,
+      closing: base.closing ?? DEFAULT_SCHOLARSHIP_GUIDE.closing!,
+    };
+  }
+
+  if (monolithicSource && isMonolithicScholarshipGuide(monolithicSource)) {
+    const parsed = splitScholarshipGuideParagraphs(monolithicSource);
+    return {
+      title: base.title || DEFAULT_SCHOLARSHIP_GUIDE.title,
+      paragraphs:
+        parsed.length >= 2
+          ? parsed
+          : DEFAULT_SCHOLARSHIP_GUIDE.paragraphs!,
+      helpIntro: base.helpIntro ?? DEFAULT_SCHOLARSHIP_GUIDE.helpIntro!,
+      helpItems: base.helpItems?.length
+        ? base.helpItems
+        : DEFAULT_SCHOLARSHIP_GUIDE.helpItems!,
+      closing: base.closing ?? DEFAULT_SCHOLARSHIP_GUIDE.closing!,
+    };
+  }
+
+  if (base.paragraphs?.length) {
+    return {
+      title: base.title || DEFAULT_SCHOLARSHIP_GUIDE.title,
+      paragraphs: base.paragraphs.map(stripHtml),
+      helpIntro: base.helpIntro ?? DEFAULT_SCHOLARSHIP_GUIDE.helpIntro!,
+      helpItems: base.helpItems?.length
+        ? base.helpItems
+        : DEFAULT_SCHOLARSHIP_GUIDE.helpItems!,
+      closing: base.closing ?? DEFAULT_SCHOLARSHIP_GUIDE.closing!,
+    };
+  }
+
+  return {
+    title: DEFAULT_SCHOLARSHIP_GUIDE.title,
+    paragraphs: DEFAULT_SCHOLARSHIP_GUIDE.paragraphs!,
+    helpIntro: DEFAULT_SCHOLARSHIP_GUIDE.helpIntro!,
+    helpItems: DEFAULT_SCHOLARSHIP_GUIDE.helpItems!,
+    closing: DEFAULT_SCHOLARSHIP_GUIDE.closing!,
+  };
+}
 
 export type TracksTab = {
   id: 'tracks';
   label: string;
+  sidebarLinks?: SidebarLink[];
   stats: StatBlock;
   intro: string[];
   sections: TrackSection[];
+  headsUpTitle?: string;
   headsUp: string[];
   punchline: string;
 };
+
+export const DEFAULT_TRACKS_SIDEBAR_LINKS: SidebarLink[] = [
+  {
+    id: 'tracks_section_1',
+    label: 'Section 1: Masters, STEM UG, MBA & Others',
+  },
+  {
+    id: 'tracks_section_2',
+    label: 'Section 2: Medical, Health, and Life Sciences',
+  },
+  {
+    id: 'tracks_heads_up',
+    label: 'A Heads Up',
+  },
+];
 
 export type CountryTab =
   | Study101Tab
@@ -323,9 +585,13 @@ export const USA_CONTENT: CountryPageContent = {
           { value: '1,126,690', label: 'Worldwide' },
           { value: '331,602', label: 'from INDIA' },
         ],
-        caption: 'Universities are from the US',
+        caption: 'INTERNATIONAL STUDENTS IN THE USA',
         sourceNote: OPEN_DOORS_NOTE,
       },
+      budgetIntro: [
+        "If you're planning to study in the U.S., understanding the full cost picture is one of the smartest moves you can make — before you even shortlist universities.",
+        'From tuition and living expenses to insurance, visa fees, and emergency savings, the numbers add up fast. The good news? With the right planning (and the right guidance), studying in America is more achievable than most students think.',
+      ],
       budgetQs: [
         '“Can I actually afford this?”',
         '“Will I be able to pay back my student loan later?”',
@@ -338,9 +604,26 @@ export const USA_CONTENT: CountryPageContent = {
         'Visa fees',
         'Emergency funds',
       ],
+      reasons: {
+        research: 'Tuition Fees — This is almost always the largest single cost.',
+        universities: 'Well-known Universities',
+        alumni: 'To be part of a strong alumni network',
+        famousUnis:
+          'The U.S. is home to world-famous universities like MIT, Harvard, Stanford, and many more.',
+        startup: 'Good startup & VC Culture',
+        tagline: 'Learn. Do. Succeed.',
+        quote:
+          'Studying in the U.S. means more than just classes — you get real-world experience, STEM OPT extensions, scholarships, internships, and a chance to build your future while you study. It’s where top education meets real opportunity. ❤️',
+      },
+      pgsBanner: {
+        headline:
+          'Yes, the competition is global, but so are the rewards —stay sharp and go claim yours.',
+        body: "We've worked closely with students who've taken this path—and yeah, it definitely takes commitment. But with the right mentor and a clear plan, it makes all the difference. That's why we've built a solid approach for each study pathway, helping our students stay on track and move forward with confidence.",
+      },
       premiumCta: {
         title: 'JOIN #PURPLEPREMIUM',
         body: 'Streamlined Support for USA Medical & Non-Medical study Paths.',
+        image: '/assets/img/step.png',
       },
     },
     {
@@ -365,9 +648,10 @@ export const USA_CONTENT: CountryPageContent = {
           { value: '19.0%', label: 'U.S College or UNI' },
           { value: '26.5%', label: 'Other Sources' },
         ],
-        caption: 'Top Funding Sources for International Students',
+        caption: 'Top Funding\nSources for\nInternational\nStudents',
         sourceNote: OPEN_DOORS_NOTE,
       },
+      intro: DEFAULT_VISA_INTRO,
       visaTypes: [
         {
           name: 'F-1 Visa',
@@ -424,6 +708,7 @@ export const USA_CONTENT: CountryPageContent = {
           ],
         },
       ],
+      planReview: DEFAULT_VISA_PLAN_REVIEW,
       steps: [
         {
           title: 'Step 1 — Secure Institution Admission',
@@ -483,6 +768,16 @@ export const USA_CONTENT: CountryPageContent = {
     {
       id: 'shortTerm',
       label: 'Short-Term-Profile Courses',
+      sidebarLinks: [
+        {
+          id: 'short_term_intro',
+          label: 'Internships. Certificates. Let’s Talk.',
+        },
+        {
+          id: 'short_term_mentor',
+          label: 'Start Here. Personalize With a Mentor.',
+        },
+      ],
       stats: {
         values: [
           { value: '1,126,690', label: 'studied in person' },
@@ -494,10 +789,13 @@ export const USA_CONTENT: CountryPageContent = {
       },
       intro: [
         'As part of our profile-building program, we bring you a range of exclusive internship opportunities, certificate courses, and short-term programs designed to give your CV that extra edge. These are not your typical courses—they’re curated based on what actually helps students get noticed, whether it’s for university admissions, competitive jobs, or global exposure.',
-        'From clinical rotations and internships to summer schools and online certifications from top institutes—we’ve got you covered. These experiences also help you build a stronger network, meet mentors in your field, and add real value to your journey.',
+        'From clinical rotations and internships to summer schools and online certifications from top institutes— we’ve got you covered. These experiences also help you build a stronger network, meet mentors in your field, and add real value to your journey.',
         'Not sure which course fits your goals? Wondering if you’re eligible or if this adds real weight to your application?',
-        'Talk to our expert today and get clarity. We’ll help you choose the right add-ons based on your career path and guide you through the process step by step.',
       ],
+      ctaLabel: 'Talk to our expert today and get clarity.',
+      ctaHelper:
+        'We’ll help you choose the right add-ons based on your career path and guide you through the process step by step.',
+      mentorTitle: 'Start Here. Personalize With a Mentor.',
       mentorBlurb:
         'Our mentors are better suited to guide you based on your background, goals, and where you want to land. Reach out to them.',
       courses: [
@@ -507,6 +805,8 @@ export const USA_CONTENT: CountryPageContent = {
           blurb:
             'Harvard Internship Harvard Harvard Internship Harvard Harvard Internship Harvard.',
           metric: '650 students enrolled',
+          image: '/assets/img/half-cut-girl.png',
+          categoryTag: '#all',
         },
         {
           tag: '#inCampus',
@@ -514,6 +814,8 @@ export const USA_CONTENT: CountryPageContent = {
           blurb:
             'Harvard Internship Harvard Harvard Internship Harvard Harvard Internship Harvard.',
           metric: 'Our 3rd Batch',
+          image: '/assets/img/half-cut-girl.png',
+          categoryTag: '#all',
         },
         {
           tag: '#inCampus',
@@ -521,20 +823,23 @@ export const USA_CONTENT: CountryPageContent = {
           blurb:
             'Harvard Internship Harvard Harvard Internship Harvard Harvard Internship Harvard.',
           metric: '650 students enrolled',
+          image: '/assets/img/half-cut-girl.png',
+          categoryTag: '#all',
         },
       ],
     },
     {
       id: 'scholarships',
       label: 'Scholarships',
+      sidebarLinks: DEFAULT_SCHOLARSHIP_SIDEBAR_LINKS,
       stats: {
         values: [
-          { value: '88%', label: 'special-focus institutions' },
-          { value: '78%', label: 'baccalaureate colleges' },
-          { value: '65%', label: 'doctoral universities' },
+          { value: '88%', label: 'special-focus\ninstitutions' },
+          { value: '78%', label: 'baccalaureate\ncolleges' },
+          { value: '65%', label: 'doctoral\nuniversities' },
         ],
         caption:
-          'Institutions have Boosted or Maintained Financial Support Since 2020',
+          'Institutions\nhave Boosted or\nMaintained Financial\nSupport Since 2020',
         sourceNote: OPEN_DOORS_NOTE,
       },
       intro: [
@@ -600,22 +905,20 @@ export const USA_CONTENT: CountryPageContent = {
           providedBy: 'American University',
         },
       ],
-      guide: {
-        title: '#PGS | Scholarship Apply Guide',
-        body: "Most students miss scholarships, not because they're not eligible, but because no one tells them how to actually apply the right way. For international students, the scholarship journey is often confusing. Every university or scholarship body has its own rules. Some want essays. Some ask for income proof. Deadlines are to be followed. And most of the time, you're just applying randomly hoping it works. By the time you figure it all out—you’ve either missed the deadline or applied with zero strategy. That’s where most students lose out. At #PGS, we don’t let that happen. We help you find scholarships that actually match your course and profile, break down what each one really needs—essays, docs, formats, all of it—and apply with a clear plan, without last-minute chaos. And if you’re part of #PurplePremium? This whole process is already included.",
-      },
+      guide: DEFAULT_SCHOLARSHIP_GUIDE,
     },
     {
       id: 'tracks',
       label: 'Popular Study Tracks',
+      sidebarLinks: DEFAULT_TRACKS_SIDEBAR_LINKS,
       stats: {
         values: [
           { value: '3.2%', label: 'Health Professions' },
           {
             value: '43.6%',
-            label: 'Math, Engineering & Computer Science',
+            label: 'Math,Engineering &\nComputer Science',
           },
-          { value: '14.2%', label: 'Business & Management' },
+          { value: '14.2%', label: 'Business &\nManagement' },
         ],
         caption: 'Study Tracks Picked by International Students',
         sourceNote: OPEN_DOORS_NOTE,

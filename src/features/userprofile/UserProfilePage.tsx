@@ -16,8 +16,19 @@ import "./userprofile.css";
 /**
  * User profile — Saved/Dashboard ID card + form fields + password row.
  */
-export function UserProfilePage() {
-  const { refreshSession, isLoggedIn, ready: authReady } = useExperience();
+export function UserProfilePage({
+  pathwayLabel,
+  premiumLabel,
+}: {
+  pathwayLabel?: string;
+  premiumLabel?: string;
+} = {}) {
+  const {
+    refreshSession,
+    isLoggedIn,
+    isPremium,
+    ready: authReady,
+  } = useExperience();
   const [avatarSrc, setAvatarSrc] = useState<string>(PROFILE_CARD.avatar);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [cardName, setCardName] = useState("");
@@ -307,12 +318,25 @@ export function UserProfilePage() {
                   </div>
                 </div>
                 <div className="title-info">
-                  <h5 className="mb-0">{PROFILE_CARD.premiumLabel}</h5>
-                  <h6 className="mb-0">{PROFILE_CARD.pathway}</h6>
+                  <h5 className="mb-0">
+                    {premiumLabel || PROFILE_CARD.premiumLabel}
+                  </h5>
+                  <h6 className="mb-0">
+                    {pathwayLabel || PROFILE_CARD.pathway}
+                  </h6>
                 </div>
               </div>
-              <div className="avatar-heading-right-box">
-                <h4 className="mb-0">#PURPLEPREMIUM</h4>
+              <div
+                className={`avatar-heading-right-box${
+                  isPremium ? "" : " justify-content-start"
+                }`}
+                style={isPremium ? undefined : { paddingLeft: 10 }}
+              >
+                {isPremium ? (
+                  <h4 className="mb-0">#PURPLEPREMIUM</h4>
+                ) : (
+                  <h4 className="mb-0">Yet to <br /> Unlock Full <br /> Access</h4>
+                )}
               </div>
             </div>
           </div>

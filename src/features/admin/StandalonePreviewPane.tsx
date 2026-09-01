@@ -6,12 +6,15 @@ import { CourseDetailPage } from "@/features/programsfull/CourseDetailPage";
 import { CountryPage } from "@/features/countries/CountryPage";
 import { PathwayPage } from "@/features/pathway/PathwayPage";
 import { PurpleNonMedicalPage } from "@/features/purplenonmedical/PurpleNonMedicalPage";
+import { DashboardPage } from "@/features/dashboard/DashboardPage";
 import type { SessionDetail } from "@/features/purpleevents/content";
 import type { CourseDetail } from "@/features/programsfull/content";
 import type { CountryPageContent } from "@/features/countries/content";
 import type { MedicalPathwayPageContent } from "@/features/pathway/page-content";
 import type { NonMedicalPathwayPageContent } from "@/features/pathway/page-content";
 import type { CountryTopTabId } from "./country-preview-map";
+import type { StudentDashboardContent } from "@/features/dashboard/content";
+import type { DashboardPreviewIdentity } from "@/features/dashboard/content";
 
 const PREVIEW_WIDTH = 1440;
 const MIN_HEIGHT = 900;
@@ -24,8 +27,14 @@ type Kind =
   | "course"
   | "country"
   | "pathway-medical"
-  | "pathway-nonmedical";
+  | "pathway-nonmedical"
+  | "dashboard";
 export type PreviewPublishMode = "draft" | "publish";
+
+export type DashboardPreviewDetail = {
+  content: StudentDashboardContent;
+  identity: DashboardPreviewIdentity;
+};
 
 /** Catch render errors in the live preview so the admin form stays usable. */
 class PreviewErrorBoundary extends Component<
@@ -174,6 +183,12 @@ export function StandalonePreviewPane({
     ) : kind === "pathway-nonmedical" ? (
       <PurpleNonMedicalPage
         content={stableDetail as NonMedicalPathwayPageContent}
+      />
+    ) : kind === "dashboard" ? (
+      <DashboardPage
+        content={(stableDetail as DashboardPreviewDetail).content}
+        previewIdentity={(stableDetail as DashboardPreviewDetail).identity}
+        forceUnlocked
       />
     ) : (
       <CountryPage

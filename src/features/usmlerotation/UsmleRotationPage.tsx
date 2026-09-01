@@ -7,6 +7,9 @@ import {
   BOOKING_STEPS,
   CLINICAL_ROTATION_BLURB,
   CONTACT_STRIP,
+  DOCUMENTS_MODAL_COPY,
+  DOCUMENTS_PROFILE_OPTIONS,
+  DOCUMENTS_SUCCESS_MODAL,
   EXPENSE_COPY,
   HERO_FEATURES,
   HERO_STATS,
@@ -125,9 +128,14 @@ function TestimonialsCarousel() {
 export function UsmleRotationPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalDone, setModalDone] = useState(false);
+  const [documentsModalOpen, setDocumentsModalOpen] = useState(false);
+  const [documentsSuccessOpen, setDocumentsSuccessOpen] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [profileStage, setProfileStage] = useState<string>(
+    DOCUMENTS_PROFILE_OPTIONS[0].value,
+  );
   const [toggles, setToggles] = useState(() => MODAL_TOGGLES.map(() => true));
 
   function openModal() {
@@ -135,10 +143,27 @@ export function UsmleRotationPage() {
     setModalOpen(true);
   }
 
+  function openDocumentsModal() {
+    setDocumentsSuccessOpen(false);
+    setDocumentsModalOpen(true);
+  }
+
+  function closeDocumentsModals() {
+    setDocumentsModalOpen(false);
+    setDocumentsSuccessOpen(false);
+  }
+
   function onModalSubmit(e: FormEvent) {
     e.preventDefault();
     if (!name.trim() || !email.includes("@")) return;
     setModalDone(true);
+  }
+
+  function onDocumentsSubmit(e: FormEvent) {
+    e.preventDefault();
+    if (!name.trim() || !email.includes("@")) return;
+    setDocumentsModalOpen(false);
+    setDocumentsSuccessOpen(true);
   }
 
   return (
@@ -451,31 +476,20 @@ export function UsmleRotationPage() {
                 </div>
               </div>
 
-              <div className="w-643px position-relative mb-4 mobile-wrap-column-2">
-                <div className="row align-items-center">
-                  <div className="col-sm-4 px-2">
-                    <h4 className="fw-500 text-black fs-25 lh-30 mobile-fs-18 mobile-lh-20 d-flex justify-content-center mt-2">
-                      Why Medical <br />
-                      Students &amp; <br />
-                      Doctors Pick Us
-                    </h4>
-                  </div>
-                  {WHY_PICK_US.map((card) => (
-                    <div className="col-sm-4 px-2" key={card.title}>
-                      <div className="card text-dark mb-3 border-0">
-                        <div
-                          className="p-1 fw-500 text-center fs-26 mobile-fs-16 mobile-lh-ful"
-                          style={{ backgroundColor: "#a6ffaf" }}
-                        >
-                          {card.title}
-                        </div>
-                        <div className="p-3 d-flex justify-content-center usml-card-tital2 lh-25">
-                          {card.body}
-                        </div>
-                      </div>
+              <div className="usml-why-pick-grid">
+                <h4 className="usml-why-pick-heading">
+                  Why Medical <br />
+                  Students &amp; <br />
+                  Doctors Pick Us
+                </h4>
+                {WHY_PICK_US.map((card) => (
+                  <article className="usml-why-pick-card" key={card.title}>
+                    <div className="usml-why-pick-card__header">{card.title}</div>
+                    <div className="usml-why-pick-card__body">
+                      <p>{card.body}</p>
                     </div>
-                  ))}
-                </div>
+                  </article>
+                ))}
               </div>
             </div>
           </div>
@@ -713,10 +727,9 @@ export function UsmleRotationPage() {
 
         {/* 9. Pricing */}
         <section className="pt-5 pb-0 USMLErotation">
-          <div>
-            <div className="row justify-content-center">
-              <div className="col-lg-12 p-0">
-                <div className="box-gray-2 border-radius-10px mobile-box-gray-2">
+          <div className="container p-0">
+            <div className="row justify-content-center usml-pricing-section">
+              <div className="box-gray-2 border-radius-10px mobile-box-gray-2 usml-pricing-gray">
                   <div className="w-760px m-auto">
                     <div
                       className="w-95 card-box-border bg-white border-black pt-4 mobile-bg-white mobile-new-box-1"
@@ -768,7 +781,10 @@ export function UsmleRotationPage() {
                     </div>
                   </div>
                 </div>
+            </div>
 
+            <div className="row justify-content-center">
+              <div className="col-lg-12 p-0">
                 <div className="w-700px m-auto pt-8">
                   <div className="usml-heading-usml">
                     <h1 className="usml-title p-1 border-radius-10px gr-mobile-1 mobile-w-50">
@@ -949,10 +965,11 @@ export function UsmleRotationPage() {
                       breakdown for your <br />
                       journey?
                     </h2>
-                    <Link
-                      href="/contact"
+                    <button
+                      type="button"
                       style={{ padding: "8px 30px" }}
                       className="mb-2 mobile-px-3 btn btn-small-large border-radius-10px btn-base-color btn-rounded btn-switch-text d-inline-block me-20px sm-me-10px align-middle left-icon mt-5px"
+                      onClick={openDocumentsModal}
                     >
                       <span>
                         <span
@@ -962,7 +979,7 @@ export function UsmleRotationPage() {
                           Request it here
                         </span>
                       </span>
-                    </Link>
+                    </button>
                     <p className="text-black mt-3 mb-3">{EXPENSE_COPY.inbox}</p>
                     <p className="text-black fs-16 lh-19 mt-6 mb-30 mobile-fs-14 mobile-pb-30">
                       {EXPENSE_COPY.body}
@@ -1241,6 +1258,233 @@ export function UsmleRotationPage() {
                   </p>
                 </form>
               )}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {documentsModalOpen ? (
+        <div
+          className="mobile-applicant pgs-modal pgs-modalSc pgs-modalSplit pgs-modalDocs premium-modal-overlay"
+          style={{ display: "flex" }}
+        >
+          <div className="premium-modal-container purple-modal d-flex">
+            <div className="panel-left">
+              <button
+                className="close-btn desktop-none"
+                type="button"
+                aria-label="Close"
+                onClick={closeDocumentsModals}
+              >
+                ✕
+              </button>
+              <div className="brand-row">
+                <div className="brand-title">#PGS</div>
+                <div className="heart-badge">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/assets/img/heart.gif" alt="" />
+                </div>
+              </div>
+              <div className="sub-label fnt-family">
+                {DOCUMENTS_MODAL_COPY.subLabel}
+              </div>
+              <p className="tagline lh-18ppx">{DOCUMENTS_MODAL_COPY.tagline}</p>
+              <div className="boost-wrap">
+                <div className="boost-wrap__callout mobile-none">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/assets/img/arrow-modal.png"
+                    alt=""
+                  />
+                  <span className="d-block fs-16 text-white lh-18">
+                    {DOCUMENTS_MODAL_COPY.boostDesktop[0]} <br />
+                    {DOCUMENTS_MODAL_COPY.boostDesktop[1]} <br />
+                    {DOCUMENTS_MODAL_COPY.boostDesktop[2]} <br />
+                    {DOCUMENTS_MODAL_COPY.boostDesktop[3]}
+                  </span>
+                </div>
+                <div className="mb-4">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/assets/img/bump.png" alt="" />
+                </div>
+                <div className="desktop-none">
+                  <p className="mb-0 fs-14 lh-20 fw-400 text-white">
+                    {DOCUMENTS_MODAL_COPY.boostMobile}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="panel-right">
+              <button
+                className="close-btn mobile-none"
+                type="button"
+                aria-label="Close"
+                onClick={closeDocumentsModals}
+              >
+                ✕
+              </button>
+              <form onSubmit={onDocumentsSubmit}>
+                <div className="field-group">
+                  <div className="field">
+                    <input
+                      type="text"
+                      placeholder="Enter Name *"
+                      autoComplete="name"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
+                  <div className="field">
+                    <input
+                      type="email"
+                      placeholder="Email *"
+                      autoComplete="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </div>
+                  <div className="field">
+                    <input
+                      type="tel"
+                      placeholder={DOCUMENTS_MODAL_COPY.phonePlaceholder}
+                      autoComplete="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <p className="section-label mb-2">
+                    {DOCUMENTS_MODAL_COPY.profileLabel}
+                  </p>
+                  <div className="d-flex gap-3">
+                    <select
+                      className="modal-btn-pgs text-center"
+                      value={profileStage}
+                      onChange={(e) => setProfileStage(e.target.value)}
+                    >
+                      {DOCUMENTS_PROFILE_OPTIONS.map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/assets/img/arrow-btn.png"
+                      style={{ width: 26, height: 26 }}
+                      alt=""
+                    />
+                  </div>
+                </div>
+                <br />
+                <div className="divider" />
+                <div className="cta-row">
+                  <button className="cta-btn" type="submit">
+                    {DOCUMENTS_MODAL_COPY.cta}
+                    <span className="arrow">←</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {documentsSuccessOpen ? (
+        <div
+          className="pgs-modal premium-modal-overlay modal-pgsamc-2 usmle-docs-success-overlay"
+          style={{ display: "flex" }}
+        >
+          <div className="premium-modal-container purple-modal d-flex bg-white pgs-modal-2 usmle-docs-success">
+            <button
+              className="close-btn"
+              type="button"
+              aria-label="Close"
+              onClick={closeDocumentsModals}
+            >
+              ✕
+            </button>
+            <div className="usmle-docs-success__hero text-center">
+              <h5 className="fw-700 fs-48 text-black">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/assets/img/check-12.png"
+                  style={{ width: 50 }}
+                  alt=""
+                />
+                {DOCUMENTS_SUCCESS_MODAL.title}
+              </h5>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/assets/img/okk.png"
+                className="usmle-docs-success__hand"
+                alt=""
+              />
+              <h5 className="fw-400 fs-24 fnt-family text-black mb-0">
+                {DOCUMENTS_SUCCESS_MODAL.nextTitle}
+              </h5>
+            </div>
+
+            <div className="usmle-docs-success__side mobile-none">
+              <p className="usmle-docs-success__copy fs-13 fw-400 mb-0 text-black lh-15">
+                {DOCUMENTS_SUCCESS_MODAL.body}{" "}
+                <b>{DOCUMENTS_SUCCESS_MODAL.bodyBold}</b>{" "}
+                {DOCUMENTS_SUCCESS_MODAL.bodySuffix}
+              </p>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                className="usmle-docs-success__heart"
+                src="/assets/img/heart.gif"
+                alt=""
+              />
+              <div className="usmle-docs-success__cta">
+                <p className="fs-13 lh-15 text-white mb-2">
+                  {DOCUMENTS_SUCCESS_MODAL.stripLines[0]}
+                </p>
+                <p className="fs-13 lh-15 text-white mb-0">
+                  <Link
+                    href="/contact"
+                    className="text-white text-decoration-underline"
+                  >
+                    {DOCUMENTS_SUCCESS_MODAL.stripLines[1]}
+                  </Link>
+                </p>
+              </div>
+            </div>
+
+            <div className="usmle-docs-success__mobile desktop-none">
+              <p className="fs-13 fw-400 mb-4 text-black lh-15">
+                {DOCUMENTS_SUCCESS_MODAL.body}{" "}
+                <b>{DOCUMENTS_SUCCESS_MODAL.bodyBold}</b>{" "}
+                {DOCUMENTS_SUCCESS_MODAL.bodySuffix}
+              </p>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/assets/img/heart.gif"
+                style={{
+                  width: 50,
+                  borderRadius: 10,
+                  margin: "0 auto 12px",
+                  display: "block",
+                }}
+                alt=""
+              />
+              <div className="usmle-docs-success__cta">
+                <p className="fs-13 lh-15 text-white mb-2">
+                  {DOCUMENTS_SUCCESS_MODAL.stripLines[0]}
+                </p>
+                <p className="fs-13 lh-15 text-white mb-0">
+                  <Link
+                    href="/contact"
+                    className="text-white text-decoration-underline"
+                  >
+                    {DOCUMENTS_SUCCESS_MODAL.stripLines[1]}
+                  </Link>
+                </p>
+              </div>
             </div>
           </div>
         </div>

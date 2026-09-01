@@ -1,0 +1,849 @@
+.countriesUSA .country-stat-sidebar {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  margin-top: 25px;
+}
+
+.countriesUSA .country-stat-values {
+  background-color: #f8f9fa;
+  padding: 12px 16px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.countriesUSA .country-stat-values > div + div {
+  margin-top: 10px;
+}
+
+.countriesUSA .country-stat-number {
+  white-space: nowrap;
+  font-size: clamp(22px, 2.2vw, 32px) !important;
+  letter-spacing: -0.02em;
+}
+
+.countriesUSA .country-stat-caption {
+  flex: 1;
+  min-width: 72px;
+  font-size: 14px !important;
+  line-height: 1.25 !important;
+  font-weight: 400 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 0 !important;
+}
+
+/* Shared sidebar card sizing — Visa 101 reference */
+.countriesUSA .country-study-sidebar,
+.countriesUSA .country-budgeting-card,
+.countriesUSA .country-visa-sidebar,
+.countriesUSA .country-short-sidebar,
+.countriesUSA .country-scholarship-sidebar,
+.countriesUSA .country-tracks-sidebar {
+  display: flex;
+  flex-direction: column;
+  min-height: 520px;
+  height: 520px;
+  position: relative;
+  padding: 1rem 1rem 2.5rem;
+  box-sizing: border-box;
+}
+
+.countriesUSA .country-study-sidebar__header,
+.countriesUSA .country-budgeting-card__header,
+.countriesUSA .country-visa-sidebar__header,
+.countriesUSA .country-short-sidebar__header,
+.countriesUSA .country-scholarship-sidebar__header,
+.countriesUSA .country-tracks-sidebar__header {
+  flex-shrink: 0;
+}
+
+.countriesUSA .country-study-sidebar__spacer,
+.countriesUSA .country-budgeting-card__spacer,
+.countriesUSA .country-visa-sidebar__spacer,
+.countriesUSA .country-short-sidebar__spacer,
+.countriesUSA .country-scholarship-sidebar__spacer,
+.countriesUSA .country-tracks-sidebar__spacer {
+  flex: 1 1 auto;
+  min-height: 120px;
+}
+
+.countriesUSA .country-study-sidebar__footer,
+.countriesUSA .country-budgeting-card__footer,
+.countriesUSA .country-visa-sidebar__footer,
+.countriesUSA .country-short-sidebar__footer,
+.countriesUSA .country-scholarship-sidebar__footer,
+.countriesUSA .country-tracks-sidebar__footer {
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
+.countriesUSA .country-study-sidebar__source,
+.countriesUSA .country-budgeting-card__source,
+.countriesUSA .country-visa-sidebar__source,
+.countriesUSA .country-short-sidebar__source,
+.countriesUSA .country-scholarship-sidebar__source,
+.countriesUSA .country-tracks-sidebar__source {
+  position: absolute;
+  right: 1rem;
+  bottom: 0.85rem;
+  font-size: 11px;
+  color: #000;
+  font-weight: 400;
+}
+
+.countriesUSA .country-study-sidebar__header a,
+.countriesUSA .country-budgeting-card__header a,
+.countriesUSA .country-visa-sidebar__header a,
+.countriesUSA .country-short-sidebar__header a,
+.countriesUSA .country-scholarship-sidebar__header a,
+.countriesUSA .country-tracks-sidebar__header a {
+  display: block;
+  color: #000 !important;
+  line-height: 1.35;
+  text-decoration: none;
+}
+
+/* Shared sidebar stat layout — Visa 101 reference */
+.countriesUSA .country-study-sidebar .country-stat-sidebar,
+.countriesUSA .country-budgeting-card .country-stat-sidebar,
+.countriesUSA .country-visa-sidebar .country-stat-sidebar,
+.countriesUSA .country-short-sidebar .country-stat-sidebar,
+.countriesUSA .country-scholarship-sidebar .country-stat-sidebar,
+.countriesUSA .country-tracks-sidebar .country-stat-sidebar {
+  align-items: center;
+  margin-top: 0;
+  gap: 10px;
+}
+
+.countriesUSA .country-study-sidebar .country-stat-values,
+.countriesUSA .country-budgeting-card .country-stat-values,
+.countriesUSA .country-visa-sidebar .country-stat-values,
+.countriesUSA .country-short-sidebar .country-stat-values,
+.countriesUSA .country-scholarship-sidebar .country-stat-values,
+.countriesUSA .country-tracks-sidebar .country-stat-values {
+  background-color: #f8f9fa;
+  padding: 8px 12px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.countriesUSA .country-study-sidebar .country-stat-number,
+.countriesUSA .country-budgeting-card .country-stat-number,
+.countriesUSA .country-visa-sidebar .country-stat-number,
+.countriesUSA .country-short-sidebar .country-stat-number,
+.countriesUSA .country-scholarship-sidebar .country-stat-number,
+.countriesUSA .country-tracks-sidebar .country-stat-number {
+  font-size: 22px !important;
+  line-height: 1 !important;
+  color: #000 !important;
+}
+
+.countriesUSA .country-study-sidebar .country-stat-values small,
+.countriesUSA .country-budgeting-card .country-stat-values small,
+.countriesUSA .country-visa-sidebar .country-stat-values small,
+.countriesUSA .country-short-sidebar .country-stat-values small,
+.countriesUSA .country-scholarship-sidebar .country-stat-values small,
+.countriesUSA .country-tracks-sidebar .country-stat-values small {
+  display: block;
+  font-size: 12px;
+  margin-top: 2px;
+  color: #000 !important;
+}
+
+.countriesUSA .country-study-sidebar .country-stat-caption,
+.countriesUSA .country-budgeting-card .country-stat-caption,
+.countriesUSA .country-visa-sidebar .country-stat-caption,
+.countriesUSA .country-short-sidebar .country-stat-caption,
+.countriesUSA .country-scholarship-sidebar .country-stat-caption,
+.countriesUSA .country-tracks-sidebar .country-stat-caption {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 20px !important;
+  font-weight: 400 !important;
+  line-height: 1.15 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  max-width: 110px;
+  min-width: 0;
+  color: #000 !important;
+}
+
+.countriesUSA .country-short-sidebar__footer {
+  margin-bottom: 1.75rem;
+}
+
+.countriesUSA .country-short-sidebar .country-stat-caption {
+  max-width: 132px;
+  margin-bottom: 0.35rem !important;
+}
+
+.countriesUSA .country-short-sidebar__source {
+  bottom: 1.35rem;
+}
+
+.countriesUSA .country-cost-main {
+  overflow: visible;
+}
+
+/* Purple envelope #PGS banner */
+.countriesUSA .country-pgs-banner-wrap {
+  position: relative;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  overflow: visible;
+  padding-right: 2.5rem;
+  transform: translateX(-0.75rem);
+}
+
+.countriesUSA .country-cost-premium-block {
+  margin-top: 2rem;
+  overflow: visible;
+  padding-right: 2.5rem;
+}
+
+.countriesUSA .country-cost-premium-block .country-pgs-banner-wrap {
+  margin-top: 0;
+  margin-bottom: 1.75rem;
+}
+
+.countriesUSA .country-pgs-card-wrap,
+.countriesUSA .pgs-track1-card-wrap {
+  position: relative;
+  isolation: isolate;
+  width: calc(100% - 1.5rem);
+  max-width: calc(100% - 1.5rem);
+}
+
+.countriesUSA .country-pgs-card-wrap .bg-pgs-content,
+.countriesUSA .pgs-track1-card-wrap .bg-pgs-content {
+  position: relative;
+  z-index: 2;
+  margin-bottom: 0 !important;
+  background-color: transparent !important;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-position: center;
+  padding: 1.25rem 6.75rem 1.25rem 1.25rem !important;
+  overflow: visible;
+  border-radius: 1rem !important;
+  min-height: 9.5rem;
+  box-sizing: border-box;
+}
+
+.countriesUSA .country-pgs-card-wrap .bg-pgs-content h5,
+.countriesUSA .pgs-track1-card-wrap .bg-pgs-content h5 {
+  font-size: 15px !important;
+  line-height: 1.35 !important;
+  margin-bottom: 0.5rem !important;
+  max-width: 100%;
+}
+
+.countriesUSA .country-pgs-card-wrap .bg-pgs-content p,
+.countriesUSA .pgs-track1-card-wrap .bg-pgs-content p {
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+  max-width: 100%;
+}
+
+.countriesUSA .country-pgs-card-wrap .pgs-badge,
+.countriesUSA .pgs-track1-card-wrap .pgs-badge {
+  position: absolute !important;
+  left: auto !important;
+  top: 50% !important;
+  bottom: auto !important;
+  right: -0.35rem !important;
+  transform: translateY(-50%);
+  width: 7rem !important;
+  height: 8.75rem !important;
+  margin: 0 !important;
+  padding: 0 0.35rem 0 2.35rem !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem !important;
+  background-color: #d9e0ff !important;
+  color: #111827 !important;
+  font-size: 1.7rem !important;
+  line-height: 1;
+  white-space: nowrap;
+  z-index: 1 !important;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+/* Envelope + JOIN #purplepremium block */
+.countriesUSA .country-cost-premium-block .country-cost-premium {
+  margin-top: 0 !important;
+}
+
+.countriesUSA .country-cost-premium__portrait {
+  background: #f4e5e4;
+  border: 1px solid #00000033;
+  border-radius: 29px;
+  overflow: hidden;
+  max-width: 389px;
+}
+
+.countriesUSA .country-cost-premium__portrait img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  object-fit: cover;
+  object-position: center top;
+  border-radius: 29px;
+  box-shadow: none;
+}
+
+.countriesUSA .country-cost-premium__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  text-decoration: none !important;
+  margin-bottom: 1rem;
+}
+
+.countriesUSA .country-cost-premium__join {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+  text-decoration: underline;
+  line-height: 1.1;
+}
+
+.countriesUSA .country-cost-premium__brand {
+  display: block;
+  font-size: 2.3rem;
+  font-weight: 400;
+  color: #111827;
+  line-height: 1.1;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.countriesUSA .country-cost-premium__copy p {
+  font-size: 20px !important;
+  font-weight: 500;
+  color: #374151;
+  line-height: 1.6;
+  margin-bottom: 0;
+}
+
+.countriesUSA .info-card-countries-usa {
+  position: relative;
+}
+
+@media (max-width: 767px) {
+  .countriesUSA .country-study-sidebar,
+  .countriesUSA .country-budgeting-card,
+  .countriesUSA .country-visa-sidebar,
+  .countriesUSA .country-short-sidebar,
+  .countriesUSA .country-scholarship-sidebar,
+  .countriesUSA .country-tracks-sidebar {
+    min-height: 420px;
+    height: 420px;
+  }
+
+  .countriesUSA .country-study-sidebar__spacer,
+  .countriesUSA .country-budgeting-card__spacer,
+  .countriesUSA .country-visa-sidebar__spacer,
+  .countriesUSA .country-short-sidebar__spacer,
+  .countriesUSA .country-scholarship-sidebar__spacer,
+  .countriesUSA .country-tracks-sidebar__spacer {
+    min-height: 80px;
+  }
+
+  .countriesUSA .country-study-sidebar .country-stat-sidebar,
+  .countriesUSA .country-budgeting-card .country-stat-sidebar,
+  .countriesUSA .country-visa-sidebar .country-stat-sidebar,
+  .countriesUSA .country-short-sidebar .country-stat-sidebar,
+  .countriesUSA .country-scholarship-sidebar .country-stat-sidebar,
+  .countriesUSA .country-tracks-sidebar .country-stat-sidebar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .countriesUSA .country-study-sidebar .country-stat-caption,
+  .countriesUSA .country-budgeting-card .country-stat-caption,
+  .countriesUSA .country-visa-sidebar .country-stat-caption,
+  .countriesUSA .country-short-sidebar .country-stat-caption,
+  .countriesUSA .country-scholarship-sidebar .country-stat-caption,
+  .countriesUSA .country-tracks-sidebar .country-stat-caption {
+    font-size: 16px !important;
+    max-width: none;
+  }
+
+  .countriesUSA .country-pgs-card-wrap .pgs-badge,
+  .countriesUSA .pgs-track1-card-wrap .pgs-badge {
+    left: auto !important;
+    right: 0.15rem !important;
+    top: 50% !important;
+    bottom: auto !important;
+    transform: translateY(-50%);
+    width: 5.5rem !important;
+    height: 7rem !important;
+    padding: 0 0.35rem 0 1.75rem !important;
+    border-radius: 1rem !important;
+    font-size: 1.35rem !important;
+    z-index: 0 !important;
+  }
+
+  .countriesUSA .country-pgs-card-wrap .bg-pgs-content,
+  .countriesUSA .pgs-track1-card-wrap .bg-pgs-content {
+    padding: 1rem 5.5rem 1rem 1rem !important;
+  }
+
+  .countriesUSA .country-cost-premium__portrait img {
+    min-height: 320px;
+  }
+
+  .countriesUSA .country-cost-premium__join,
+  .countriesUSA .country-cost-premium__brand {
+    font-size: 1.75rem;
+  }
+}
+
+/* Visa 101 main content */
+.countriesUSA .country-visa-main .visa-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin: 25px 0;
+}
+
+.countriesUSA .country-visa-main .visa-card {
+  flex: 1;
+  min-width: 220px;
+  margin: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.countriesUSA .country-visa-main .visa-card--narrow {
+  max-width: 45%;
+}
+
+.countriesUSA .country-visa-main .visa-card h3 {
+  font-size: 22px;
+  font-weight: 500;
+  margin-bottom: 0;
+  background: #000;
+  color: #fff;
+  width: 165px;
+  padding: 0 13px;
+  line-height: 40px;
+}
+
+.countriesUSA .country-visa-main .visa-card p {
+  background: #ffc107;
+  margin: 0;
+  padding: 12px;
+  font-size: 17px;
+  color: #111;
+  width: 224px;
+  line-height: 1.2;
+}
+
+.countriesUSA .country-visa-notes-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.countriesUSA .country-visa-notes-card {
+  background-color: #dce6ff !important;
+  padding: 15px !important;
+  border-radius: 8px;
+  width: 320px;
+  max-width: 100%;
+  margin-top: 40px;
+  color: #000 !important;
+}
+
+.countriesUSA .country-visa-notes-card h3 {
+  margin-top: 0;
+  font-weight: 700;
+  color: #000 !important;
+}
+
+.countriesUSA .country-visa-notes-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.countriesUSA .country-visa-notes-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  line-height: 1.35;
+  color: #000 !important;
+}
+
+.countriesUSA .country-visa-notes-list__num {
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+  flex-shrink: 0;
+  color: #000 !important;
+}
+
+.countriesUSA .country-visa-plan-review__list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.countriesUSA .helper-box-new .talk-button {
+  display: inline-block;
+  text-decoration: none;
+}
+
+@media (max-width: 767px) {
+  .countriesUSA .country-visa-main .visa-card--narrow {
+    max-width: 100%;
+  }
+
+  .countriesUSA .country-visa-main .visa-card p {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .countriesUSA .country-visa-notes-card {
+    width: 100%;
+  }
+}
+
+/* Short-Term-Profile Courses */
+.countriesUSA .country-short-cta {
+  display: inline-block;
+  background-color: #ffd54f;
+  color: #000 !important;
+  font-weight: 700;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 8px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.countriesUSA .country-short-cta:hover {
+  color: #000 !important;
+  opacity: 0.9;
+}
+
+.countriesUSA .country-short-mentor-section {
+  padding: 40px 0;
+}
+
+.countriesUSA .country-short-mentor-box {
+  background: #f1f1f1;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #00000033;
+}
+
+.countriesUSA .country-short-mentor-title {
+  display: flex;
+  justify-content: center;
+  color: #000 !important;
+  font-weight: 600;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.countriesUSA .country-short-mentor-copy {
+  display: flex;
+  justify-content: center;
+  color: #000;
+  font-size: 15px;
+  font-weight: 400;
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.countriesUSA .country-short-courses {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 1.25rem;
+}
+
+.countriesUSA .country-short-courses .county-box-short {
+  width: 100%;
+  max-width: 319px;
+  flex: none;
+}
+
+.countriesUSA .country-short-courses .img-box-fit img {
+  width: 100%;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  display: block;
+  object-fit: cover;
+}
+
+.countriesUSA .country-short-course-body {
+  padding: 15px 0 0;
+}
+
+.countriesUSA .country-short-course-cat {
+  margin-bottom: 12px;
+}
+
+.countriesUSA .country-short-course-cat span {
+  display: inline-block;
+  background: #000;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  color: #fff;
+}
+
+.countriesUSA .country-short-course-metric {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.countriesUSA .country-short-course-metric i {
+  font-size: 23px;
+  color: forestgreen;
+}
+
+.countriesUSA .country-short-course-heart {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.countriesUSA .country-short-course-heart button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 28px;
+  color: #e53935;
+  padding: 0;
+  line-height: 1;
+}
+
+@media (max-width: 767px) {
+  .countriesUSA .country-short-courses .county-box-short {
+    width: 70%;
+    max-width: none;
+  }
+}
+
+/* Scholarships */
+.countriesUSA .country-scholarship-main .MajorScholarships {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin: 16px auto;
+}
+
+.countriesUSA .country-scholarship-main .MajorScholarships .column h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 0 5px;
+  color: #000;
+  line-height: 40px;
+}
+
+.countriesUSA .country-scholarship-main .MajorScholarships .column p {
+  margin: 10px 5px;
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.countriesUSA .country-scholarship-main .ScholarshipApplyGuide {
+  background: #fff;
+  border-radius: 12px;
+  line-height: 1.5;
+  font-size: 16px;
+  color: #222;
+  font-weight: 400;
+}
+
+.countriesUSA .country-scholarship-main .ScholarshipApplyGuide p {
+  margin-bottom: 15px;
+  font-size: 14px !important;
+  color: #000;
+}
+
+.countriesUSA .country-scholarship-main .ScholarshipApplyGuide ul {
+  margin: 10px 0 20px 20px;
+  padding: 0;
+}
+
+.countriesUSA .country-scholarship-main .ScholarshipApplyGuide ul li {
+  font-size: 14px;
+  list-style: disc;
+  line-height: 18px;
+  font-weight: 400;
+  color: #000;
+}
+
+.countriesUSA .country-scholarship-main .ScholarshipApplyGuide strong {
+  font-weight: 600;
+  color: #000;
+}
+
+@media (max-width: 767px) {
+  .countriesUSA .country-scholarship-main .MajorScholarships {
+    white-space: nowrap;
+    overflow-x: auto;
+  }
+}
+
+/* Popular Study Tracks */
+.countriesUSA .country-tracks-sidebar {
+  background: #fff;
+  border-radius: 12px;
+}
+
+.countriesUSA .country-tracks-main .border-section-set {
+  margin-top: 1.5rem;
+  white-space: nowrap;
+  overflow-x: auto;
+}
+
+.countriesUSA .country-tracks-main .border-section-set h4 {
+  margin-bottom: 12px;
+  font-size: 26px;
+  font-weight: 500;
+  color: #000;
+  white-space: normal;
+}
+
+.countriesUSA .country-tracks-main .country-tracks-columns {
+  min-width: max-content;
+}
+
+.countriesUSA .country-tracks-main .border-section-set h6 {
+  margin-bottom: 8px;
+  border: 1px solid #00000033;
+  width: 100%;
+  border-radius: 9px;
+  padding: 2px 9px;
+  font-size: 19px;
+  font-weight: 500;
+  color: #000;
+}
+
+.countriesUSA .country-tracks-main .border-section-set p {
+  padding-left: 10px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #000;
+}
+
+.countriesUSA .country-tracks-main .text-underline {
+  text-decoration: underline;
+}
+
+/* Hero: one flag strip (may include companion art) + panoramic banner */
+.countriesUSA .country-hero-stack {
+  display: flex !important;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100% !important;
+  max-width: 1200px;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.countriesUSA .country-hero-topline {
+  display: flex !important;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.countriesUSA .country-hero-flag-slot {
+  flex: 0 0 180px !important;
+  width: 180px !important;
+  height: 78px !important;
+  max-width: 180px !important;
+  max-height: 78px !important;
+  overflow: hidden !important;
+  margin-bottom: 10px;
+  border-radius: 10px;
+}
+
+.countriesUSA .country-hero-flag-slot img,
+.countriesUSA .mobile-hero-coutry .overlap-gap-section .card-box-img .flag {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+  object-position: right center;
+  display: block;
+}
+
+.countriesUSA .hero-country-box {
+  display: block !important;
+  height: 303px !important;
+  max-height: 303px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  flex-shrink: 0;
+  border-radius: 16px;
+}
+
+.countriesUSA .hero-country-box img {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: cover !important;
+  object-position: center;
+  display: block;
+  border-radius: 16px;
+}
+
+/* Never show the phone banner beside the desktop strip */
+.countriesUSA .hero-country-box img.desktop-none {
+  display: none !important;
+}
+
+@media (max-width: 767px) {
+  .countriesUSA .mobile-hero-coutry .overlap-gap-section.country-hero-stack {
+    width: 100% !important;
+  }
+
+  .countriesUSA .country-hero-flag-slot {
+    flex-basis: 120px !important;
+    width: 120px !important;
+    height: 52px !important;
+    max-width: 120px !important;
+    max-height: 52px !important;
+  }
+
+  .countriesUSA .hero-country-box {
+    height: 220px !important;
+    max-height: 220px !important;
+  }
+
+  .countriesUSA .hero-country-box img.mobile-none {
+    display: none !important;
+  }
+
+  .countriesUSA .hero-country-box img.desktop-none {
+    display: block !important;
+  }
+}

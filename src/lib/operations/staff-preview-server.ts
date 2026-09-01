@@ -1,7 +1,9 @@
 import "server-only";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
+import { redirect } from "next/navigation";
 import type { StaffContext } from "@/lib/auth/actor-context";
+import { resolveActorContext, staffHasPermission } from "@/lib/auth/actor-context";
 
 export type StaffPreviewMode = "student" | "mentor";
 
@@ -39,19 +41,48 @@ export async function getStaffPreviewContext(
   }
 }
 
-export function isPreviewMutationBlocked(
-  preview: StaffPreviewContext | null,
-): boolean {
-  return preview?.mode === "student";
+export function isPreviewMutationBlocked(preview: StaffPreviewContext | null): boolean {
+  return Boolean(preview);
 }
 
 export async function assertStaffPreviewWritable() {
-  const { resolveActorContext } = await import("@/lib/auth/actor-context");
   const actor = await resolveActorContext();
   if (!actor.staff) throw new Error("Forbidden");
   const preview = await getStaffPreviewContext(actor.staff);
   if (isPreviewMutationBlocked(preview)) {
-    throw new Error("Mutations are blocked while previewing as a student.");
+    throw new Error("Preview is read-only. Exit preview to make changes.");
+  }
+}
+
+export function canStartStaffPreview(
+  staff: StaffContext,
+  preview: StaffPreviewContext | null,
+): boolean {
+  return (
+    (staff.roleKey === "admin" || staff.roleKey === "super_admin") && !preview
+  );
+}
+
+export function canAssignStudents(
+  staff: StaffContext,
+  preview: StaffPreviewContext | null,
+): boolean {
+  return staffHasPermission(staff, "mentor_assignments.manage") && !preview;
+}
+
+export async function redirectMentorPreviewAwayFromPrivilegedPages() {
+  const actor = await resolveActorContext();
+  if (!actor.staff) return;
+  const preview = await getStaffPreviewContext(actor.staff);
+  if (preview?.mode !== "mentor") return;
+  const headerStore = await headers();
+  const path = headerStore.get("x-pathname") || headerStore.get("next-url") || "";
+  if (
+    path.includes("/ops/team") ||
+    path.includes("/ops/activity") ||
+    path.includes("/ops/access")
+  ) {
+    redirect("/ops/students");
   }
 }
 

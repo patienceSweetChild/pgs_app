@@ -12,10 +12,11 @@ export function StaffAccessSummary({
 }) {
   const rows = [
     ["Operations", access.operations],
-    ["Student scope", access.studentScope || staffStudentScopeLabel("read_only_staff")],
+    ["Student scope", access.studentScope || staffStudentScopeLabel("viewer")],
     ["CMS", access.cms],
     ["Audit", access.audit],
     ["Staff management", access.staffManagement],
+    ["AI", access.ai],
   ] as const;
 
   return (

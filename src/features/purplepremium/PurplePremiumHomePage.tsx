@@ -72,25 +72,7 @@ function TestimonialsCarousel() {
               <div className="row">
                 <div className="overflow-hidden m-auto">
                   <div className="xl-outside-box-right-20 sm-outside-box-right-0">
-                    <div className="d-flex justify-content-end gap-2 mb-2 pe-3">
-                      <button
-                        type="button"
-                        className="slider-one-slide-prev-1 text-dark-gray swiper-button-prev slider-navigation-style-04 border border-1 border-color-extra-medium-gray"
-                        aria-label="Previous testimonial"
-                        onClick={prev}
-                      >
-                        <i className="fa-solid fa-arrow-left" />
-                      </button>
-                      <button
-                        type="button"
-                        className="slider-one-slide-next-1 text-dark-gray swiper-button-next slider-navigation-style-04 border border-1 border-color-extra-medium-gray"
-                        aria-label="Next testimonial"
-                        onClick={next}
-                      >
-                        <i className="fa-solid fa-arrow-right" />
-                      </button>
-                    </div>
-                    <div className="d-flex gap-4 pt-30px pb-30px overflow-hidden ps-25px sm-p-0">
+                    <div className="d-flex gap-4 pt-30px pb-30px overflow-hidden justify-content-center sm-p-0">
                       {visible.map((t, i) => (
                         <div
                           className="testimonials full-items-width flex-shrink-0"
@@ -118,6 +100,24 @@ function TestimonialsCarousel() {
                           </div>
                         </div>
                       ))}
+                    </div>
+                    <div className="d-flex justify-content-center gap-2 mt-2">
+                      <button
+                        type="button"
+                        className="slider-one-slide-prev-1 text-dark-gray swiper-button-prev slider-navigation-style-04 border border-1 border-color-extra-medium-gray"
+                        aria-label="Previous testimonial"
+                        onClick={prev}
+                      >
+                        <i className="fa-solid fa-arrow-left" />
+                      </button>
+                      <button
+                        type="button"
+                        className="slider-one-slide-next-1 text-dark-gray swiper-button-next slider-navigation-style-04 border border-1 border-color-extra-medium-gray"
+                        aria-label="Next testimonial"
+                        onClick={next}
+                      >
+                        <i className="fa-solid fa-arrow-right" />
+                      </button>
                     </div>
                   </div>
                 </div>

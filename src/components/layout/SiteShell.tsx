@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { ExperienceProvider } from "@/lib/auth/experience";
+import { isDashCmsPath } from "@/lib/dash-cms-path";
 import type {
   CmsHighlight,
   CmsNotice,
@@ -37,6 +38,7 @@ export function SiteShell({
   const bare =
     pathname.startsWith("/admin") ||
     pathname.startsWith("/ops") ||
+    isDashCmsPath(pathname) ||
     pathname.startsWith("/portal") ||
     pathname.startsWith("/auth") ||
     pathname.startsWith("/cms-preview");
@@ -50,37 +52,37 @@ export function SiteShell({
     }
   }, [bare]);
 
-  if (bare) {
-    return <ExperienceProvider>{children}</ExperienceProvider>;
-  }
+  const publicChrome = (
+    <CmsShellProvider highlights={highlights} testimonials={testimonials}>
+      <ShellUiProvider>
+        <div id="pgs-toast-container" aria-live="polite" />
+        <Header />
+        <Sidebar univMeet={univMeet ?? undefined} />
+        {marquee && marquee.length > 0 ? (
+          <div className="marquee-section bg-black text-white p-1 overflow-hidden">
+            <div className="marquees-text">
+              {marquee.map((n, i) =>
+                n.linkUrl ? (
+                  <a key={`${n.text}-${i}`} href={n.linkUrl}>
+                    {n.text}{" "}
+                  </a>
+                ) : (
+                  <span key={`${n.text}-${i}`}>{n.text} </span>
+                ),
+              )}
+            </div>
+          </div>
+        ) : null}
+        <main>{children}</main>
+        <Footer socialLinks={socialLinks} />
+        <DevRoleSwitcher />
+      </ShellUiProvider>
+    </CmsShellProvider>
+  );
 
   return (
     <ExperienceProvider>
-      <CmsShellProvider highlights={highlights} testimonials={testimonials}>
-        <ShellUiProvider>
-          <div id="pgs-toast-container" aria-live="polite" />
-          <Header />
-          <Sidebar univMeet={univMeet ?? undefined} />
-          {marquee && marquee.length > 0 ? (
-            <div className="marquee-section bg-black text-white p-1 overflow-hidden">
-              <div className="marquees-text">
-                {marquee.map((n, i) =>
-                  n.linkUrl ? (
-                    <a key={`${n.text}-${i}`} href={n.linkUrl}>
-                      {n.text}{" "}
-                    </a>
-                  ) : (
-                    <span key={`${n.text}-${i}`}>{n.text} </span>
-                  ),
-                )}
-              </div>
-            </div>
-          ) : null}
-          <main>{children}</main>
-          <Footer socialLinks={socialLinks} />
-          <DevRoleSwitcher />
-        </ShellUiProvider>
-      </CmsShellProvider>
+      {bare ? children : publicChrome}
     </ExperienceProvider>
   );
 }

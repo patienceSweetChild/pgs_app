@@ -194,3 +194,34 @@ export const MODAL_TOGGLES = [
   "Timeline for rotations vs Step exams",
   "My profile strength for USCE",
 ] as const;
+
+export const DOCUMENTS_PROFILE_OPTIONS = [
+  { value: "1", label: "Pre-Step 1" },
+  { value: "2", label: "Pre-Step 2" },
+  { value: "3", label: "Post-Step 2" },
+  { value: "4", label: "Other" },
+] as const;
+
+/** Request documents / checklist popup */
+export const DOCUMENTS_MODAL_COPY = {
+  subLabel: "for usmle ROTATION",
+  tagline:
+    "Get checklist you need to secure your US clinical rotations.",
+  boostDesktop: ["get the", "boost your", "PREP", "deserves"],
+  boostMobile: "get the boost your PREP deserves",
+  profileLabel: "What describes you best?",
+  cta: "i need to join",
+  phonePlaceholder: "Phone (Whatsapp number preffered) (optional)",
+} as const;
+
+export const DOCUMENTS_SUCCESS_MODAL = {
+  title: "you're in",
+  nextTitle: "lets get things moving.",
+  body: "A",
+  bodyBold: "USCE",
+  bodySuffix: "advisor will contact you shortly.",
+  stripLines: [
+    "Need to sort out the study journey?",
+    "Book a free 15min clarity call",
+  ],
+} as const;

@@ -58,6 +58,8 @@ export type StaffAlert = {
   created_at: string;
   updated_at: string;
 };
+export type DashboardChecklistItem = { text: string; checked: boolean };
+export type DashboardTrackerItem = { count: number; is_red?: boolean };
 export type PremiumWorkspaceProfile = {
   pathway_label: string;
   intake_label: string;
@@ -66,6 +68,43 @@ export type PremiumWorkspaceProfile = {
   visa_status: string;
   tuition_receipt_uploaded: boolean | null;
   onboarding_percentage: number | null;
+  onboarding_checklist?: DashboardChecklistItem[];
+  feedback_session_title?: string;
+  feedback_session_items?: DashboardChecklistItem[];
+  documents_tracker?: Record<string, DashboardTrackerItem>;
+  currently_working_on?: string[];
+  future_tasks?: string[];
+  dashboard_content?: Record<string, unknown> | null;
+  dashboard_published?: boolean;
+  cms_draft?: Record<string, unknown> | null;
+};
+
+export type WorkspaceComment = {
+  id: string;
+  parent_id: string | null;
+  author_id: string;
+  body: string;
+  created_at: string;
+};
+export type WorkspaceReview = {
+  id: string;
+  title: string;
+  details: string;
+  status: string;
+  sort_order: number;
+};
+export type CounselorNote = {
+  id: string;
+  body: string;
+  visibility: string;
+  created_at: string;
+  author_id: string;
+};
+export type UniversitySelection = {
+  id: string;
+  stage: string;
+  sort_order: number;
+  universities: { id: number; name: string; slug: string } | null;
 };
 
 export type PremiumWorkspace = {
@@ -76,6 +115,10 @@ export type PremiumWorkspace = {
   tasks: StudentTask[];
   alerts: StaffAlert[];
   requirements: DocumentRequirement[];
+  comments: WorkspaceComment[];
+  reviews: WorkspaceReview[];
+  notes: CounselorNote[];
+  universities: UniversitySelection[];
 };
 
 const DEFAULT_BOARD_COLUMNS = [
@@ -122,47 +165,71 @@ export async function loadPremiumWorkspaceWithClient(
 ): Promise<PremiumWorkspace> {
   await ensureDefaultBoard(client, studentId, actorId);
 
-  const [profile, premiumProfile, columns, tasks, alerts, requirements] =
-    await Promise.all([
-      client
-        .from("profiles")
-        .select("full_name, study_level")
-        .eq("id", studentId)
-        .maybeSingle(),
-      client
-        .from("premium_workspace_profiles")
-        .select(
-          "pathway_label,intake_label,universities_applied,offers_received,visa_status,tuition_receipt_uploaded,onboarding_percentage",
-        )
-        .eq("student_id", studentId)
-        .maybeSingle(),
-      client
-        .from("student_board_columns")
-        .select("id,key,title,sort_order")
-        .eq("student_id", studentId)
-        .order("sort_order"),
-      client
-        .from("student_tasks")
-        .select(
-          "id,column_id,title,details,sort_order,due_at,created_at,updated_at",
-        )
-        .eq("student_id", studentId)
-        .order("sort_order"),
-      client
-        .from("student_alerts")
-        .select(
-          "id,alert_text,severity,active,sort_order,created_at,updated_at",
-        )
-        .eq("student_id", studentId)
-        .order("sort_order"),
-      client
-        .from("student_document_requirements")
-        .select(
-          "id,document_type,requirement_kind,status,instructions,sort_order,student_documents(id,requirement_id,original_filename,mime_type,byte_size,version,qc_status,scan_status,uploaded_at,superseded_at,archived_at,purged_at)",
-        )
-        .eq("student_id", studentId)
-        .order("sort_order"),
-    ]);
+  const [
+    profile,
+    premiumProfile,
+    columns,
+    tasks,
+    alerts,
+    requirements,
+    comments,
+    reviews,
+    notes,
+    universities,
+  ] = await Promise.all([
+    client
+      .from("profiles")
+      .select("full_name, study_level")
+      .eq("id", studentId)
+      .maybeSingle(),
+    client
+      .from("premium_workspace_profiles")
+      .select("*")
+      .eq("student_id", studentId)
+      .maybeSingle(),
+    client
+      .from("student_board_columns")
+      .select("id,key,title,sort_order")
+      .eq("student_id", studentId)
+      .order("sort_order"),
+    client
+      .from("student_tasks")
+      .select("id,column_id,title,details,sort_order,due_at,created_at,updated_at")
+      .eq("student_id", studentId)
+      .order("sort_order"),
+    client
+      .from("student_alerts")
+      .select("id,alert_text,severity,active,sort_order,created_at,updated_at")
+      .eq("student_id", studentId)
+      .order("sort_order"),
+    client
+      .from("student_document_requirements")
+      .select(
+        "id,document_type,requirement_kind,status,instructions,sort_order,student_documents(id,requirement_id,original_filename,mime_type,byte_size,version,qc_status,scan_status,uploaded_at,superseded_at,archived_at,purged_at)",
+      )
+      .eq("student_id", studentId)
+      .order("sort_order"),
+    client
+      .from("workspace_comments")
+      .select("id,parent_id,author_id,body,created_at")
+      .eq("student_id", studentId)
+      .order("created_at"),
+    client
+      .from("review_queue_items")
+      .select("id,title,details,status,sort_order")
+      .eq("student_id", studentId)
+      .order("sort_order"),
+    client
+      .from("counselor_notes")
+      .select("id,body,visibility,created_at,author_id")
+      .eq("student_id", studentId)
+      .order("created_at", { ascending: false }),
+    client
+      .from("student_university_selections")
+      .select("id,stage,sort_order,universities(id,name,slug)")
+      .eq("student_id", studentId)
+      .order("sort_order"),
+  ]);
 
   return {
     studentId,
@@ -172,6 +239,10 @@ export async function loadPremiumWorkspaceWithClient(
     tasks: tasks.data ?? [],
     alerts: (alerts.data ?? []) as StaffAlert[],
     requirements: (requirements.data ?? []) as DocumentRequirement[],
+    comments: (comments.data ?? []) as WorkspaceComment[],
+    reviews: (reviews.data ?? []) as WorkspaceReview[],
+    notes: (notes.data ?? []) as CounselorNote[],
+    universities: (universities.data ?? []) as unknown as UniversitySelection[],
   };
 }
 

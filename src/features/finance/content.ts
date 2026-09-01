@@ -108,7 +108,7 @@ export const MODAL_COPY = {
   boostMobile: "get the boost your PREP deserves",
   aimLabel: "What are you aiming to sort out?",
   countryLabel: "What country you are planning to study?",
-  cta: "GET MY CHECKLIST",
+  cta: "Check My Eligibility",
   successTitle: "You're all set!",
   successBody: "Your personalised checklist is on its way.\nCheck your inbox soon.",
 } as const;

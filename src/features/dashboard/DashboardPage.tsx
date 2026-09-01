@@ -11,16 +11,14 @@ import { CmsHtml } from "@/components/CmsHtml";
 import { SoftLock } from "@/components/SoftLock";
 import { DEFAULT_AVATAR, useExperience } from "@/lib/auth/experience";
 import {
-  DOC_TRACKER,
-  FINALIZED_UNIS,
-  FUTURE_TASKS,
+  defaultDashboardContent,
   GUEST_PROFILE,
-  ONBOARDING_CHECKS,
-  SHORTLIST,
-  TOP_PICKS,
+  onboardingPercentageFromChecklist,
+  upcomingItemsToFeed,
   UPCOMING_EVENTS,
-  WORKING_ON,
+  type DashboardPreviewIdentity,
   type FeedUpcomingEvent,
+  type StudentDashboardContent,
 } from "./content";
 import { CommentsSection } from "./CommentsSection";
 import "./dashboard.css";
@@ -165,7 +163,7 @@ function FeedMonthCalendar({ events }: { events: FeedUpcomingEvent[] }) {
 function TopPickItem({
   pick,
 }: {
-  pick: (typeof TOP_PICKS)[number];
+  pick: StudentDashboardContent["top_picks"][number];
 }) {
   return (
     <div className="todo-list">
@@ -196,37 +194,58 @@ function TopPickItem({
 export function DashboardPage({
   upcomingEvents,
   staffStudentId,
+  content,
+  previewIdentity,
+  forceUnlocked = false,
 }: {
   upcomingEvents?: FeedUpcomingEvent[];
   staffStudentId?: string;
+  content?: StudentDashboardContent | null;
+  previewIdentity?: DashboardPreviewIdentity;
+  forceUnlocked?: boolean;
 } = {}) {
   const { isLoggedIn, isPremium, fullName, avatarUrl, email, pgsCode } =
     useExperience();
   const router = useRouter();
   const [unlockOpen, setUnlockOpen] = useState(false);
+  const dash = content ?? defaultDashboardContent();
 
+  const cmsEvents = upcomingItemsToFeed(dash.upcoming_events);
   const feedEvents =
-    upcomingEvents && upcomingEvents.length > 0
-      ? upcomingEvents
-      : fallbackFeedEvents();
+    cmsEvents.length > 0
+      ? cmsEvents
+      : upcomingEvents && upcomingEvents.length > 0
+        ? upcomingEvents
+        : fallbackFeedEvents();
   const chipEvents = feedEvents.slice(0, CHIP_LIMIT);
   const moreCount = Math.max(0, feedEvents.length - CHIP_LIMIT);
 
-  const locked = !isPremium;
-  const displayName = isLoggedIn
-    ? fullName?.trim() || "Student"
-    : GUEST_PROFILE.name;
-  const displayHandle = isLoggedIn
-    ? email
-      ? `@${email.split("@")[0]}`
-      : ""
-    : GUEST_PROFILE.handle;
-  const displayId = isLoggedIn ? pgsCode || "" : "";
-  const displayAvatar = isLoggedIn
-    ? avatarUrl || DEFAULT_AVATAR
-    : GUEST_PROFILE.avatar;
-  const pathway = GUEST_PROFILE.pathway;
-  const premiumLabel = GUEST_PROFILE.premiumLabel;
+  const locked = forceUnlocked ? false : !isPremium;
+  const showPremiumBadge = forceUnlocked || isPremium;
+  const displayName = previewIdentity?.name
+    ? previewIdentity.name
+    : isLoggedIn
+      ? fullName?.trim() || "Student"
+      : GUEST_PROFILE.name;
+  const displayHandle = previewIdentity
+    ? previewIdentity.handle
+    : isLoggedIn
+      ? email
+        ? `@${email.split("@")[0]}`
+        : ""
+      : GUEST_PROFILE.handle;
+  const displayId = previewIdentity
+    ? previewIdentity.id
+    : isLoggedIn
+      ? pgsCode || ""
+      : "";
+  const displayAvatar = previewIdentity?.avatar
+    ? previewIdentity.avatar
+    : isLoggedIn
+      ? avatarUrl || DEFAULT_AVATAR
+      : GUEST_PROFILE.avatar;
+  const pathway = dash.pathway_label;
+  const premiumLabel = dash.premium_label;
 
   function openUnlock() {
     if (!isLoggedIn) {
@@ -281,7 +300,7 @@ export function DashboardPage({
         <div className="pgs-dashboard-feed-inner">
         <div className="w-729px p-0">
           <div className="card-box-avatar">
-            {isLoggedIn ? (
+            {isLoggedIn || previewIdentity ? (
               <div className="avatar-info position-relative">
                 <div className="avatar-img">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -309,11 +328,11 @@ export function DashboardPage({
             )}
             <div
               className={`avatar-heading-right-box${
-                isPremium ? "" : " justify-content-start"
+                showPremiumBadge ? "" : " justify-content-start"
               }`}
-              style={isPremium ? undefined : { paddingLeft: 10 }}
+              style={showPremiumBadge ? undefined : { paddingLeft: 10 }}
             >
-              {isPremium ? (
+              {showPremiumBadge ? (
                 <h4 className="mb-0">#PURPLEPREMIUM</h4>
               ) : (
                 unlockBadge
@@ -336,7 +355,7 @@ export function DashboardPage({
                   </div>
                 </div>
                 <div className="body-of-todo">
-                  {TOP_PICKS.map((pick, i) => (
+                  {dash.top_picks.map((pick, i) => (
                     <TopPickItem key={`m-${i}`} pick={pick} />
                   ))}
                 </div>
@@ -355,7 +374,9 @@ export function DashboardPage({
                   Uni <br /> Applied
                   <div className="d-flex justify-content-space">
                     <span>|</span>
-                    <span>02</span>
+                    <span>
+                      {String(dash.overview.universities_applied).padStart(2, "0")}
+                    </span>
                   </div>
                 </div>
                 <div className="card-fill-box">
@@ -363,7 +384,9 @@ export function DashboardPage({
                   Received
                   <div className="d-flex justify-content-space">
                     <span>|</span>
-                    <span>02</span>
+                    <span>
+                      {String(dash.overview.offers_received).padStart(2, "0")}
+                    </span>
                   </div>
                 </div>
                 <div className="card-fill-box">
@@ -372,7 +395,12 @@ export function DashboardPage({
                   <div className="d-flex justify-content-space">
                     <span>|</span>
                     <label className="toggle-switch">
-                      <input type="checkbox" checked readOnly disabled />
+                      <input
+                        type="checkbox"
+                        checked={dash.overview.tuition_receipt_uploaded}
+                        readOnly
+                        disabled
+                      />
                       <span className="slider" />
                     </label>
                   </div>
@@ -383,7 +411,12 @@ export function DashboardPage({
                   <div className="d-flex justify-content-space">
                     <span>|</span>
                     <label className="toggle-switch">
-                      <input type="checkbox" checked readOnly disabled />
+                      <input
+                        type="checkbox"
+                        checked={dash.overview.visa_applied}
+                        readOnly
+                        disabled
+                      />
                       <span className="slider" />
                     </label>
                   </div>
@@ -395,26 +428,26 @@ export function DashboardPage({
                   <h5 className="mb-2 text-black fs-17 lh-22 fw-600 mobile-fs-14">
                     Notes
                   </h5>
-                  <p className="mb-0 text-black fs-14 lh-19 mobile-fs-14">
-                    This is the phase where we check your documents, get your
-                    applications ready, and start planning your university
-                    journey. Got questions or need feedback? Reach out to your
-                    counselor anytime—and make sure to join any upcoming
-                    sessions we invite you to.
-                  </p>
+                  <CmsHtml
+                    as="div"
+                    className="mb-0 text-black fs-14 lh-19 mobile-fs-14"
+                    html={dash.notes_html}
+                  />
                 </div>
                 <div className="w-50 position-relative">
                   <div className="mobile-width-set">
                     <div>
                       <h5 className="mb-0 bg-bluey fs-19 lh-19 fw-500 mobile-fs-14">
-                        MBA Aspirant @class of 2025
+                        {dash.aspirant.title}
                       </h5>
                     </div>
                     <div className="lh-full">
                       <h6 className="mb-0 bg-dark-pink fs-12 lh-12 ">Gender</h6>
                     </div>
                     <div className="lh-full">
-                      <h6 className="mb-0 bg-bluey fs-12 lh-12">Male</h6>
+                      <h6 className="mb-0 bg-bluey fs-12 lh-12">
+                        {dash.aspirant.gender}
+                      </h6>
                     </div>
                     <div className="d-flex lh-full align-items-center">
                       <div className="bg-light-yellow-2 w-12-ht-19">
@@ -424,20 +457,19 @@ export function DashboardPage({
                         <i className="bi bi-geo-alt-fill" />
                       </div>
                       <h5 className="bg-dark-pink fs-12 lh-12 mb-0">
-                        White Town, Pondicherry
+                        {dash.aspirant.location}
                       </h5>
                     </div>
                     <div className="d-flex ht-custom25">
-                      <div className="light-gray-bg">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/assets/img/US.png" alt="" />
-                      </div>
-                      <div className="bg-bluey lh-12">USA</div>
-                      <div className="light-gray-bg">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/assets/img/US.png" alt="" />
-                      </div>
-                      <div className="bg-bluey px-2 lh-12">UK</div>
+                      {dash.aspirant.destinations.map((dest) => (
+                        <div key={`${dest.code}-${dest.name}`} className="d-flex">
+                          <div className="light-gray-bg">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={dest.flag || "/assets/img/US.png"} alt="" />
+                          </div>
+                          <div className="bg-bluey px-2 lh-12">{dest.name}</div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                   <div>
@@ -488,7 +520,7 @@ export function DashboardPage({
                     <img src="/assets/img/filter-icon.png" alt="" />
                   </div>
                   <hr />
-                  {TOP_PICKS.map((pick, i) => (
+                  {dash.top_picks.map((pick, i) => (
                     <TopPickItem key={`d-${i}`} pick={pick} />
                   ))}
                 </div>
@@ -600,7 +632,9 @@ export function DashboardPage({
                     <div className="w-100px d-flex align-items-center m-auto">
                       <div>
                         <h5 className="fnt-family text-back fs-60 text-black mb-0">
-                          14%
+                          {onboardingPercentageFromChecklist(
+                            dash.onboarding_checklist,
+                          )}%
                         </h5>
                         <h6 className="mb-0 text-black fs-16 lh-19">
                           through your <br />
@@ -612,10 +646,10 @@ export function DashboardPage({
                     <div className="w-40">
                       <div className="checkbox-card">
                         <h5 className="mb-5">Onboarding Checklist </h5>
-                        {ONBOARDING_CHECKS.map((item) => (
+                        {dash.onboarding_checklist.map((item, i) => (
                           <div
                             className="d-flex align-items-center gap-4 mb-4"
-                            key={item.label}
+                            key={`onboard-${i}`}
                           >
                             <label className="toggle-switch">
                               <input
@@ -626,23 +660,33 @@ export function DashboardPage({
                               />
                               <span className="slider" />
                             </label>
-                            <span className="w-80 text-start">{item.label}</span>
+                            <span className="w-80 text-start">
+                              {item.text || "Untitled item"}
+                            </span>
                           </div>
                         ))}
                       </div>
                     </div>
                     <div className="w-40">
                       <div className="checkbox-card" style={{ height: "60%" }}>
-                        <h5 className="mb-5">June feedback session </h5>
-                        <div className="d-flex align-items-center gap-4 mb-4">
-                          <label className="toggle-switch">
-                            <input type="checkbox" readOnly disabled />
-                            <span className="slider" />
-                          </label>
-                          <span className="w-80 text-start">
-                            One-on-One Session Booked
-                          </span>
-                        </div>
+                        <h5 className="mb-5">{dash.feedback_session_title}</h5>
+                        {dash.feedback_session_items.map((item) => (
+                          <div
+                            className="d-flex align-items-center gap-4 mb-4"
+                            key={item.text}
+                          >
+                            <label className="toggle-switch">
+                              <input
+                                type="checkbox"
+                                checked={item.checked}
+                                readOnly
+                                disabled
+                              />
+                              <span className="slider" />
+                            </label>
+                            <span className="w-80 text-start">{item.text}</span>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
@@ -659,7 +703,7 @@ export function DashboardPage({
                     <div className="w-264px">
                       <div className="checkbox-card">
                         <h5 className="mb-5">Documents Tracker</h5>
-                        {DOC_TRACKER.map((row) => (
+                        {dash.documents_tracker.map((row) => (
                           <div
                             className="d-flex align-items-center gap-2 mb-2"
                             key={row.label}
@@ -682,7 +726,7 @@ export function DashboardPage({
                         style={{ height: "90%" }}
                       >
                         <h5 className="mb-5">Uni Shortlist</h5>
-                        {SHORTLIST.map((row) => (
+                        {dash.uni_shortlist.map((row) => (
                           <div
                             className="d-flex align-items-center gap-2 mb-2"
                             key={row.label}
@@ -706,9 +750,9 @@ export function DashboardPage({
                 >
                   <div className="w-25 d-flex align-items-center justify-content-center">
                     <div>
-                      <h5 className="fnt-family text-back fs-60 text-white mb-0">
-                        06
-                      </h5>
+                        <h5 className="fnt-family text-back fs-60 text-white mb-0">
+                          {String(dash.finalized_unis.length).padStart(2, "0")}
+                        </h5>
                       <h5 className="fnt-family text-back fs-28 lh-24 text-white mb-0 fw-400">
                         Finalized
                         <br /> Uni List
@@ -720,7 +764,7 @@ export function DashboardPage({
                       {locked ? (
                         <SoftLock className="lock-box" onUnlock={openUnlock} />
                       ) : null}
-                      {FINALIZED_UNIS.map((uni, i) => (
+                      {dash.finalized_unis.map((uni, i) => (
                         <div
                           className="card-with-image w-30"
                           key={`${uni.name}-${i}`}
@@ -756,7 +800,7 @@ export function DashboardPage({
                       </div>
                       <div className="w-70">
                         <div className="card-white-box-border">
-                          {WORKING_ON.map((item, i) => (
+                          {dash.currently_working_on.map((item, i) => (
                             <div className="list-type" key={`w-${i}`}>
                               {item.badge ? <span>{item.badge}</span> : null}
                               {item.label}
@@ -776,7 +820,7 @@ export function DashboardPage({
                       </div>
                       <div className="w-70">
                         <div className="card-white-box-border">
-                          {FUTURE_TASKS.map((item, i) => (
+                          {dash.future_tasks.map((item, i) => (
                             <div className="list-type" key={`f-${i}`}>
                               {item.badge ? <span>{item.badge}</span> : null}
                               {item.label}
@@ -792,7 +836,7 @@ export function DashboardPage({
           </div>
         </section>
 
-        <CommentsSection />
+        <CommentsSection items={dash.comments} />
 
         <section className="content-report pt-10">
           <div>

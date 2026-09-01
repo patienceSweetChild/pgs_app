@@ -5,21 +5,24 @@ import { staffHasPermission, type ActorContext } from "@/lib/auth/actor-context"
 import { requireStaffPermission } from "@/lib/auth/student-access";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { STAFF_PERMISSIONS, type StaffPermission } from "@/lib/auth/permissions";
 import type {
   StaffAccessDetail,
   StaffDirectoryRow,
 } from "@/lib/operations/staff-access";
-import { isStaffRoleKey } from "@/lib/operations/staff-access";
+import { isStaffRoleKey, normalizeRoleKey } from "@/lib/operations/staff-access";
+import { rpcMissing } from "@/lib/operations/role-matrix";
 
 function asDirectoryRow(row: Record<string, unknown>): StaffDirectoryRow | null {
-  if (!isStaffRoleKey(String(row.role_key ?? ""))) return null;
+  const roleKey = normalizeRoleKey(String(row.role_key ?? row.role ?? ""));
+  if (!isStaffRoleKey(roleKey)) return null;
   const status = row.status;
   if (status !== "active" && status !== "suspended" && status !== "ended") return null;
   return {
     user_id: String(row.user_id),
     display_name: String(row.display_name || "Staff"),
     status: status as StaffDirectoryRow["status"],
-    role_key: row.role_key as StaffDirectoryRow["role_key"],
+    role_key: roleKey as StaffDirectoryRow["role_key"],
     assigned_student_count: Number(row.assigned_student_count ?? 0),
     invite_pending: Boolean(row.invite_pending),
     has_student_profile: Boolean(row.has_student_profile),
@@ -27,14 +30,50 @@ function asDirectoryRow(row: Record<string, unknown>): StaffDirectoryRow | null 
   };
 }
 
+function permissionKeys(value: unknown): StaffPermission[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(
+    (key): key is StaffPermission =>
+      typeof key === "string" && (STAFF_PERMISSIONS as readonly string[]).includes(key),
+  );
+}
+
+async function loadDirectoryFromTables(): Promise<StaffDirectoryRow[]> {
+  const supabase = await createSupabaseServerClient();
+  const [{ data: profiles }, { data: assignments }] = await Promise.all([
+    supabase
+      .from("staff_profiles")
+      .select("user_id, display_name, status, role_key, created_at")
+      .order("display_name"),
+    supabase.from("mentor_assignments").select("mentor_id").eq("status", "active"),
+  ]);
+  const counts = new Map<string, number>();
+  for (const row of assignments ?? []) {
+    const mentorId = String(row.mentor_id ?? "");
+    if (!mentorId) continue;
+    counts.set(mentorId, (counts.get(mentorId) ?? 0) + 1);
+  }
+  return (profiles ?? [])
+    .map((row) =>
+      asDirectoryRow({
+        ...row,
+        assigned_student_count: counts.get(row.user_id) ?? 0,
+      }),
+    )
+    .filter((row): row is StaffDirectoryRow => Boolean(row));
+}
+
 export async function loadStaffDirectory(): Promise<StaffDirectoryRow[]> {
   await requireStaffPermission("staff.read");
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.rpc("staff_people_directory");
-  if (error) throw new Error(error.message);
-  return ((data ?? []) as unknown[])
-    .map((row) => asDirectoryRow(row as Record<string, unknown>))
-    .filter((row): row is StaffDirectoryRow => Boolean(row));
+  if (!error) {
+    return ((data ?? []) as unknown[])
+      .map((row) => asDirectoryRow(row as Record<string, unknown>))
+      .filter((row): row is StaffDirectoryRow => Boolean(row));
+  }
+  if (!rpcMissing(error)) throw new Error(error.message);
+  return loadDirectoryFromTables();
 }
 
 export async function loadStaffAccessDetail(
@@ -45,18 +84,81 @@ export async function loadStaffAccessDetail(
   const { data, error } = await supabase.rpc("staff_access_detail", {
     target_user: userId,
   });
-  if (error) throw new Error(error.message);
-  const row = Array.isArray(data) ? data[0] : data;
-  if (!row) return null;
-  const directory = asDirectoryRow(row as Record<string, unknown>);
+  if (!error) {
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row) return null;
+    const directory = asDirectoryRow(row as Record<string, unknown>);
+    if (!directory) return null;
+    return {
+      ...directory,
+      permission_keys: permissionKeys((row as { permission_keys?: unknown }).permission_keys),
+    };
+  }
+  if (!rpcMissing(error)) throw new Error(error.message);
+
+  const { data: profile } = await supabase
+    .from("staff_profiles")
+    .select("user_id, display_name, status, role_key, created_at")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!profile) return null;
+  const directory = asDirectoryRow(profile as Record<string, unknown>);
   if (!directory) return null;
-  const keys = Array.isArray((row as { permission_keys?: unknown }).permission_keys)
-    ? (row as { permission_keys: string[] }).permission_keys.filter(
-        (key): key is StaffAccessDetail["permission_keys"][number] =>
-          typeof key === "string",
-      )
-    : [];
-  return { ...directory, permission_keys: keys };
+  const roleKey = normalizeRoleKey(profile.role_key);
+  const { data: links } = await supabase
+    .from("staff_role_permissions")
+    .select("staff_permissions(key), staff_roles!inner(key)")
+    .eq("staff_roles.key", roleKey);
+  const keys = (links ?? [])
+    .map((row) => {
+      const perm = row.staff_permissions as { key: string } | { key: string }[] | null;
+      return Array.isArray(perm) ? perm[0]?.key : perm?.key;
+    })
+    .filter(Boolean);
+  const { count } = await supabase
+    .from("mentor_assignments")
+    .select("*", { count: "exact", head: true })
+    .eq("mentor_id", userId)
+    .eq("status", "active");
+  const { data: student } = await supabase.from("profiles").select("id").eq("id", userId).maybeSingle();
+  return {
+    ...directory,
+    assigned_student_count: count ?? 0,
+    has_student_profile: Boolean(student),
+    permission_keys: permissionKeys(keys),
+  };
+}
+
+export async function applyStaffAccessChange(input: {
+  userId: string;
+  role: string;
+  displayName: string;
+  active: boolean;
+  status: string;
+  reason?: string;
+}) {
+  const supabase = await createSupabaseServerClient();
+  const rpc = await supabase.rpc("manage_staff_access", {
+    target_user: input.userId,
+    target_role: input.role,
+    target_active: input.active,
+    target_status: input.status,
+    target_display_name: input.displayName,
+    event_reason: input.reason ?? "Updated from operations",
+  });
+  if (!rpc.error) return;
+  if (!rpcMissing(rpc.error)) throw new Error(rpc.error.message);
+
+  const { error } = await supabase.from("staff_profiles").upsert(
+    {
+      user_id: input.userId,
+      role_key: input.role,
+      display_name: input.displayName,
+      status: input.active ? input.status : "ended",
+    },
+    { onConflict: "user_id" },
+  );
+  if (error) throw new Error(error.message);
 }
 
 export async function requireStaffAccessDetail(userId: string) {
